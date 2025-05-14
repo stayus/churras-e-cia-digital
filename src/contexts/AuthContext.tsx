@@ -130,7 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setUser(updatedUser);
       }
       
-      return true;
+      // Changed return type to match the Promise<void> in the interface
     } catch (error) {
       console.error('Password update failed:', error);
       throw error;
