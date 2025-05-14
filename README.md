@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
 
-## Project info
+# 🍖 Churrasquinho & Cia - Sistema de Gestão e Delivery
 
-**URL**: https://lovable.dev/projects/f52e4350-81d6-4d87-b56f-4a447ea42082
+Sistema completo para gestão e delivery da lanchonete Churrasquinho & Cia, desenvolvido com React, Vite, Supabase, shadcn-ui e Tailwind CSS.
 
-## How can I edit this code?
+## 🚀 Recursos
 
-There are several ways of editing your application.
+- **🔐 Autenticação diferenciada**: Funcionários acessam via `username/senha` e clientes via `email/senha`
+- **👨‍💼 Painel Administrativo**: Gerenciamento completo de produtos, funcionários, pedidos, relatórios e configurações
+- **👨‍🍳 Painel de Funcionários**: Visualização e atualização de pedidos em tempo real
+- **🛵 Painel de Motoboys**: Gerenciamento de entregas 
+- **👨‍👩‍👧‍👦 Portal do Cliente**: Catálogo de produtos, carrinho, checkout e acompanhamento de pedidos
+- **💾 Banco de Dados Supabase**: Armazenamento seguro com tabelas para funcionários, clientes, produtos, pedidos e configurações
+- **⚡ Edge Functions**: APIs serverless para autenticação, criação de usuários e atualização de status de pedidos
+- **📊 Relatórios**: Exportação em PDF e análise de vendas por período
 
-**Use Lovable**
+## 🧰 Tecnologias
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/f52e4350-81d6-4d87-b56f-4a447ea42082) and start prompting.
+- ⚛️ **React**: Biblioteca JavaScript para interfaces de usuário
+- 🛠️ **Vite**: Build tool rápida para desenvolvimento moderno
+- 🔥 **Supabase**: Banco de dados PostgreSQL com autenticação, APIs e Edge Functions
+- 🎨 **shadcn/ui**: Componentes de UI reutilizáveis e personalizáveis
+- 💅 **Tailwind CSS**: Framework CSS utilitário para design responsivo
+- 🧩 **React Router**: Navegação entre páginas
+- 📡 **Tanstack Query**: Gerenciamento de estado e sincronização com servidor
+- 🗃️ **React Hook Form + Zod**: Validação de formulários
 
-Changes made via Lovable will be committed automatically to this repo.
+## 🏁 Primeiros passos
 
-**Use your preferred IDE**
+### Pré-requisitos
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- Node.js (v14+)
+- Conta no Supabase
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Instalação
 
-Follow these steps:
+1. Clone este repositório
+2. Instale as dependências: `npm install`
+3. Configure as variáveis de ambiente (veja `.env.example`)
+4. Execute o script SQL no Supabase (veja `supabase/migrations/`)
+5. Implante as Edge Functions (veja `DEPLOYMENT.md`)
+6. Inicie o servidor de desenvolvimento: `npm run dev`
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 👥 Usuários do sistema
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+| Tipo | Credenciais | Permissões |
+|------|-------------|------------|
+| Administrador | `admin` / `Churr@squinhoAdm2025` | Todas |
+| Funcionários | Via cadastro (troca senha no 1° acesso) | Baseadas no cargo |
+| Clientes | Email/senha | Acesso ao catálogo e carrinho |
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📝 Documentação
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+Para instruções detalhadas sobre configuração, implantação e manutenção, consulte `DEPLOYMENT.md`.
 
-**Edit a file directly in GitHub**
+## 📷 Screenshots
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+[Em breve]
 
-**Use GitHub Codespaces**
+## 📄 Licença
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Este projeto é proprietário e confidencial. Uso não autorizado é estritamente proibido.
 
-## What technologies are used for this project?
+## 👨‍💻 Autores
 
-This project is built with:
+Desenvolvido por [Sua Empresa/Nome]
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/f52e4350-81d6-4d87-b56f-4a447ea42082) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+© 2025 Churrasquinho & Cia. Todos os direitos reservados.
