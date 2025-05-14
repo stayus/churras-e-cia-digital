@@ -9,6 +9,7 @@ import { CartProvider } from "@/contexts/CartContext";
 
 // Pages
 import LoginPage from "@/pages/Login";
+import EmployeeLoginPage from "@/pages/EmployeeLogin";
 import HomePage from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
 import PasswordChangePage from "@/pages/PasswordChange";
@@ -82,6 +83,7 @@ const App = () => (
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/employee-login" element={<EmployeeLoginPage />} />
               
               {/* Protected routes with role-based access */}
               <Route 

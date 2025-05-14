@@ -20,11 +20,7 @@ const employeeLoginSchema = z.object({
 
 type EmployeeLoginFormValues = z.infer<typeof employeeLoginSchema>;
 
-interface EmployeeLoginFormProps {
-  onTabChange?: (tab: string) => void;
-}
-
-const EmployeeLoginForm: React.FC<EmployeeLoginFormProps> = ({ onTabChange }) => {
+const EmployeeLoginForm: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -59,45 +55,43 @@ const EmployeeLoginForm: React.FC<EmployeeLoginFormProps> = ({ onTabChange }) =>
   };
 
   return (
-    <>
-      <CardContent className="space-y-4 pt-4">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleEmployeeLogin)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nome de usuário</FormLabel>
-                  <FormControl>
-                    <Input placeholder="username" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="password"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Senha</FormLabel>
-                  <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </>
+    <CardContent className="space-y-4 pt-4">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleEmployeeLogin)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="username"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome de usuário</FormLabel>
+                <FormControl>
+                  <Input placeholder="username" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Senha</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="••••••••" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
+          </Button>
+        </form>
+      </Form>
+    </CardContent>
   );
 };
 
