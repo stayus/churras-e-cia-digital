@@ -29,7 +29,7 @@ type EmployeeLoginFormValues = z.infer<typeof employeeLoginSchema>;
 type CustomerLoginFormValues = z.infer<typeof customerLoginSchema>;
 
 const LoginPage = () => {
-  const [activeTab, setActiveTab] = useState<'employee' | 'customer'>('employee');
+  const [activeTab, setActiveTab] = useState<'employee' | 'customer'>('customer');
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -96,7 +96,7 @@ const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="logo-text">Churrasquinho & Cia</h2>
+          <h2 className="text-3xl font-extrabold text-red-600">Churrasquinho & Cia</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             O melhor churrasquinho da região!
           </p>
@@ -112,49 +112,9 @@ const LoginPage = () => {
           
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'employee' | 'customer')}>
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="employee">Funcionários</TabsTrigger>
               <TabsTrigger value="customer">Clientes</TabsTrigger>
+              <TabsTrigger value="employee">Funcionários</TabsTrigger>
             </TabsList>
-            
-            <TabsContent value="employee">
-              <CardContent className="space-y-4 pt-4">
-                <Form {...employeeForm}>
-                  <form onSubmit={employeeForm.handleSubmit(handleEmployeeLogin)} className="space-y-4">
-                    <FormField
-                      control={employeeForm.control}
-                      name="username"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nome de usuário</FormLabel>
-                          <FormControl>
-                            <Input placeholder="username" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={employeeForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Senha</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="••••••••" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button type="submit" className="w-full" disabled={employeeForm.formState.isSubmitting}>
-                      {employeeForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </TabsContent>
             
             <TabsContent value="customer">
               <CardContent className="space-y-4 pt-4">
@@ -188,7 +148,7 @@ const LoginPage = () => {
                       )}
                     />
                     
-                    <Button type="submit" className="w-full" disabled={customerForm.formState.isSubmitting}>
+                    <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={customerForm.formState.isSubmitting}>
                       {customerForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
                     </Button>
                   </form>
@@ -196,10 +156,50 @@ const LoginPage = () => {
               </CardContent>
               
               <CardFooter className="flex justify-center">
-                <Button variant="link" className="text-brand-red">
+                <Button variant="link" className="text-red-600">
                   Criar uma conta
                 </Button>
               </CardFooter>
+            </TabsContent>
+            
+            <TabsContent value="employee">
+              <CardContent className="space-y-4 pt-4">
+                <Form {...employeeForm}>
+                  <form onSubmit={employeeForm.handleSubmit(handleEmployeeLogin)} className="space-y-4">
+                    <FormField
+                      control={employeeForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nome de usuário</FormLabel>
+                          <FormControl>
+                            <Input placeholder="username" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={employeeForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Senha</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="••••••••" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={employeeForm.formState.isSubmitting}>
+                      {employeeForm.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
             </TabsContent>
           </Tabs>
         </Card>

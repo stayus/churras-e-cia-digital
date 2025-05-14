@@ -9,7 +9,191 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          addresses: Json
+          created_at: string
+          email: string
+          id: string
+          name: string
+          password: string
+        }
+        Insert: {
+          addresses?: Json
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          password: string
+        }
+        Update: {
+          addresses?: Json
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          password?: string
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          birth_date: string | null
+          cpf: string | null
+          created_at: string
+          id: string
+          name: string
+          password: string
+          permissions: Json
+          phone: string | null
+          pix_key: string | null
+          registration_number: string
+          role: string
+          username: string
+        }
+        Insert: {
+          birth_date?: string | null
+          cpf?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          password: string
+          permissions: Json
+          phone?: string | null
+          pix_key?: string | null
+          registration_number: string
+          role: string
+          username: string
+        }
+        Update: {
+          birth_date?: string | null
+          cpf?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          password?: string
+          permissions?: Json
+          phone?: string | null
+          pix_key?: string | null
+          registration_number?: string
+          role?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          address: Json
+          created_at: string
+          customer_id: string
+          id: string
+          items: Json
+          observations: string | null
+          payment_method: string
+          status: string
+          total: number
+        }
+        Insert: {
+          address: Json
+          created_at?: string
+          customer_id: string
+          id?: string
+          items: Json
+          observations?: string | null
+          payment_method: string
+          status: string
+          total: number
+        }
+        Update: {
+          address?: Json
+          created_at?: string
+          customer_id?: string
+          id?: string
+          items?: Json
+          observations?: string | null
+          payment_method?: string
+          status?: string
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          created_at: string
+          description: string
+          extras: Json | null
+          id: string
+          image_url: string
+          is_out_of_stock: boolean
+          name: string
+          price: number
+          promotion_price: number | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          extras?: Json | null
+          id?: string
+          image_url: string
+          is_out_of_stock?: boolean
+          name: string
+          price: number
+          promotion_price?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          extras?: Json | null
+          id?: string
+          image_url?: string
+          is_out_of_stock?: boolean
+          name?: string
+          price?: number
+          promotion_price?: number | null
+        }
+        Relationships: []
+      }
+      settings: {
+        Row: {
+          free_shipping_radius_km: number
+          id: string
+          pix_key: string
+          shipping_fee: number
+          store_address: Json
+          store_name: string
+          store_phone: string
+          whatsapp_link: string
+        }
+        Insert: {
+          free_shipping_radius_km?: number
+          id?: string
+          pix_key: string
+          shipping_fee?: number
+          store_address: Json
+          store_name?: string
+          store_phone: string
+          whatsapp_link: string
+        }
+        Update: {
+          free_shipping_radius_km?: number
+          id?: string
+          pix_key?: string
+          shipping_fee?: number
+          store_address?: Json
+          store_name?: string
+          store_phone?: string
+          whatsapp_link?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

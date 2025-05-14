@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 // Types for our auth context
 export type UserRole = 'admin' | 'employee' | 'motoboy' | 'customer';
@@ -50,10 +51,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Here we would typically check for a JWT in localStorage and validate it
-        // For now we'll just simulate checking auth status
+        const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
-        if (storedUser) {
+        
+        if (storedToken && storedUser) {
           setUser(JSON.parse(storedUser));
         }
       } catch (error) {
@@ -66,51 +67,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
     checkAuth();
   }, []);
 
-  // Login function - in the real app this would call the Supabase edge function
   const login = async (credentialType: 'email' | 'username', credential: string, password: string) => {
     setIsLoading(true);
     try {
-      // In a real implementation, this would call the Supabase login edge function
-      // For now, we'll simulate a successful login
-
-      // This is just for demo purposes - in a real app we'd get this from the API
-      let mockUser: User;
+      // Call the Supabase Edge Function for login
+      const { data, error } = await supabase.functions.invoke('login', {
+        body: {
+          credential,
+          credentialType,
+          password,
+        },
+      });
       
-      if (credentialType === 'username' && credential === 'admin' && password === 'Churr@squinhoAdm2025') {
-        mockUser = {
-          id: '123e4567-e89b-12d3-a456-426614174000',
-          name: 'Administrador',
-          role: 'admin',
-          username: 'admin',
-          registration_number: 'MC-0000',
-          permissions: {
-            manageStock: true,
-            viewReports: true,
-            changeOrderStatus: true,
-          }
-        };
-      } else {
-        // For demo purposes, create a mock user based on the login type
-        mockUser = {
-          id: '123e4567-e89b-12d3-a456-426614174001',
-          name: credentialType === 'email' ? 'Cliente Teste' : 'Funcionário Teste',
-          role: credentialType === 'email' ? 'customer' : 'employee',
-          ...(credentialType === 'email' ? { email: credential } : { username: credential }),
-          ...(credentialType !== 'email' && {
-            registration_number: 'MC-0001',
-            permissions: {
-              manageStock: false,
-              viewReports: false,
-              changeOrderStatus: true,
-            },
-            isFirstLogin: true
-          })
-        };
+      if (error || !data.success) {
+        console.error('Login error:', error || data.error);
+        throw new Error(data.error || 'Login failed');
       }
       
-      // Store the user in localStorage
-      localStorage.setItem('user', JSON.stringify(mockUser));
-      setUser(mockUser);
+      // Store token and user data
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setUser(data.user);
+      return data.user;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -119,25 +98,44 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Logout function
   const logout = () => {
-    setUser(null);
+    localStorage.removeItem('token');
     localStorage.removeItem('user');
+    setUser(null);
   };
 
-  // Update password function
   const updatePassword = async (oldPassword: string, newPassword: string) => {
-    // This would call the Supabase edge function to update the password
+    if (!user) throw new Error('No user is logged in');
+    
+    setIsLoading(true);
     try {
-      // Simulate password update
-      if (user) {
-        const updatedUser = { ...user, isFirstLogin: false };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+      // Call the Supabase Edge Function to update password
+      const { data, error } = await supabase.functions.invoke('update-password', {
+        body: {
+          userId: user.id,
+          oldPassword,
+          newPassword,
+          userType: user.role === 'customer' ? 'customers' : 'employees',
+        },
+      });
+      
+      if (error || !data.success) {
+        throw new Error(data?.error || 'Failed to update password');
       }
+      
+      // Update the local user state if isFirstLogin was true before
+      if (user.isFirstLogin) {
+        const updatedUser = { ...user, isFirstLogin: false };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+      }
+      
+      return true;
     } catch (error) {
       console.error('Password update failed:', error);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 

@@ -6,40 +6,20 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
-import { create, verify } from "https://deno.land/x/djwt@v2.8/mod.ts";
+import { create } from "https://deno.land/x/djwt@v2.8/mod.ts";
 
 interface LoginRequest {
   credential: string;
-  credentialType: 'email' | 'username';
+  credentialType: "email" | "username";
   password: string;
 }
 
-interface EmployeeData {
-  id: string;
-  name: string;
-  username: string;
-  password: string;
-  registration_number: string;
-  role: string;
-  permissions: {
-    manageStock: boolean;
-    viewReports: boolean;
-    changeOrderStatus: boolean;
-  };
-  created_at: string;
-  // Flag to determine if it's their first login
-  first_login?: boolean;
-}
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-interface CustomerData {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  addresses: any[];
-  created_at: string;
-}
-
+// Generate a secure key for JWT signing
 const key = await crypto.subtle.generateKey(
   { name: "HMAC", hash: "SHA-512" },
   true,
@@ -50,11 +30,7 @@ serve(async (req) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
+      headers: corsHeaders,
     });
   }
 
@@ -64,16 +40,15 @@ serve(async (req) => {
       status: 405,
       headers: { 
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        ...corsHeaders
       },
     });
   }
 
   try {
-    // Get request body and create Supabase client
+    // Extract login credentials and create Supabase client
     const { credential, credentialType, password } = await req.json() as LoginRequest;
     
-    // Create Supabase client
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
@@ -90,215 +65,113 @@ serve(async (req) => {
           status: 400, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
     }
     
-    let userData = null;
-    let isFirstLogin = false;
+    let userData;
+    let table;
     
-    // Check if the credential is a username (employee) or email (customer)
-    if (credentialType === 'username') {
-      // Employee login
-      const { data: employee, error: employeeError } = await supabaseClient
-        .from("employees")
-        .select("*")
-        .eq("username", credential)
-        .single();
-      
-      if (employeeError) {
-        if (employeeError.code === "PGRST116") {
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: "Username or password is incorrect" 
-            }),
-            { 
-              status: 401, 
-              headers: { 
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-              }
-            }
-          );
-        }
-        
-        console.error("Database error during employee fetch:", employeeError);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: "Database error during authentication" 
-          }),
-          { 
-            status: 500, 
-            headers: { 
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
-            }
-          }
-        );
-      }
-      
-      if (!employee) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: "Username or password is incorrect" 
-          }),
-          { 
-            status: 401, 
-            headers: { 
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
-            }
-          }
-        );
-      }
-      
-      // Check password
-      const passwordMatch = await bcrypt.compare(password, employee.password);
-      if (!passwordMatch) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: "Username or password is incorrect" 
-          }),
-          { 
-            status: 401, 
-            headers: { 
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
-            }
-          }
-        );
-      }
-      
-      userData = {
-        id: employee.id,
-        name: employee.name,
-        role: employee.role,
-        username: employee.username,
-        registration_number: employee.registration_number,
-        permissions: employee.permissions
-      };
-      
-      // Check if this is the first login (implementation dependent)
-      // Here we're checking if the password matches a default pattern or hasn't been changed
-      // This is just an example - in real apps this is tracked differently
-      
-      // Simple example: If their password matches their username, it's their first login
-      isFirstLogin = password === credential || password === 'password';
-      
-    } else if (credentialType === 'email') {
-      // Customer login
-      const { data: customer, error: customerError } = await supabaseClient
-        .from("customers")
-        .select("*")
+    if (credentialType === "email") {
+      // Customer login (email)
+      table = "customers";
+      const { data, error } = await supabaseClient
+        .from(table)
+        .select("id, name, email, password")
         .eq("email", credential)
         .single();
       
-      if (customerError) {
-        if (customerError.code === "PGRST116") {
-          return new Response(
-            JSON.stringify({ 
-              success: false, 
-              error: "Email or password is incorrect" 
-            }),
-            { 
-              status: 401, 
-              headers: { 
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*"
-              }
-            }
-          );
-        }
-        
-        console.error("Database error during customer fetch:", customerError);
+      if (error || !data) {
+        console.error("Error fetching customer:", error);
         return new Response(
           JSON.stringify({ 
             success: false, 
-            error: "Database error during authentication" 
-          }),
-          { 
-            status: 500, 
-            headers: { 
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
-            }
-          }
-        );
-      }
-      
-      if (!customer) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: "Email or password is incorrect" 
+            error: "Invalid email or password" 
           }),
           { 
             status: 401, 
             headers: { 
               "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
+              ...corsHeaders
             }
           }
         );
       }
       
-      // Check password
-      const passwordMatch = await bcrypt.compare(password, customer.password);
-      if (!passwordMatch) {
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: "Email or password is incorrect" 
-          }),
-          { 
-            status: 401, 
-            headers: { 
-              "Content-Type": "application/json",
-              "Access-Control-Allow-Origin": "*"
-            }
-          }
-        );
-      }
-      
-      userData = {
-        id: customer.id,
-        name: customer.name,
-        role: 'customer',
-        email: customer.email
-      };
+      userData = data;
     } else {
+      // Employee login (username)
+      table = "employees";
+      const { data, error } = await supabaseClient
+        .from(table)
+        .select("id, name, username, password, role, permissions, registration_number")
+        .eq("username", credential)
+        .single();
+      
+      if (error || !data) {
+        console.error("Error fetching employee:", error);
+        return new Response(
+          JSON.stringify({ 
+            success: false, 
+            error: "Invalid username or password" 
+          }),
+          { 
+            status: 401, 
+            headers: { 
+              "Content-Type": "application/json",
+              ...corsHeaders
+            }
+          }
+        );
+      }
+      
+      userData = data;
+    }
+    
+    // Verify password
+    const isPasswordCorrect = await bcrypt.compare(password, userData.password);
+    
+    if (!isPasswordCorrect) {
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: "Invalid credential type" 
+          error: "Invalid credentials" 
         }),
         { 
-          status: 400, 
+          status: 401, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
     }
     
-    // Generate JWT
-    const jwt = await create(
-      { alg: "HS512", typ: "JWT" },
-      {
-        sub: userData.id,
-        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 24 hour expiry
-        role: userData.role,
-        ...userData
-      },
-      key
-    );
+    // Check if it's the employee's first login (using the default password pattern)
+    // This is a simple check. In a real scenario, you would have a field to track this.
+    const isFirstLogin = table === "employees" && /^MC-\d{4}/.test(password);
+    
+    // Create JWT payload
+    const payload = {
+      id: userData.id,
+      name: userData.name,
+      role: table === "customers" ? "customer" : userData.role,
+      ...(table === "customers" ? { email: userData.email } : { 
+        username: userData.username,
+        registration_number: userData.registration_number,
+        permissions: userData.permissions
+      }),
+      ...(isFirstLogin && { isFirstLogin: true }),
+      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // Token expires in 7 days
+    };
+    
+    // Sign JWT
+    const jwt = await create({ alg: "HS512", typ: "JWT" }, payload, key);
+    
+    // Remove password from userData before returning
+    delete userData.password;
     
     return new Response(
       JSON.stringify({ 
@@ -306,17 +179,19 @@ serve(async (req) => {
         token: jwt,
         user: {
           ...userData,
-          isFirstLogin
+          ...(isFirstLogin && { isFirstLogin }),
+          role: table === "customers" ? "customer" : userData.role
         }
       }),
       { 
         status: 200, 
         headers: { 
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          ...corsHeaders
         }
       }
     );
+    
   } catch (error) {
     console.error("Unhandled error:", error);
     return new Response(
@@ -328,7 +203,7 @@ serve(async (req) => {
         status: 500, 
         headers: { 
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          ...corsHeaders
         }
       }
     );
