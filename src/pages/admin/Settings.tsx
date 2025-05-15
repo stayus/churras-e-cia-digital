@@ -5,6 +5,7 @@ import SettingsTabs from '@/components/admin/settings/SettingsTabs';
 import { BackButton } from '@/components/ui/back-button';
 import { useSettingsData } from '@/hooks/useSettingsData';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from '@/hooks/use-toast';
 
 const AdminSettings = () => {
   const { settings, isLoading, saveSettings } = useSettingsData();

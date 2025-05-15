@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WorkingHours } from '@/types/dashboard';
 import { useToast } from '@/components/ui/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 export interface SettingsData {
   id: string;
@@ -42,6 +43,7 @@ export function useSettingsData() {
       
       // If no settings exist, create default settings
       if (!settingsExists || settingsExists.length === 0) {
+        const defaultWorkingHours = getDefaultWorkingHours();
         const defaultSettings = {
           store_name: 'Churrasquinho & Cia',
           store_phone: '(00) 0000-0000',
@@ -55,7 +57,8 @@ export function useSettingsData() {
             city: '',
             zip: ''
           },
-          working_hours: getDefaultWorkingHours()
+          // Cast working_hours to Json type
+          working_hours: defaultWorkingHours as unknown as Json
         };
         
         const { data: newSettings, error: createError } = await supabase
@@ -164,7 +167,7 @@ export function useSettingsData() {
         updateData.store_address = newSettings.storeAddress;
       
       if (newSettings.workingHours !== undefined) 
-        updateData.working_hours = newSettings.workingHours;
+        updateData.working_hours = newSettings.workingHours as unknown as Json;
       
       // Update settings in database
       const { error } = await supabase
