@@ -12,7 +12,7 @@ export const useEmployeeForm = (
     employee || {
       name: '',
       username: '',
-      role: '',
+      role: 'employee' as 'admin' | 'employee' | 'motoboy',
       cpf: '',
       birthDate: '',
       phone: '',
@@ -126,7 +126,7 @@ export const useEmployeeForm = (
       toast({
         variant: 'destructive',
         title: 'Erro ao salvar',
-        description: 'Ocorreu um erro ao salvar o funcionário.'
+        description: error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o funcionário.'
       });
     } finally {
       setIsSubmitting(false);
