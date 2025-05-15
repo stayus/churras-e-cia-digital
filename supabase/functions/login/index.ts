@@ -104,39 +104,96 @@ serve(async (req) => {
     } else {
       // Employee login (username)
       table = "employees";
-      const { data, error } = await supabaseClient
-        .from(table)
-        .select("id, name, username, password, role, permissions, registration_number")
-        .eq("username", credential)
-        .single();
       
-      if (error || !data) {
-        console.error("Error fetching employee:", error);
-        return new Response(
-          JSON.stringify({ 
-            success: false, 
-            error: "Invalid username or password" 
-          }),
-          { 
-            status: 401, 
-            headers: { 
-              "Content-Type": "application/json",
-              ...corsHeaders
+      // Special case for admin/admin
+      if (credential === "admin" && password === "admin") {
+        // Check if admin user exists first
+        const { data: adminData, error: adminError } = await supabaseClient
+          .from(table)
+          .select("id, name, username, password, role, permissions, registration_number")
+          .eq("username", "admin")
+          .maybeSingle();
+          
+        if (!adminError && adminData) {
+          userData = adminData;
+        } else {
+          // If no admin user, create a default one for demo purposes
+          const defaultAdmin = {
+            name: "Administrador",
+            username: "admin",
+            password: "admin", // In production this would be hashed
+            role: "admin",
+            registration_number: "ADM-0001",
+            permissions: {
+              manageStock: true,
+              viewReports: true,
+              changeOrderStatus: true,
+              exportOrderReportPDF: true,
+              promotionProducts: true
             }
+          };
+          
+          const { data: newAdmin, error: createError } = await supabaseClient
+            .from(table)
+            .insert(defaultAdmin)
+            .select()
+            .single();
+            
+          if (createError) {
+            console.error("Error creating admin:", createError);
+            return new Response(
+              JSON.stringify({ 
+                success: false, 
+                error: "Failed to authenticate" 
+              }),
+              { 
+                status: 500, 
+                headers: { 
+                  "Content-Type": "application/json",
+                  ...corsHeaders
+                }
+              }
+            );
           }
-        );
+          
+          userData = newAdmin;
+        }
+      } else {
+        // Regular employee login
+        const { data, error } = await supabaseClient
+          .from(table)
+          .select("id, name, username, password, role, permissions, registration_number")
+          .eq("username", credential)
+          .maybeSingle(); // Use maybeSingle instead of single to avoid error when no rows found
+        
+        if (error || !data) {
+          console.error("Error fetching employee:", error);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: "Invalid username or password" 
+            }),
+            { 
+              status: 401, 
+              headers: { 
+                "Content-Type": "application/json",
+                ...corsHeaders
+              }
+            }
+          );
+        }
+        
+        userData = data;
       }
-      
-      userData = data;
     }
     
-    // Simplified authentication for development
+    // Password check - simplify for admin/admin case
     let isPasswordCorrect = false;
     
     // Direct check for admin/admin credentials
     if (credential === "admin" && password === "admin") {
       isPasswordCorrect = true;
-    } else {
+    } else if (userData) {
       // For other users, try bcrypt compare first
       try {
         isPasswordCorrect = await compare(password, userData.password);
@@ -164,7 +221,6 @@ serve(async (req) => {
     }
     
     // Check if it's the employee's first login (using the default password pattern)
-    // This is a simple check. In a real scenario, you would have a field to track this.
     const isFirstLogin = table === "employees" && /^MC-\d{4}/.test(password);
     
     // Create JWT payload

@@ -16,6 +16,8 @@ export interface User {
     manageStock: boolean;
     viewReports: boolean;
     changeOrderStatus: boolean;
+    exportOrderReportPDF?: boolean;
+    promotionProducts?: boolean;
   };
   isFirstLogin?: boolean;
 }
@@ -55,7 +57,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const storedUser = localStorage.getItem('user');
         
         if (storedToken && storedUser) {
-          setUser(JSON.parse(storedUser));
+          const parsedUser = JSON.parse(storedUser);
+          console.log('Stored user found:', parsedUser);
+          setUser(parsedUser);
+        } else {
+          console.log('No stored user found');
         }
       } catch (error) {
         console.error('Authentication error:', error);
@@ -70,6 +76,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (credentialType: 'email' | 'username', credential: string, password: string) => {
     setIsLoading(true);
     try {
+      console.log(`Calling login edge function with ${credentialType}:`, credential);
+      
       // Call the Supabase Edge Function for login
       const { data, error } = await supabase.functions.invoke('login', {
         body: {
@@ -88,6 +96,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('Login failed:', data?.error || 'Unknown error');
         throw new Error(data?.error || 'Login failed');
       }
+      
+      console.log('Login successful, response data:', data);
       
       // Store token and user data
       localStorage.setItem('token', data.token);
@@ -134,8 +144,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
       }
-      
-      // Changed return type to match the Promise<void> in the interface
     } catch (error) {
       console.error('Password update failed:', error);
       throw error;

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
 
 // Schema for employee login (username/password)
 const employeeLoginSchema = z.object({
@@ -24,6 +25,8 @@ type EmployeeLoginFormValues = z.infer<typeof employeeLoginSchema>;
 const EmployeeLoginForm: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form for employee login
   const form = useForm<EmployeeLoginFormValues>({
@@ -35,7 +38,11 @@ const EmployeeLoginForm: React.FC = () => {
   });
 
   const handleEmployeeLogin = async (data: EmployeeLoginFormValues) => {
+    setIsLoading(true);
+    setErrorMessage(null);
+    
     try {
+      console.log('Attempting login with:', { username: data.username, password: '***' });
       await login('username', data.username, data.password);
       
       // Show success message
@@ -48,11 +55,14 @@ const EmployeeLoginForm: React.FC = () => {
       navigate('/admin');
     } catch (error) {
       console.error('Login error:', error);
+      setErrorMessage('Nome de usuário ou senha incorretos. Por favor, tente novamente.');
       toast({
         variant: 'destructive',
         title: 'Falha no login',
         description: 'Nome de usuário ou senha incorretos.',
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -68,7 +78,7 @@ const EmployeeLoginForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Nome de usuário</FormLabel>
                   <FormControl>
-                    <Input placeholder="username" {...field} />
+                    <Input placeholder="username" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -82,15 +92,31 @@ const EmployeeLoginForm: React.FC = () => {
                 <FormItem>
                   <FormLabel>Senha</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             
-            <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? 'Entrando...' : 'Entrar'}
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
+            
+            <Button 
+              type="submit" 
+              className="w-full bg-red-600 hover:bg-red-700" 
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Entrando...
+                </>
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </form>
         </Form>
