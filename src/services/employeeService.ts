@@ -48,11 +48,23 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
       
       // Verificar se a senha foi fornecida
       if (!dbEmployee.password) {
-        throw new Error('Password is required for new employees');
+        throw new Error('É necessário gerar uma senha para novos funcionários');
       }
       
-      // Improved error handling for the edge function call
       try {
+        // Log the data being sent to the edge function
+        console.log('Sending data to create-employee function:', {
+          name: dbEmployee.name,
+          username: dbEmployee.username,
+          password: dbEmployee.password,
+          cpf: dbEmployee.cpf || null,
+          phone: dbEmployee.phone || null,
+          birth_date: dbEmployee.birth_date || null,
+          pix_key: dbEmployee.pix_key || null,
+          role: dbEmployee.role,
+          permissions: dbEmployee.permissions
+        });
+        
         // Chamar a Edge Function para criar o funcionário
         const { data, error } = await supabase.functions.invoke('create-employee', {
           body: {
@@ -70,20 +82,24 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         
         if (error) {
           console.error('Error calling create-employee function:', error);
-          throw new Error(`Failed to create employee: ${error.message}`);
+          throw new Error(`Falha ao criar funcionário: ${error.message}`);
         }
         
         if (!data || !data.success) {
           console.error('Failed to create employee:', data?.error || 'Unknown error');
-          throw new Error(data?.error || 'Failed to create employee');
+          throw new Error(data?.error || 'Falha ao criar funcionário');
         }
         
         console.log('Employee created successfully:', data);
         return true;
-      } catch (functionError) {
+      } catch (functionError: any) {
         // More specific error message for edge function failures
         console.error('Error with edge function:', functionError);
-        throw new Error(`Edge function error: ${functionError.message || 'Connection error'}`);
+        if (functionError.message && functionError.message.includes('Failed to fetch')) {
+          throw new Error('Erro de conexão com o servidor. Verifique sua conexão de internet e tente novamente.');
+        } else {
+          throw new Error(`Erro na função: ${functionError.message || 'Erro de conexão'}`);
+        }
       }
     } else if (employee.id) {
       console.log('Updating employee:', employee.id);
@@ -105,20 +121,26 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         
         if (error) {
           console.error('Error calling update-employee function:', error);
-          throw new Error(`Failed to update employee: ${error.message}`);
+          throw new Error(`Falha ao atualizar funcionário: ${error.message}`);
         }
         
         if (!data || !data.success) {
           console.error('Failed to update employee:', data?.error || 'Unknown error');
-          throw new Error(data?.error || 'Failed to update employee');
+          throw new Error(data?.error || 'Falha ao atualizar funcionário');
         }
         
         console.log('Employee updated successfully:', data);
         return true;
-      } catch (functionError) {
+      } catch (functionError: any) {
         console.error('Error with edge function:', functionError);
-        throw new Error(`Edge function error: ${functionError.message || 'Connection error'}`);
+        if (functionError.message && functionError.message.includes('Failed to fetch')) {
+          throw new Error('Erro de conexão com o servidor. Verifique sua conexão de internet e tente novamente.');
+        } else {
+          throw new Error(`Erro na função: ${functionError.message || 'Erro de conexão'}`);
+        }
       }
+    } else {
+      throw new Error('Dados de funcionário inválidos');
     }
     
     return false;
@@ -152,9 +174,13 @@ export async function deleteEmployeeFromDatabase(employeeId: string): Promise<bo
       
       console.log('Employee deleted successfully');
       return true;
-    } catch (functionError) {
+    } catch (functionError: any) {
       console.error('Error with edge function:', functionError);
-      throw new Error(`Edge function error: ${functionError.message || 'Connection error'}`);
+      if (functionError.message && functionError.message.includes('Failed to fetch')) {
+        throw new Error('Erro de conexão com o servidor. Verifique sua conexão de internet e tente novamente.');
+      } else {
+        throw new Error(`Erro na função: ${functionError.message || 'Erro de conexão'}`);
+      }
     }
   } catch (error) {
     console.error('Error removing employee:', error);

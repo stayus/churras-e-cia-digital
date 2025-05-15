@@ -66,7 +66,7 @@ export function useEmployeeData() {
         errorMessage = error;
       }
       
-      // Display a more helpful message if it's a connection error
+      // Handle specific connection errors with more user-friendly messages
       if (errorMessage.includes('Failed to fetch') || 
           errorMessage.includes('Connection error') ||
           errorMessage.includes('Edge function error')) {
@@ -78,7 +78,7 @@ export function useEmployeeData() {
         title: 'Erro ao salvar funcionário',
         description: errorMessage
       });
-      return false;
+      throw error; // Re-throw to allow form to handle the error
     }
   };
 

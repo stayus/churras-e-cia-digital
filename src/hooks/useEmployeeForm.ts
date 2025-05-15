@@ -148,6 +148,10 @@ export const useEmployeeForm = (
       }
       
       await onSave(employeeData, isNew);
+      toast({
+        title: isNew ? 'Funcionário criado' : 'Funcionário atualizado',
+        description: `${formData.name} foi ${isNew ? 'adicionado' : 'atualizado'} com sucesso.`
+      });
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
