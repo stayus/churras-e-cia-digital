@@ -71,7 +71,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     );
   }
 
-  if (employees.length === 0) {
+  if (!employees || employees.length === 0) {
     return (
       <div className="rounded-md border p-8">
         <p className="text-center text-muted-foreground">
@@ -80,6 +80,8 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       </div>
     );
   }
+
+  console.log('Rendering employee table with employees:', employees);
 
   return (
     <div className="rounded-md border">

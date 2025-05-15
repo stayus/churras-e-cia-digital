@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { Employee } from '@/types/dashboard';
@@ -17,13 +17,20 @@ const AdminEmployees = () => {
     isLoading,
     saveEmployee,
     deleteEmployee,
-    generatePassword
+    generatePassword,
+    fetchEmployees
   } = useEmployeeData();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
+
+  // Forçar atualização dos dados quando a página é montada
+  useEffect(() => {
+    console.log('AdminEmployees: Component mounted, fetching data');
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   const handleOpenDialog = (employee: Employee | null = null) => {
     setSelectedEmployee(employee);
@@ -56,6 +63,7 @@ const AdminEmployees = () => {
   };
 
   const handleSaveEmployee = async (employee: Partial<Employee>, isNew: boolean) => {
+    console.log('Handling save employee:', { employee, isNew });
     const success = await saveEmployee(employee, isNew);
     if (success) {
       handleCloseDialog();
@@ -75,11 +83,11 @@ const AdminEmployees = () => {
         });
         handleCloseDeleteDialog();
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Erro ao remover funcionário",
-        description: error instanceof Error ? error.message : "Ocorreu um erro durante a remoção."
+        description: error instanceof Error ? error.message : (error?.message || "Ocorreu um erro durante a remoção.")
       });
     } finally {
       setIsDeletingEmployee(false);
@@ -103,12 +111,26 @@ const AdminEmployees = () => {
           </Button>
         </div>
         
-        <EmployeeTable 
-          employees={employees}
-          isLoading={isLoading}
-          onEdit={handleOpenDialog}
-          onDelete={handleOpenDeleteDialog}
-        />
+        {isLoading ? (
+          <p className="text-center py-4">Carregando funcionários...</p>
+        ) : (
+          <>
+            {Array.isArray(employees) && employees.length > 0 ? (
+              <EmployeeTable 
+                employees={employees}
+                isLoading={isLoading}
+                onEdit={handleOpenDialog}
+                onDelete={handleOpenDeleteDialog}
+              />
+            ) : (
+              <div className="rounded-md border p-8">
+                <p className="text-center text-muted-foreground">
+                  Nenhum funcionário cadastrado. Utilize o botão "Adicionar Funcionário" para começar.
+                </p>
+              </div>
+            )}
+          </>
+        )}
         
         <EmployeeDialog
           isOpen={isDialogOpen}

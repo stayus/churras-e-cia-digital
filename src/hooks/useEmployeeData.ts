@@ -17,7 +17,9 @@ export function useEmployeeData() {
   const fetchEmployees = async () => {
     setIsLoading(true);
     try {
+      console.log('Fetching employees from database...');
       const formattedEmployees = await fetchEmployeesFromDatabase();
+      console.log('Employees fetched successfully:', formattedEmployees);
       setEmployees(formattedEmployees);
     } catch (error) {
       console.error('Error fetching employees:', error);
@@ -26,12 +28,15 @@ export function useEmployeeData() {
         title: 'Erro ao carregar funcionários',
         description: 'Não foi possível carregar a lista de funcionários.'
       });
+      // Definir como array vazio em caso de erro
+      setEmployees([]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const saveEmployee = async (employee: Partial<Employee>, isNew: boolean) => {
+    console.log(`Saving employee (isNew: ${isNew}):`, employee);
     try {
       const success = await saveEmployeeToDatabase(employee, isNew);
       
@@ -41,17 +46,17 @@ export function useEmployeeData() {
           description: `Funcionário ${employee.name} foi ${isNew ? 'adicionado' : 'atualizado'} com sucesso.`
         });
         
-        // Reload list
+        // Recarregar lista
         fetchEmployees();
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving employee:', error);
       toast({
         variant: 'destructive',
         title: 'Erro ao salvar funcionário',
-        description: error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o funcionário.'
+        description: error instanceof Error ? error.message : (error?.message || 'Ocorreu um erro ao salvar o funcionário.')
       });
       return false;
     }
@@ -59,6 +64,7 @@ export function useEmployeeData() {
 
   const deleteEmployee = async (employeeId: string) => {
     try {
+      console.log('Deleting employee:', employeeId);
       const success = await deleteEmployeeFromDatabase(employeeId);
       
       if (success) {
@@ -71,18 +77,20 @@ export function useEmployeeData() {
         return true;
       }
       return false;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing employee:', error);
       toast({
         variant: 'destructive',
         title: 'Erro ao remover funcionário',
-        description: error instanceof Error ? error.message : 'Ocorreu um erro ao remover o funcionário.'
+        description: error instanceof Error ? error.message : (error?.message || 'Ocorreu um erro ao remover o funcionário.')
       });
       return false;
     }
   };
 
+  // Carregar funcionários quando o componente é montado
   useEffect(() => {
+    console.log('useEmployeeData: Initial data fetch');
     fetchEmployees();
   }, []);
 

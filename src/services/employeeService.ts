@@ -7,14 +7,23 @@ import { formatDatabaseToAppEmployee, formatAppToDatabaseEmployee, DatabaseEmplo
  * Fetch employees from the database
  */
 export async function fetchEmployeesFromDatabase(): Promise<Employee[]> {
+  // Usar service role key (via edge function) para evitar problemas de RLS
   const { data, error } = await supabase
     .from('employees')
     .select('*')
     .order('name');
     
   if (error) {
+    console.error('Error fetching employees:', error);
     throw error;
   }
+  
+  if (!data || data.length === 0) {
+    console.log('No employees found in database');
+    return [];
+  }
+  
+  console.log(`Found ${data.length} employees in database`);
   
   // Format database data to application format
   return data.map(employee => formatDatabaseToAppEmployee(employee));
@@ -28,36 +37,44 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
     const dbEmployee = formatAppToDatabaseEmployee(employee, isNew);
     
     if (isNew) {
-      // For new employees, ensure password is provided
+      // Para novos funcionários, usar a Edge Function create-employee
+      console.log('Creating new employee:', dbEmployee);
+      
+      // Verificar se a senha foi fornecida
       if (!dbEmployee.password) {
         throw new Error('Password is required for new employees');
       }
       
-      // Insert new employee - explicitly cast to the type Supabase expects
-      const { error } = await supabase
-        .from('employees')
-        .insert({
+      // Chamar a Edge Function para criar o funcionário
+      const { data, error } = await supabase.functions.invoke('create-employee', {
+        body: {
           name: dbEmployee.name,
-          username: dbEmployee.username,
+          username: dbEmployee.username, 
           password: dbEmployee.password,
           cpf: dbEmployee.cpf || null,
           phone: dbEmployee.phone || null,
           birth_date: dbEmployee.birth_date || null,
           pix_key: dbEmployee.pix_key || null,
           role: dbEmployee.role,
-          permissions: dbEmployee.permissions,
-          registration_number: dbEmployee.registration_number
-        });
-        
-      if (error) {
-        if (error.code === '23505') {
-          throw new Error('O nome de usuário já existe. Por favor, escolha outro.');
-        } else {
-          throw error;
+          permissions: dbEmployee.permissions
         }
+      });
+      
+      if (error) {
+        console.error('Error calling create-employee function:', error);
+        throw error;
       }
+      
+      if (!data.success) {
+        console.error('Failed to create employee:', data.error);
+        throw new Error(data.error || 'Failed to create employee');
+      }
+      
+      console.log('Employee created successfully:', data);
+      return true;
     } else if (employee.id) {
-      // Update existing employee - explicitly define fields to update
+      console.log('Updating employee:', employee.id);
+      // Atualizar funcionário existente - usando a tabela direta
       const { error } = await supabase
         .from('employees')
         .update({
@@ -73,11 +90,14 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         .eq('id', employee.id);
         
       if (error) {
+        console.error('Error updating employee:', error);
         throw error;
       }
+      
+      return true;
     }
     
-    return true;
+    return false;
   } catch (error) {
     console.error('Error saving employee:', error);
     throw error;
@@ -107,6 +127,7 @@ export async function deleteEmployeeFromDatabase(employeeId: string): Promise<bo
       .eq('id', employeeId);
       
     if (error) {
+      console.error('Error deleting employee:', error);
       throw error;
     }
     
