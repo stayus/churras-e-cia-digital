@@ -1,4 +1,3 @@
-
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
@@ -21,6 +20,8 @@ interface EmployeeData {
     manageStock: boolean;
     viewReports: boolean;
     changeOrderStatus: boolean;
+    exportOrderReportPDF: boolean;
+    promotionProducts: boolean;
   };
 }
 
@@ -208,7 +209,7 @@ serve(async (req) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Create employee record
+    // Create employee record with expanded permissions object
     const { data, error } = await supabaseClient
       .from("employees")
       .insert([
@@ -222,7 +223,13 @@ serve(async (req) => {
           phone,
           birth_date: birth_date ? new Date(birth_date) : null,
           pix_key,
-          permissions
+          permissions: {
+            manageStock: permissions?.manageStock || false,
+            viewReports: permissions?.viewReports || false,
+            changeOrderStatus: permissions?.changeOrderStatus || false,
+            exportOrderReportPDF: permissions?.exportOrderReportPDF || false,
+            promotionProducts: permissions?.promotionProducts || false
+          }
         }
       ])
       .select("id")
