@@ -3,18 +3,19 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2 } from "lucide-react";
+import { Loader2, LogOut } from "lucide-react";
 import OrdersList from "@/components/employee/OrdersList";
-import SalesReport from "@/components/employee/SalesReport";
 import ProductsManagement from "@/components/employee/ProductsManagement";
 import ProductsPromotions from "@/components/employee/ProductsPromotions";
 import OrderExports from "@/components/employee/OrderExports";
-import EmployeeLayout from "@/components/employee/EmployeeLayout";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const EmployeePanel = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState("orders");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Simulate loading
@@ -31,6 +32,11 @@ const EmployeePanel = () => {
   const showStockTab = user?.permissions?.manageStock;
   const showExportsTab = user?.permissions?.exportOrderReportPDF;
 
+  const handleLogout = () => {
+    logout();
+    navigate('/employee-login');
+  };
+
   // Default to the first available tab
   useEffect(() => {
     if (!loading) {
@@ -43,43 +49,53 @@ const EmployeePanel = () => {
 
   if (loading) {
     return (
-      <EmployeeLayout>
-        <div className="flex h-screen items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">Carregando...</span>
-        </div>
-      </EmployeeLayout>
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Carregando...</span>
+      </div>
     );
   }
 
   return (
-    <EmployeeLayout>
+    <div className="min-h-screen bg-gray-100">
+      <header className="bg-white border-b p-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-xl font-bold text-brand-black">Churrasquinho & Cia</h1>
+            <p className="text-sm text-muted-foreground">Painel do Funcionário</p>
+          </div>
+          <Button variant="outline" className="gap-2" onClick={handleLogout}>
+            <LogOut className="h-4 w-4" />
+            Sair
+          </Button>
+        </div>
+      </header>
+
       <div className="p-6">
-        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-          <h1 className="text-3xl font-bold text-brand-black">Bem-vindo, {user?.name}</h1>
-          <p className="text-muted-foreground">Painel do Funcionário</p>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-brand-black">Bem-vindo, {user?.name}</h2>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full mb-6 overflow-x-auto flex-wrap">
             {showOrdersTab && (
               <TabsTrigger value="orders" className="flex-1">
-                Gerenciar Pedidos
+                Alterar Status do Pedido
               </TabsTrigger>
             )}
             {showPromotionsTab && (
               <TabsTrigger value="promotions" className="flex-1">
-                Gerenciar Promoções
+                Colocar Produtos em Promoção
               </TabsTrigger>
             )}
             {showStockTab && (
               <TabsTrigger value="stock" className="flex-1">
-                Gerenciar Estoque
+                Alterar Status do Produto
               </TabsTrigger>
             )}
             {showExportsTab && (
               <TabsTrigger value="exports" className="flex-1">
-                Exportar Relatórios
+                Exportação de Relatório em PDF
               </TabsTrigger>
             )}
           </TabsList>
@@ -137,7 +153,7 @@ const EmployeePanel = () => {
           )}
         </Tabs>
       </div>
-    </EmployeeLayout>
+    </div>
   );
 };
 

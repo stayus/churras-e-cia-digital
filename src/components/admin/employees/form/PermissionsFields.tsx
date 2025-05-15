@@ -29,7 +29,7 @@ const PermissionsFields: React.FC<PermissionsFieldsProps> = ({ form }) => {
               />
             </FormControl>
             <FormLabel className="font-normal">
-              Gerenciar estoque
+              Alterar status do produto
             </FormLabel>
           </FormItem>
         )}
@@ -47,7 +47,7 @@ const PermissionsFields: React.FC<PermissionsFieldsProps> = ({ form }) => {
               />
             </FormControl>
             <FormLabel className="font-normal">
-              Visualizar relatórios
+              Visualizar relatório de vendas do dia
             </FormLabel>
           </FormItem>
         )}
@@ -83,7 +83,7 @@ const PermissionsFields: React.FC<PermissionsFieldsProps> = ({ form }) => {
               />
             </FormControl>
             <FormLabel className="font-normal">
-              Exportar relatório em PDF
+              Exportação de relatório em PDF
             </FormLabel>
           </FormItem>
         )}
@@ -101,7 +101,7 @@ const PermissionsFields: React.FC<PermissionsFieldsProps> = ({ form }) => {
               />
             </FormControl>
             <FormLabel className="font-normal">
-              Gerenciar promoções
+              Colocar produtos em promoção
             </FormLabel>
           </FormItem>
         )}
