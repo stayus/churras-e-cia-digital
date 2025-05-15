@@ -2,7 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input as FormInput } from '@/components/ui/input';
 import { Employee } from '@/types/dashboard';
 
 interface EmployeeBasicInfoProps {
@@ -16,6 +16,48 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
   handleChange,
   isNew
 }) => {
+  // Format phone number as user types (XX) XXXXX-XXXX
+  const formatPhone = (value: string) => {
+    if (!value) return value;
+    
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Format the phone number
+    if (digits.length <= 2) {
+      return `(${digits}`;
+    } else if (digits.length <= 7) {
+      return `(${digits.substring(0, 2)}) ${digits.substring(2)}`;
+    } else {
+      return `(${digits.substring(0, 2)}) ${digits.substring(2, 7)}-${digits.substring(7, 11)}`;
+    }
+  };
+  
+  // Format CPF as user types XXX.XXX.XXX-XX
+  const formatCPF = (value: string) => {
+    if (!value) return value;
+    
+    // Remove all non-digit characters
+    const digits = value.replace(/\D/g, '');
+    
+    // Format the CPF
+    if (digits.length <= 3) {
+      return digits;
+    } else if (digits.length <= 6) {
+      return `${digits.substring(0, 3)}.${digits.substring(3)}`;
+    } else if (digits.length <= 9) {
+      return `${digits.substring(0, 3)}.${digits.substring(3, 6)}.${digits.substring(6)}`;
+    } else {
+      return `${digits.substring(0, 3)}.${digits.substring(3, 6)}.${digits.substring(6, 9)}-${digits.substring(9, 11)}`;
+    }
+  };
+  
+  // Validate name to ensure it has at least first and last name
+  const validateName = (name: string) => {
+    const nameParts = name.trim().split(/\s+/);
+    return nameParts.length >= 2;
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -24,9 +66,19 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
           id="name"
           placeholder="Nome e sobrenome"
           value={formData.name || ''}
-          onChange={(e) => handleChange('name', e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            handleChange('name', value);
+          }}
+          onBlur={(e) => {
+            const value = e.target.value;
+            if (value && !validateName(value)) {
+              alert('Digite o nome completo (nome e sobrenome)');
+            }
+          }}
           required
         />
+        <p className="text-xs text-muted-foreground">Digite o nome completo (nome e sobrenome)</p>
       </div>
       
       <div className="space-y-2">
@@ -47,7 +99,11 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
           id="cpf"
           placeholder="000.000.000-00"
           value={formData.cpf || ''}
-          onChange={(e) => handleChange('cpf', e.target.value)}
+          onChange={(e) => {
+            const formatted = formatCPF(e.target.value);
+            handleChange('cpf', formatted);
+          }}
+          maxLength={14} // XXX.XXX.XXX-XX (14 characters)
         />
       </div>
       
@@ -67,25 +123,23 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
           id="phone"
           placeholder="(00) 00000-0000"
           value={formData.phone || ''}
-          onChange={(e) => handleChange('phone', e.target.value)}
+          onChange={(e) => {
+            const formatted = formatPhone(e.target.value);
+            handleChange('phone', formatted);
+          }}
+          maxLength={15} // (XX) XXXXX-XXXX (15 characters)
         />
       </div>
       
       <div className="space-y-2">
         <Label htmlFor="role">Cargo *</Label>
-        <Select
+        <Input
+          id="role"
+          placeholder="Digite o cargo"
           value={formData.role || ''}
-          onValueChange={(value) => handleChange('role', value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Selecione o cargo" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="admin">Administrador</SelectItem>
-            <SelectItem value="employee">Funcionário</SelectItem>
-            <SelectItem value="motoboy">Motoboy</SelectItem>
-          </SelectContent>
-        </Select>
+          onChange={(e) => handleChange('role', e.target.value)}
+          required
+        />
       </div>
       
       <div className="space-y-2">

@@ -8,6 +8,8 @@ import { PlusCircle } from 'lucide-react';
 import EmployeeTable from '@/components/admin/employees/EmployeeTable';
 import DeleteConfirmationDialog from '@/components/admin/DeleteConfirmationDialog';
 import EmployeeDialog from '@/components/admin/employees/EmployeeDialog';
+import { BackButton } from '@/components/ui/back-button';
+import { toast } from '@/hooks/use-toast';
 
 const AdminEmployees = () => {
   const {
@@ -33,6 +35,16 @@ const AdminEmployees = () => {
   };
 
   const handleOpenDeleteDialog = (employee: Employee) => {
+    // Don't allow removing the admin user
+    if (employee.username === 'admin') {
+      toast({
+        variant: 'destructive',
+        title: 'Operação não permitida',
+        description: 'O usuário administrador não pode ser removido.'
+      });
+      return;
+    }
+    
     setSelectedEmployee(employee);
     setIsDeleteDialogOpen(true);
   };
@@ -61,15 +73,17 @@ const AdminEmployees = () => {
   return (
     <AdminLayout>
       <div className="p-6">
+        <BackButton to="/admin" label="Voltar ao Dashboard" />
+        
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Manage Employees</h1>
+          <h1 className="text-2xl font-bold">Gerenciar Funcionários</h1>
           
           <Button 
             className="bg-red-600 hover:bg-red-700"
             onClick={() => handleOpenDialog()}
           >
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add Employee
+            Adicionar Funcionário
           </Button>
         </div>
         
@@ -93,8 +107,8 @@ const AdminEmployees = () => {
           isOpen={isDeleteDialogOpen}
           onClose={handleCloseDeleteDialog}
           onConfirm={handleDeleteEmployee}
-          title="Remove Employee"
-          description={`Are you sure you want to remove employee ${selectedEmployee?.name}? This action cannot be undone.`}
+          title="Remover Funcionário"
+          description={`Tem certeza que deseja remover o funcionário ${selectedEmployee?.name}? Esta ação não pode ser desfeita.`}
         />
       </div>
     </AdminLayout>

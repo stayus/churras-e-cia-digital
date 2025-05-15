@@ -51,8 +51,8 @@ export function useEmployeeData() {
       console.error('Error fetching employees:', error);
       toast({
         variant: 'destructive',
-        title: 'Error loading employees',
-        description: 'Unable to load the employee list.'
+        title: 'Erro ao carregar funcionários',
+        description: 'Não foi possível carregar a lista de funcionários.'
       });
     } finally {
       setIsLoading(false);
@@ -61,43 +61,46 @@ export function useEmployeeData() {
 
   const saveEmployee = async (employee: Partial<Employee>, isNew: boolean) => {
     try {
+      // Format data for the database
+      const dbEmployee: any = {
+        name: employee.name,
+        username: employee.username,
+        cpf: employee.cpf,
+        phone: employee.phone,
+        birth_date: employee.birthDate,
+        pix_key: employee.pixKey,
+        role: employee.role,
+        permissions: employee.permissions,
+      };
+      
       if (isNew) {
-        // Create new employee using the edge function
-        const { data, error } = await supabase.functions.invoke('create-employee', {
-          body: {
-            name: employee.name,
-            username: employee.username,
-            cpf: employee.cpf,
-            phone: employee.phone,
-            birth_date: employee.birthDate,
-            pix_key: employee.pixKey,
-            role: employee.role,
-            password: employee.password,
-            permissions: employee.permissions,
-          },
-        });
+        // Add registration number for new employees
+        dbEmployee.registration_number = `MC-${Math.floor(1000 + Math.random() * 9000)}`;
+        dbEmployee.password = employee.password;
         
-        if (error || !data.success) {
-          throw new Error(data?.error || 'Error creating employee');
+        // Insert new employee
+        const { error } = await supabase
+          .from('employees')
+          .insert([dbEmployee]);
+          
+        if (error) {
+          if (error.code === '23505') {
+            toast({
+              variant: 'destructive',
+              title: 'Erro ao adicionar funcionário',
+              description: 'O nome de usuário já existe. Por favor, escolha outro.'
+            });
+          } else {
+            throw error;
+          }
+          return false;
         }
         
         toast({
-          title: 'Employee added',
-          description: `Employee ${employee.name} was successfully added.`
+          title: 'Funcionário adicionado',
+          description: `Funcionário ${employee.name} foi adicionado com sucesso.`
         });
       } else if (employee.id) {
-        // Format for database
-        const dbEmployee: any = {
-          name: employee.name,
-          username: employee.username,
-          cpf: employee.cpf,
-          phone: employee.phone,
-          birth_date: employee.birthDate,
-          pix_key: employee.pixKey,
-          role: employee.role,
-          permissions: employee.permissions,
-        };
-        
         // Update existing employee
         const { error } = await supabase
           .from('employees')
@@ -109,8 +112,8 @@ export function useEmployeeData() {
         }
         
         toast({
-          title: 'Employee updated',
-          description: `Employee ${employee.name} was successfully updated.`
+          title: 'Funcionário atualizado',
+          description: `Funcionário ${employee.name} foi atualizado com sucesso.`
         });
       }
       
@@ -121,8 +124,8 @@ export function useEmployeeData() {
       console.error('Error saving employee:', error);
       toast({
         variant: 'destructive',
-        title: 'Error saving employee',
-        description: error instanceof Error ? error.message : 'An error occurred while saving the employee.'
+        title: 'Erro ao salvar funcionário',
+        description: error instanceof Error ? error.message : 'Ocorreu um erro ao salvar o funcionário.'
       });
       return false;
     }
@@ -130,6 +133,23 @@ export function useEmployeeData() {
 
   const deleteEmployee = async (employeeId: string) => {
     try {
+      // Check if employee is admin
+      const { data } = await supabase
+        .from('employees')
+        .select('username')
+        .eq('id', employeeId)
+        .single();
+        
+      if (data && data.username === 'admin') {
+        toast({
+          variant: 'destructive',
+          title: 'Operação não permitida',
+          description: 'O usuário administrador não pode ser removido.'
+        });
+        return false;
+      }
+      
+      // Delete employee
       const { error } = await supabase
         .from('employees')
         .delete()
@@ -140,8 +160,8 @@ export function useEmployeeData() {
       }
       
       toast({
-        title: 'Employee removed',
-        description: 'Employee was successfully removed.'
+        title: 'Funcionário removido',
+        description: 'O funcionário foi removido com sucesso.'
       });
       
       fetchEmployees();
@@ -150,8 +170,8 @@ export function useEmployeeData() {
       console.error('Error removing employee:', error);
       toast({
         variant: 'destructive',
-        title: 'Error removing employee',
-        description: 'An error occurred while removing the employee.'
+        title: 'Erro ao remover funcionário',
+        description: 'Ocorreu um erro ao remover o funcionário.'
       });
       return false;
     }

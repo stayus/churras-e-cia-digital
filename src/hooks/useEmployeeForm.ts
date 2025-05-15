@@ -12,7 +12,7 @@ export const useEmployeeForm = (
     employee || {
       name: '',
       username: '',
-      role: 'employee',
+      role: '',
       cpf: '',
       birthDate: '',
       phone: '',
@@ -79,6 +79,16 @@ export const useEmployeeForm = (
       return false;
     }
     
+    // Validação de cargo
+    if (!formData.role?.trim()) {
+      toast({
+        variant: 'destructive',
+        title: 'Campo obrigatório',
+        description: 'O cargo é obrigatório.'
+      });
+      return false;
+    }
+    
     // Verificação de senha para novo funcionário
     if (isNew && !password) {
       toast({
@@ -111,6 +121,13 @@ export const useEmployeeForm = (
       }
       
       await onSave(employeeData, isNew);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Erro ao salvar',
+        description: 'Ocorreu um erro ao salvar o funcionário.'
+      });
     } finally {
       setIsSubmitting(false);
     }
