@@ -12,11 +12,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Verifica se o usuário é administrador
-  const isAdmin = user?.role === 'admin';
+  // Verifica se o usuário está autenticado e não é um cliente
+  // Qualquer usuário que não seja 'customer' é considerado funcionário
+  const isEmployee = user && user.role !== 'customer';
 
-  // Redireciona se não for administrador
-  if (!isAdmin) {
+  // Redireciona se não for funcionário
+  if (!isEmployee) {
     navigate('/login');
     return null;
   }

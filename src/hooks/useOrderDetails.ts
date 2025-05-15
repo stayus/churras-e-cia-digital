@@ -1,80 +1,92 @@
 
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { Order } from "@/types/orders";
 import { supabase } from "@/integrations/supabase/client";
+import { Order } from "@/types/orders";
+import { toast } from "@/hooks/use-toast";
 
-export const useOrderDetails = (userRole?: string) => {
+type UserRole = 'admin' | 'employee' | 'motoboy' | 'customer' | string; // Adicionamos string para aceitar qualquer role de funcionário
+
+interface StatusOption {
+  value: string;
+  label: string;
+}
+
+export const useOrderDetails = (userRole?: UserRole) => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const { toast } = useToast();
 
-  // Function to update order status
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
-    try {
-      // Get token from localStorage
-      const token = localStorage.getItem('token');
-      if (!token) {
-        throw new Error('Usuário não autenticado');
-      }
-      
-      // Call the update-order-status edge function
-      const response = await supabase.functions.invoke('update-order-status', {
-        body: {
-          orderId,
-          status: newStatus,
-          token
-        }
-      });
-      
-      if (!response.data.success) {
-        throw new Error(response.data.error || 'Falha ao atualizar status');
-      }
-      
-      toast({
-        title: "Status atualizado",
-        description: `Status do pedido alterado com sucesso`,
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating order status:', error);
+  // Verifica se o usuário é funcionário (não cliente)
+  const isEmployee = userRole && userRole !== 'customer';
+
+  // Atualiza o status do pedido
+  const updateOrderStatus = async (orderId: string, newStatus: string): Promise<boolean> => {
+    // Somente funcionários podem atualizar o status do pedido
+    if (!isEmployee) {
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao atualizar status do pedido",
+        title: "Permissão negada",
+        description: "Você não tem permissão para atualizar o status do pedido."
+      });
+      return false;
+    }
+
+    try {
+      const { data, error } = await supabase.functions.invoke("update-order-status", {
+        body: { orderId, newStatus }
+      });
+
+      if (error) {
+        console.error("Error updating order status:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao atualizar status",
+          description: "Não foi possível atualizar o status do pedido."
+        });
+        return false;
+      }
+
+      toast({
+        title: "Status atualizado",
+        description: `Pedido #${orderId.substr(0, 8)} atualizado para "${newStatus}".`
+      });
+      return true;
+    } catch (error) {
+      console.error("Failed to update order status:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar status",
+        description: "Ocorreu um erro ao processar a solicitação."
       });
       return false;
     }
   };
 
-  // Function to determine which status options are available for updating
-  const getAvailableStatusOptions = (currentStatus: string) => {
-    // Default options for employees
-    const options = [];
-    
-    // Always allow to move forward in the workflow
-    if (currentStatus === 'received') {
-      options.push({ value: 'preparing', label: 'Em produção' });
-    } 
-    else if (currentStatus === 'preparing') {
-      options.push({ value: 'delivering', label: 'Saiu para entrega' });
+  // Obtém as opções de status disponíveis com base no status atual
+  const getAvailableStatusOptions = (currentStatus?: string): StatusOption[] => {
+    // Somente funcionários podem ver opções de status
+    if (!isEmployee) return [];
+
+    // Se não tiver status atual, retorne vazio
+    if (!currentStatus) return [];
+
+    // Opções de status disponíveis para cada status atual
+    switch (currentStatus) {
+      case "received":
+        return [
+          { value: "preparing", label: "Em preparação" }
+        ];
+      case "preparing":
+        return [
+          { value: "delivering", label: "Em entrega" }
+        ];
+      case "delivering":
+        return [
+          { value: "completed", label: "Entregue" }
+        ];
+      case "completed":
+        return []; // Pedido já finalizado
+      default:
+        return [];
     }
-    
-    // Only allow moving backwards for certain statuses
-    if (currentStatus === 'preparing') {
-      options.push({ value: 'received', label: 'Pedido recebido' });
-    }
-    else if (currentStatus === 'delivering' && userRole === 'admin') {
-      // Only admin can move back from delivering
-      options.push({ value: 'preparing', label: 'Em produção' });
-    }
-    
-    // Only motoboys can mark as completed
-    if (currentStatus === 'delivering' && userRole === 'motoboy') {
-      options.push({ value: 'completed', label: 'Pedido finalizado' });
-    }
-    
-    return options;
   };
 
   return {

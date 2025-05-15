@@ -9,11 +9,13 @@ import SalesReport from "@/components/employee/SalesReport";
 import ProductsManagement from "@/components/employee/ProductsManagement";
 import ProductsPromotions from "@/components/employee/ProductsPromotions";
 import OrderExports from "@/components/employee/OrderExports";
+import { useNavigate } from "react-router-dom";
 
 const EmployeePanel = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("orders");
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Simulate loading
@@ -23,6 +25,16 @@ const EmployeePanel = () => {
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Verificar se o usuário está autenticado e não é cliente
+  const isEmployee = user && user.role !== 'customer';
+  
+  // Redirecionar se não for funcionário
+  useEffect(() => {
+    if (!loading && !isEmployee) {
+      navigate('/login');
+    }
+  }, [loading, isEmployee, navigate]);
 
   // Determine which tabs to display based on user permissions
   const showOrdersTab = user?.permissions?.changeOrderStatus;
@@ -49,6 +61,11 @@ const EmployeePanel = () => {
         <span className="ml-2">Carregando...</span>
       </div>
     );
+  }
+
+  // Se não for funcionário, não renderize nada (o redirecionamento já foi tratado acima)
+  if (!isEmployee) {
+    return null;
   }
 
   return (

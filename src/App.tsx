@@ -53,16 +53,26 @@ const ProtectedRoute = ({ element, allowedRoles = [] }: ProtectedRouteProps) => 
   }
 
   // Check if the user has one of the allowed roles
-  if (allowedRoles.length > 0 && user && !allowedRoles.includes(user.role)) {
-    // Redirect based on user role
-    if (user.role === 'admin') {
-      return <Navigate to="/admin" replace />;
-    } else if (user.role === 'employee') {
-      return <Navigate to="/employee" replace />;
-    } else if (user.role === 'motoboy') {
-      return <Navigate to="/motoboy" replace />;
-    } else {
-      return <Navigate to="/" replace />;
+  // Se allowedRoles contém 'employee', consideramos todos os usuários não-customer como funcionários
+  if (allowedRoles.length > 0 && user) {
+    const isEmployee = user.role !== 'customer';
+    
+    // Se 'employee' está na lista de funções permitidas e o usuário é um funcionário, permitir acesso
+    // Ou se a função específica do usuário está na lista de funções permitidas
+    const hasAllowedRole = 
+      (allowedRoles.includes('employee') && isEmployee) ||
+      allowedRoles.includes(user.role);
+    
+    if (!hasAllowedRole) {
+      // Redirect based on user role
+      if (user.role === 'admin') {
+        return <Navigate to="/admin" replace />;
+      } else if (user.role !== 'customer') {
+        // Qualquer funcionário (não cliente) vai para o painel de funcionário
+        return <Navigate to="/employee" replace />;
+      } else {
+        return <Navigate to="/" replace />;
+      }
     }
   }
 
@@ -91,7 +101,8 @@ const App = () => (
                 element={
                   <ProtectedRoute 
                     element={<PasswordChangePage />} 
-                    allowedRoles={['admin', 'employee', 'motoboy']} 
+                    // Permitir qualquer funcionário, não apenas aqueles com role específico
+                    allowedRoles={['admin', 'employee', 'motoboy', 'tesoureiro', 'analista', 'cozinheira']} 
                   />
                 } 
               />
@@ -122,10 +133,10 @@ const App = () => (
                 element={<ProtectedRoute element={<AdminOrders />} allowedRoles={['admin']} />} 
               />
               
-              {/* Employee routes */}
+              {/* Employee routes - Permitir qualquer funcionário, não apenas com role "employee" */}
               <Route 
                 path="/employee" 
-                element={<ProtectedRoute element={<EmployeePanel />} allowedRoles={['employee']} />} 
+                element={<ProtectedRoute element={<EmployeePanel />} allowedRoles={['employee', 'tesoureiro', 'analista', 'cozinheira', 'motoboy']} />} 
               />
               
               {/* Motoboy routes */}
