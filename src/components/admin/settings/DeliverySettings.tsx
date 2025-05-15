@@ -1,16 +1,15 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { StoreSettings } from '@/types/dashboard';
 import { Plus, Trash } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
+import { SettingsData } from '@/hooks/useSettingsData';
 
 interface DeliverySettingsProps {
-  settings: StoreSettings;
-  onSave: (settings: Partial<StoreSettings>) => void;
+  settings: SettingsData;
+  onSave: (settings: Partial<SettingsData>) => void;
 }
 
 interface DeliveryTier {

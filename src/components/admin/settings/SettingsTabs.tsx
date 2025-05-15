@@ -5,13 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import WorkingHoursSettings from './WorkingHoursSettings';
 import StoreInfoSettings from './StoreInfoSettings';
 import DeliverySettings from './DeliverySettings';
-import { StoreSettings } from '@/types/dashboard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { SettingsData } from '@/hooks/useSettingsData';
 
 interface SettingsTabsProps {
   isLoading: boolean;
-  settings: StoreSettings | null;
-  onUpdateSettings: (settings: Partial<StoreSettings>) => Promise<void>;
+  settings: SettingsData | null;
+  onUpdateSettings: (settings: Partial<SettingsData>) => Promise<void>;
 }
 
 // Helper component to display while loading
