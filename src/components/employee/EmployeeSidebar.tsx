@@ -15,7 +15,7 @@ import {
   List, 
   Percent,
   Package,
-  FileExport,
+  FileText,
   LogOut
 } from 'lucide-react';
 
@@ -56,7 +56,7 @@ const EmployeeSidebar = () => {
     {
       name: 'Exportações',
       path: '/employee/exports',
-      icon: FileExport,
+      icon: FileText,
       show: showExportsMenu
     }
   ].filter(item => item.show);
