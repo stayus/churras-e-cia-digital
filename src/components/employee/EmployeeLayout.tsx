@@ -1,8 +1,15 @@
 
 import React, { ReactNode } from 'react';
-import EmployeeSidebar from '@/components/employee/EmployeeSidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarTrigger,
+  SidebarInset
+} from '@/components/ui/sidebar';
+import EmployeeSidebar from '@/components/employee/EmployeeSidebar';
 
 interface EmployeeLayoutProps {
   children: ReactNode;
@@ -23,12 +30,24 @@ const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <EmployeeSidebar />
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
-    </div>
+    <SidebarProvider>
+      <div className="flex h-screen w-full bg-gray-100">
+        <Sidebar variant="inset" side="left">
+          <SidebarContent>
+            <EmployeeSidebar />
+          </SidebarContent>
+        </Sidebar>
+        <SidebarInset className="overflow-y-auto">
+          <div className="flex justify-between items-center p-4 bg-white border-b">
+            <div className="flex items-center">
+              <SidebarTrigger />
+              <h2 className="text-xl font-semibold ml-2 text-brand-red">Painel do Funcionário</h2>
+            </div>
+          </div>
+          {children}
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
   );
 };
 

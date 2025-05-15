@@ -138,6 +138,22 @@ const App = () => (
                 path="/employee" 
                 element={<ProtectedRoute element={<EmployeePanel />} allowedRoles={['employee', 'tesoureiro', 'analista', 'cozinheira', 'motoboy']} />} 
               />
+              <Route 
+                path="/employee/reports" 
+                element={<ProtectedRoute element={<EmployeePanel />} allowedRoles={['employee', 'tesoureiro', 'analista', 'cozinheira', 'motoboy']} />} 
+              />
+              <Route 
+                path="/employee/promotions" 
+                element={<ProtectedRoute element={<EmployeePanel />} allowedRoles={['employee', 'tesoureiro', 'analista', 'cozinheira', 'motoboy']} />} 
+              />
+              <Route 
+                path="/employee/stock" 
+                element={<ProtectedRoute element={<EmployeePanel />} allowedRoles={['employee', 'tesoureiro', 'analista', 'cozinheira', 'motoboy']} />} 
+              />
+              <Route 
+                path="/employee/exports" 
+                element={<ProtectedRoute element={<EmployeePanel />} allowedRoles={['employee', 'tesoureiro', 'analista', 'cozinheira', 'motoboy']} />} 
+              />
               
               {/* Motoboy routes */}
               <Route 

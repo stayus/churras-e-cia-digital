@@ -2,9 +2,16 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { cn } from '@/lib/utils';
 import {
-  ChevronRight,
+  SidebarHeader,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter
+} from '@/components/ui/sidebar';
+import {
   LayoutDashboard,
   Package,
   Users,
@@ -14,8 +21,8 @@ import {
   LogOut
 } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 const AdminSidebar = () => {
   const navigate = useNavigate();
@@ -57,49 +64,44 @@ const AdminSidebar = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/employee-login');
   };
 
   return (
-    <aside className="w-64 h-screen bg-white border-r flex flex-col">
-      <div className="p-4">
-        <h1 className="logo-text">Churrasquinho & Cia</h1>
-        <p className="text-xs text-muted-foreground mt-1">Painel de administração</p>
-      </div>
+    <>
+      <SidebarHeader className="bg-primary/5 border-b">
+        <div className="p-4">
+          <h1 className="logo-text">Churrasquinho & Cia</h1>
+          <p className="text-xs text-muted-foreground mt-1">Painel de Administração</p>
+        </div>
+      </SidebarHeader>
 
-      <Separator />
-
-      <nav className="flex-1 p-4">
-        <ul className="space-y-1">
+      <SidebarGroup>
+        <SidebarGroupLabel>Menu</SidebarGroupLabel>
+        <SidebarMenu>
           {menuItems.map((item) => (
-            <li key={item.path}>
-              <Button
-                variant="ghost"
-                className={cn(
-                  "w-full justify-start gap-2 font-normal",
-                  location.pathname === item.path && "bg-muted font-medium"
-                )}
+            <SidebarMenuItem key={item.path}>
+              <SidebarMenuButton 
+                isActive={location.pathname === item.path}
+                tooltip={item.name}
                 onClick={() => navigate(item.path)}
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.name}</span>
-                {location.pathname === item.path && (
-                  <ChevronRight className="h-4 w-4 ml-auto" />
-                )}
-              </Button>
-            </li>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           ))}
-        </ul>
-      </nav>
+        </SidebarMenu>
+      </SidebarGroup>
 
-      <div className="p-4">
-        <Separator className="my-4" />
+      <SidebarFooter className="mt-auto p-4">
+        <Separator className="my-2" />
         <Button variant="outline" className="w-full gap-2 justify-start" onClick={handleLogout}>
           <LogOut className="h-4 w-4" />
           <span>Sair</span>
         </Button>
-      </div>
-    </aside>
+      </SidebarFooter>
+    </>
   );
 };
 
