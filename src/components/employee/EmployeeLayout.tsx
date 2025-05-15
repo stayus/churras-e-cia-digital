@@ -22,7 +22,7 @@ const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
   }
 
   return (
-    <div className="h-screen w-full bg-gray-100">
+    <div className="min-h-screen bg-muted">
       {children}
     </div>
   );

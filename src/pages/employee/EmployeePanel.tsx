@@ -49,62 +49,65 @@ const EmployeePanel = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Carregando...</span>
+      <div className="flex h-screen items-center justify-center bg-muted">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+          <span className="text-lg font-medium">Carregando...</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white border-b p-4">
-        <div className="flex justify-between items-center">
+    <div className="min-h-screen bg-muted">
+      <header className="bg-white shadow-sm border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
-            <h1 className="text-xl font-bold text-brand-black">Churrasquinho & Cia</h1>
+            <h1 className="logo-text text-2xl md:text-3xl">Churrasquinho & Cia</h1>
             <p className="text-sm text-muted-foreground">Painel do Funcionário</p>
           </div>
-          <Button variant="outline" className="gap-2" onClick={handleLogout}>
+          <Button variant="outline" className="gap-2 hover:bg-muted/80" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             Sair
           </Button>
         </div>
       </header>
 
-      <div className="p-6">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold text-brand-black">Bem-vindo, {user?.name}</h2>
+      <div className="container mx-auto px-4 py-6 md:py-8">
+        <div className="mb-6 bg-white p-6 rounded-lg border shadow-sm">
+          <h2 className="text-xl md:text-2xl font-bold text-brand-black">Bem-vindo, {user?.name}</h2>
+          <p className="text-muted-foreground mt-1">Função: {user?.role}</p>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full mb-6 overflow-x-auto flex-wrap">
+          <TabsList className="w-full mb-6 overflow-x-auto flex-wrap bg-background shadow-sm border">
             {showOrdersTab && (
-              <TabsTrigger value="orders" className="flex-1">
+              <TabsTrigger value="orders" className="flex-1 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Alterar Status do Pedido
               </TabsTrigger>
             )}
             {showPromotionsTab && (
-              <TabsTrigger value="promotions" className="flex-1">
+              <TabsTrigger value="promotions" className="flex-1 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Colocar Produtos em Promoção
               </TabsTrigger>
             )}
             {showStockTab && (
-              <TabsTrigger value="stock" className="flex-1">
+              <TabsTrigger value="stock" className="flex-1 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Alterar Status do Produto
               </TabsTrigger>
             )}
             {showExportsTab && (
-              <TabsTrigger value="exports" className="flex-1">
+              <TabsTrigger value="exports" className="flex-1 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                 Exportação de Relatório em PDF
               </TabsTrigger>
             )}
           </TabsList>
 
           {showOrdersTab && (
-            <TabsContent value="orders">
-              <Card>
-                <CardHeader className="bg-muted/40">
-                  <CardTitle>Gerenciamento de Pedidos</CardTitle>
+            <TabsContent value="orders" className="animate-fade-in">
+              <Card className="shadow-md border-border">
+                <CardHeader className="bg-muted/40 border-b">
+                  <CardTitle className="text-xl md:text-2xl">Gerenciamento de Pedidos</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <OrdersList />
@@ -114,12 +117,12 @@ const EmployeePanel = () => {
           )}
           
           {showPromotionsTab && (
-            <TabsContent value="promotions">
-              <Card>
-                <CardHeader className="bg-muted/40">
-                  <CardTitle>Gerenciar Promoções</CardTitle>
+            <TabsContent value="promotions" className="animate-fade-in">
+              <Card className="shadow-md border-border">
+                <CardHeader className="bg-muted/40 border-b">
+                  <CardTitle className="text-xl md:text-2xl">Gerenciar Promoções</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <ProductsPromotions />
                 </CardContent>
               </Card>
@@ -127,12 +130,12 @@ const EmployeePanel = () => {
           )}
           
           {showStockTab && (
-            <TabsContent value="stock">
-              <Card>
-                <CardHeader className="bg-muted/40">
-                  <CardTitle>Gerenciar Estoque</CardTitle>
+            <TabsContent value="stock" className="animate-fade-in">
+              <Card className="shadow-md border-border">
+                <CardHeader className="bg-muted/40 border-b">
+                  <CardTitle className="text-xl md:text-2xl">Gerenciar Estoque</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <ProductsManagement />
                 </CardContent>
               </Card>
@@ -140,12 +143,12 @@ const EmployeePanel = () => {
           )}
           
           {showExportsTab && (
-            <TabsContent value="exports">
-              <Card>
-                <CardHeader className="bg-muted/40">
-                  <CardTitle>Exportação de Relatórios</CardTitle>
+            <TabsContent value="exports" className="animate-fade-in">
+              <Card className="shadow-md border-border">
+                <CardHeader className="bg-muted/40 border-b">
+                  <CardTitle className="text-xl md:text-2xl">Exportação de Relatórios</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="p-6">
                   <OrderExports />
                 </CardContent>
               </Card>
