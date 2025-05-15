@@ -81,6 +81,7 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
     );
   }
 
+  // Prevent infinite renders by using console.log instead of setting state
   console.log('Rendering employee table with employees:', employees);
 
   return (
@@ -127,6 +128,6 @@ const EmployeeTable: React.FC<EmployeeTableProps> = ({
       </Table>
     </div>
   );
-};
+}
 
 export default EmployeeTable;

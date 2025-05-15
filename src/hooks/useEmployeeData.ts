@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Employee } from '@/types/dashboard';
 import { 
@@ -14,7 +14,8 @@ export function useEmployeeData() {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchEmployees = async () => {
+  // Use useCallback to prevent recreation of the function on each render
+  const fetchEmployees = useCallback(async () => {
     setIsLoading(true);
     try {
       console.log('Fetching employees from database...');
@@ -33,7 +34,7 @@ export function useEmployeeData() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [toast]);
 
   const saveEmployee = async (employee: Partial<Employee>, isNew: boolean) => {
     console.log(`Saving employee (isNew: ${isNew}):`, employee);
@@ -88,11 +89,12 @@ export function useEmployeeData() {
     }
   };
 
-  // Carregar funcionários quando o componente é montado
+  // Carregar funcionários quando o componente é montado, apenas uma vez
   useEffect(() => {
     console.log('useEmployeeData: Initial data fetch');
     fetchEmployees();
-  }, []);
+    // Empty dependency array means this effect runs once on mount
+  }, [fetchEmployees]);
 
   return {
     employees,

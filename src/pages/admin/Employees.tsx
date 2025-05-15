@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { Employee } from '@/types/dashboard';
@@ -18,7 +18,6 @@ const AdminEmployees = () => {
     saveEmployee,
     deleteEmployee,
     generatePassword,
-    fetchEmployees
   } = useEmployeeData();
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -26,11 +25,7 @@ const AdminEmployees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
-  // Force data refresh when the component mounts
-  useEffect(() => {
-    console.log('AdminEmployees: Component mounted, fetching data');
-    fetchEmployees();
-  }, [fetchEmployees]);
+  // Remove the useEffect that was causing the loop
 
   const handleOpenDialog = (employee: Employee | null = null) => {
     setSelectedEmployee(employee);
