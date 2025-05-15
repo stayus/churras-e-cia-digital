@@ -29,6 +29,6 @@ export interface DbSettingsData {
   shipping_fee: number;
   free_shipping_radius_km: number;
   delivery_tiers?: Json;
-  store_address?: Record<string, string>;
+  store_address?: Json; // Change from Record<string, string> to Json
   working_hours?: Json;
 }

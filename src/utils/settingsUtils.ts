@@ -1,6 +1,7 @@
 
 import { DeliveryTier, WorkingHours } from '@/types/dashboard';
 import { DbSettingsData, SettingsData } from '@/types/settings';
+import { Json } from '@/integrations/supabase/types';
 
 export const getDefaultWorkingHours = (): WorkingHours[] => {
   return Array.from({ length: 7 }, (_, index) => ({
@@ -21,7 +22,7 @@ export const getDefaultDeliveryTiers = (baseFee: number = 5.0): DeliveryTier[] =
 export const mapSettingsFromDb = (data: DbSettingsData): SettingsData => {
   // Cast properly from database to our application type
   const workingHoursData = data.working_hours as unknown as WorkingHours[] || [];
-  const storeAddressData = data.store_address || {};
+  const storeAddressData = data.store_address as unknown as Record<string, string> || {};
   const deliveryTiersData = data.delivery_tiers as unknown as DeliveryTier[] || 
     getDefaultDeliveryTiers(data.shipping_fee);
   
@@ -66,7 +67,7 @@ export const mapSettingsToDb = (settings: Partial<SettingsData>): Partial<DbSett
     updateData.free_shipping_radius_km = settings.freeShippingRadiusKm;
   
   if (settings.storeAddress !== undefined) 
-    updateData.store_address = settings.storeAddress;
+    updateData.store_address = settings.storeAddress as unknown as Json;
   
   if (settings.workingHours !== undefined) 
     updateData.working_hours = settings.workingHours as unknown as Json;
