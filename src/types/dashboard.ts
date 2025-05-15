@@ -1,3 +1,4 @@
+
 export interface DashboardStats {
   dailyRevenue: number;
   totalOrders: number;
@@ -19,11 +20,19 @@ export interface WorkingHours {
   isOpen: boolean;
 }
 
+export interface DeliveryTier {
+  id: string;
+  minDistance: number;
+  maxDistance: number;
+  fee: number;
+}
+
 export interface StoreSettings {
   workingHours: WorkingHours[];
   pixKey: string;
   shippingFee: number;
   freeShippingRadiusKm: number;
+  deliveryTiers?: DeliveryTier[];
   storeName: string;
   storePhone: string;
   storeAddress: {

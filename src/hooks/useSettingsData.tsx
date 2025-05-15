@@ -1,8 +1,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { WorkingHours } from '@/types/dashboard';
-import { useToast } from '@/components/ui/use-toast';
+import { WorkingHours, DeliveryTier } from '@/types/dashboard';
+import { useToast } from '@/hooks/use-toast';
 import { Json } from '@/integrations/supabase/types';
 
 export interface SettingsData {
@@ -13,6 +13,7 @@ export interface SettingsData {
   whatsappLink: string;
   shippingFee: number;
   freeShippingRadiusKm: number;
+  deliveryTiers?: DeliveryTier[];
   storeAddress: {
     street: string;
     number: string;
@@ -44,6 +45,10 @@ export function useSettingsData() {
       // If no settings exist, create default settings
       if (!settingsExists || settingsExists.length === 0) {
         const defaultWorkingHours = getDefaultWorkingHours();
+        const defaultDeliveryTiers = [
+          { id: 'tier-1', minDistance: 0, maxDistance: 3, fee: 5.0 }
+        ];
+        
         const defaultSettings = {
           store_name: 'Churrasquinho & Cia',
           store_phone: '(00) 0000-0000',
@@ -51,6 +56,7 @@ export function useSettingsData() {
           whatsapp_link: 'https://wa.me/5500000000000',
           shipping_fee: 5.0,
           free_shipping_radius_km: 2.0,
+          delivery_tiers: defaultDeliveryTiers as unknown as Json,
           store_address: {
             street: '',
             number: '',
@@ -107,6 +113,9 @@ export function useSettingsData() {
     // Cast properly from database to our application type
     const workingHoursData = data.working_hours as unknown as WorkingHours[] || [];
     const storeAddressData = data.store_address as Record<string, string> || {};
+    const deliveryTiersData = data.delivery_tiers as unknown as DeliveryTier[] || [
+      { id: 'tier-1', minDistance: 0, maxDistance: 3, fee: data.shipping_fee || 5.0 }
+    ];
     
     setSettings({
       id: data.id,
@@ -116,6 +125,7 @@ export function useSettingsData() {
       whatsappLink: data.whatsapp_link,
       shippingFee: data.shipping_fee,
       freeShippingRadiusKm: data.free_shipping_radius_km,
+      deliveryTiers: deliveryTiersData,
       storeAddress: {
         street: storeAddressData.street || '',
         number: storeAddressData.number || '',
@@ -168,6 +178,9 @@ export function useSettingsData() {
       
       if (newSettings.workingHours !== undefined) 
         updateData.working_hours = newSettings.workingHours as unknown as Json;
+        
+      if (newSettings.deliveryTiers !== undefined)
+        updateData.delivery_tiers = newSettings.deliveryTiers as unknown as Json;
       
       // Update settings in database
       const { error } = await supabase
@@ -186,15 +199,15 @@ export function useSettingsData() {
       });
       
       toast({
-        title: 'Settings updated',
-        description: 'Store settings were successfully updated.'
+        title: 'Configurações atualizadas',
+        description: 'As configurações foram salvas com sucesso.'
       });
     } catch (error) {
       console.error('Error saving settings:', error);
       toast({
         variant: 'destructive',
-        title: 'Error saving settings',
-        description: 'An error occurred while saving the settings.'
+        title: 'Erro ao salvar configurações',
+        description: 'Ocorreu um erro ao salvar as configurações.'
       });
     } finally {
       setIsSaving(false);
