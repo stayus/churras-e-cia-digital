@@ -69,7 +69,7 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         
         // Use direct URL with full project reference to avoid issues with redirects
         const projectRef = "flhdgdpewxooxtxqqhdz"; // From your Supabase config
-        const apiKey = supabase.auth.anon.anon_key;
+        const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsaGRnZHBld3hvb3h0eHFxaGR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxODc4ODgsImV4cCI6MjA2Mjc2Mzg4OH0.ZDT4JO3QQb1zlaD-NeMT0pcAJ-aNhDELNqyB3Gyl9no";
         
         // Make a direct fetch call to the edge function
         const response = await fetch(`https://${projectRef}.supabase.co/functions/v1/create-employee`, {
