@@ -21,6 +21,7 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({
 }) => {
   const generateAndSetPassword = () => {
     const newPassword = generatePassword();
+    console.log('Generated password:', newPassword); // Log the generated password
     setPassword(newPassword);
   };
 

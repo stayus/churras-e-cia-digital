@@ -47,7 +47,7 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
       console.log('Creating new employee:', dbEmployee);
       
       // Verificar se a senha foi fornecida
-      if (!dbEmployee.password) {
+      if (!employee.password) {
         throw new Error('É necessário gerar uma senha para novos funcionários');
       }
       
@@ -56,7 +56,7 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         const employeeData = {
           name: dbEmployee.name,
           username: dbEmployee.username,
-          password: dbEmployee.password, // We're now correctly including the actual password
+          password: employee.password, // Use the original password from the employee object
           cpf: dbEmployee.cpf || null,
           phone: dbEmployee.phone || null,
           birth_date: dbEmployee.birth_date || null,
@@ -65,7 +65,10 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
           permissions: dbEmployee.permissions
         };
         
-        console.log('Sending data to create-employee function:', employeeData);
+        console.log('Sending data to create-employee function:', {
+          ...employeeData,
+          password: '********' // Don't log the actual password
+        });
         
         // Use the Supabase client to invoke the edge function
         const { data, error } = await supabase.functions.invoke('create-employee', {

@@ -68,10 +68,8 @@ export function formatAppToDatabaseEmployee(employee: Partial<Employee>, isNew: 
     // Add registration number for new employees
     dbEmployee.registration_number = `MC-${Math.floor(1000 + Math.random() * 9000)}`;
     
-    // Add password if provided
-    if (employee.password) {
-      dbEmployee.password = employee.password;
-    }
+    // Note: We're not setting the password here because we want to pass the plaintext password
+    // directly to the edge function where it will be properly hashed
   }
   
   return dbEmployee;

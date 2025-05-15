@@ -138,12 +138,13 @@ export const useEmployeeForm = (
     
     setIsSubmitting(true);
     try {
-      // Adiciona a senha ao objeto apenas se for um novo funcionário
+      // Create a new object with the form data and password when it's a new employee
       const employeeData = {
         ...formData
       };
       
-      if (isNew && password) {
+      if (isNew) {
+        // Make sure the password is included when creating a new employee
         employeeData.password = password;
       }
       

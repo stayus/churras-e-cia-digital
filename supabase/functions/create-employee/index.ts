@@ -1,3 +1,4 @@
+
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
@@ -78,7 +79,9 @@ serve(async (req) => {
     
     // Get request body and create Supabase client
     const requestData = await req.json();
-    console.log("Received data:", JSON.stringify(requestData));
+    // Log the received data but mask the password
+    const logData = { ...requestData, password: requestData.password ? '********' : undefined };
+    console.log("Received data:", JSON.stringify(logData));
     
     const { name, username, cpf, phone, birth_date, pix_key, role, password, permissions } = requestData as EmployeeData;
     
@@ -236,7 +239,9 @@ serve(async (req) => {
     
     // Hash password with our Deno-compatible method
     console.log("Hashing password");
+    console.log("Password to hash:", password); // Log the password before hashing
     const hashedPassword = await hashPassword(password);
+    console.log("Password hashed successfully");
     
     console.log("Creating employee record");
     // Create employee record with expanded permissions object
