@@ -33,12 +33,16 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
     handleSubmit
   } = useEmployeeForm(employee, onSave);
 
+  // Combined disabled state from both internal and parent component
+  const isFormDisabled = isSubmitting || isSaving;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6 py-4">
       <EmployeeBasicInfo 
         formData={formData} 
         handleChange={handleChange} 
         isNew={isNew} 
+        disabled={isFormDisabled}
       />
       
       {isNew && (
@@ -46,6 +50,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
           password={password}
           setPassword={setPassword}
           generatePassword={generatePassword}
+          disabled={isFormDisabled}
         />
       )}
       
@@ -58,11 +63,12 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
           promotionProducts: false
         }}
         handlePermissionChange={handlePermissionChange}
+        disabled={isFormDisabled}
       />
       
       <FormButtons 
         onCancel={onCancel}
-        isSubmitting={isSubmitting || isSaving}
+        isSubmitting={isFormDisabled}
         isNew={isNew}
       />
     </form>

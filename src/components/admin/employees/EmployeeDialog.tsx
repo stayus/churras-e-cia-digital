@@ -28,8 +28,15 @@ export default function EmployeeDialog({
   generatePassword,
   isSaving = false
 }: EmployeeDialogProps) {
+  // Close dialog only when not saving
+  const handleOpenChange = (open: boolean) => {
+    if (!isSaving) {
+      onOpenChange(open);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>

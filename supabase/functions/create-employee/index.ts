@@ -5,7 +5,10 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+// Using a Deno-compatible crypto library instead of bcrypt
+import { crypto } from "https://deno.land/std@0.177.0/crypto/mod.ts";
+import { encode as hexEncode } from "https://deno.land/std@0.177.0/encoding/hex.ts";
+import { encode as base64Encode } from "https://deno.land/std@0.177.0/encoding/base64.ts";
 
 interface EmployeeData {
   name: string;
@@ -32,6 +35,25 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey, x-client-info',
 };
+
+// Helper function to hash passwords with SHA-256 + salt
+async function hashPassword(password: string): Promise<string> {
+  // Generate a random salt
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const saltHex = hexEncode(salt);
+  
+  // Encode password as UTF-8
+  const encoder = new TextEncoder();
+  const passwordData = encoder.encode(password + saltHex);
+  
+  // Hash the password with the salt
+  const hashBuffer = await crypto.subtle.digest('SHA-256', passwordData);
+  const hashArray = new Uint8Array(hashBuffer);
+  const hashHex = hexEncode(hashArray);
+  
+  // Return salt and hash together
+  return `${saltHex}:${hashHex}`;
+}
 
 serve(async (req) => {
   // CORS preflight
@@ -234,10 +256,9 @@ serve(async (req) => {
       registrationNumber = "MC-0001";
     }
     
-    // Hash password
+    // Hash password with our Deno-compatible method
     console.log("Hashing password");
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await hashPassword(password);
     
     console.log("Creating employee record");
     // Create employee record with expanded permissions object

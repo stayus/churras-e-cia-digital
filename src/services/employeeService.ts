@@ -67,7 +67,7 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         
         console.log('Sending data to create-employee function:', employeeData);
         
-        // Use the Supabase client to invoke the edge function - this avoids CORS issues
+        // Use the Supabase client to invoke the edge function
         const { data, error } = await supabase.functions.invoke('create-employee', {
           body: employeeData
         });
