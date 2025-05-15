@@ -2,6 +2,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { formatPhone, formatCPF, validateCPF, validatePhone } from '@/lib/format';
 import {
   FormField,
   FormItem,
@@ -20,33 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { UseFormReturn } from 'react-hook-form';
 import { EmployeeFormValues } from '../EmployeeFormDialog';
-
-// Utility functions for formatting
-const formatPhoneNumber = (value: string) => {
-  const digits = value.replace(/\D/g, '');
-  
-  if (digits.length <= 2) {
-    return `(${digits}`;
-  } else if (digits.length <= 7) {
-    return `(${digits.substring(0, 2)}) ${digits.substring(2)}`;
-  } else {
-    return `(${digits.substring(0, 2)}) ${digits.substring(2, 7)}-${digits.substring(7, 11)}`;
-  }
-};
-
-const formatCPF = (value: string) => {
-  const digits = value.replace(/\D/g, '');
-  
-  if (digits.length <= 3) {
-    return digits;
-  } else if (digits.length <= 6) {
-    return `${digits.substring(0, 3)}.${digits.substring(3)}`;
-  } else if (digits.length <= 9) {
-    return `${digits.substring(0, 3)}.${digits.substring(3, 6)}.${digits.substring(6)}`;
-  } else {
-    return `${digits.substring(0, 3)}.${digits.substring(3, 6)}.${digits.substring(6, 9)}-${digits.substring(9, 11)}`;
-  }
-};
+import { toast } from '@/hooks/use-toast';
 
 interface PersonalInfoFieldsProps {
   form: UseFormReturn<EmployeeFormValues>;
@@ -113,9 +88,24 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ form, isEditing
                   const formatted = formatCPF(e.target.value);
                   field.onChange(formatted);
                 }}
+                onBlur={(e) => {
+                  // Validar o CPF quando o campo perde o foco
+                  if (e.target.value && !validateCPF(e.target.value)) {
+                    toast({
+                      title: "CPF inválido",
+                      description: "O CPF informado não é válido.",
+                      variant: "destructive"
+                    });
+                    // Opcional: limpar o campo quando inválido
+                    // field.onChange("");
+                  }
+                }}
                 maxLength={14}
               />
             </FormControl>
+            <FormDescription>
+              Formato: 000.000.000-00
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}
@@ -134,12 +124,27 @@ const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ form, isEditing
                 {...field} 
                 value={field.value || ''}
                 onChange={(e) => {
-                  const formatted = formatPhoneNumber(e.target.value);
+                  const formatted = formatPhone(e.target.value);
                   field.onChange(formatted);
+                }}
+                onBlur={(e) => {
+                  // Validar o telefone quando o campo perde o foco
+                  if (e.target.value && !validatePhone(e.target.value)) {
+                    toast({
+                      title: "Telefone inválido",
+                      description: "O telefone deve estar no formato (00) 00000-0000.",
+                      variant: "destructive"
+                    });
+                    // Opcional: limpar o campo quando inválido
+                    // field.onChange("");
+                  }
                 }}
                 maxLength={15}
               />
             </FormControl>
+            <FormDescription>
+              Formato: (00) 00000-0000
+            </FormDescription>
             <FormMessage />
           </FormItem>
         )}

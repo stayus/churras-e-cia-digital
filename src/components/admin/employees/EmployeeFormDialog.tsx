@@ -22,6 +22,7 @@ import PersonalInfoFields from './form/PersonalInfoFields';
 import RoleField from './form/RoleField';
 import PermissionsFields from './form/PermissionsFields';
 import PasswordField from './form/PasswordField';
+import { validateCPF, validatePhone } from '@/lib/format';
 
 // Employee form schema with validation
 export const employeeSchema = z.object({
@@ -34,11 +35,11 @@ export const employeeSchema = z.object({
       message: 'Username deve conter apenas letras minúsculas, sem números ou espaços' 
     }),
   cpf: z.string().optional()
-    .refine(val => !val || /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(val), {
-      message: 'CPF deve estar no formato 000.000.000-00'
+    .refine(val => !val || validateCPF(val), {
+      message: 'CPF inválido. Verifique os dígitos.'
     }),
   phone: z.string().optional()
-    .refine(val => !val || /^\(\d{2}\) \d{5}-\d{4}$/.test(val), {
+    .refine(val => !val || validatePhone(val), {
       message: 'Telefone deve estar no formato (00) 00000-0000'
     }),
   birth_date: z.date().optional(),

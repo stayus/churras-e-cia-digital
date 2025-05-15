@@ -31,7 +31,7 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
       // Insert new employee
       const { error } = await supabase
         .from('employees')
-        .insert([dbEmployee]);
+        .insert(dbEmployee); // This was causing the type error - we removed the array brackets
         
       if (error) {
         if (error.code === '23505') {
