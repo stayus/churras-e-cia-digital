@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -102,11 +101,15 @@ const OrderExports = () => {
           return {
             ...order,
             customer_name: customerData?.name || "Cliente não encontrado",
+            // Convert items from Json to OrderItem[] type
+            items: (typeof order.items === 'string' 
+              ? JSON.parse(order.items) 
+              : order.items) as OrderItem[]
           };
         })
       );
 
-      setOrders(ordersWithCustomerNames);
+      setOrders(ordersWithCustomerNames as Order[]);
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast({
