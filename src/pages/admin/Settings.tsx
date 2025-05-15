@@ -6,7 +6,7 @@ import { BackButton } from '@/components/ui/back-button';
 import { useSettingsData } from '@/hooks/useSettingsData';
 
 const AdminSettings = () => {
-  const { settings, isLoading, updateSettings } = useSettingsData();
+  const { settings, isLoading, saveSettings } = useSettingsData();
 
   return (
     <AdminLayout>
@@ -18,7 +18,7 @@ const AdminSettings = () => {
         <SettingsTabs 
           isLoading={isLoading} 
           settings={settings} 
-          onUpdateSettings={updateSettings}
+          onUpdateSettings={saveSettings}
         />
       </div>
     </AdminLayout>
