@@ -53,7 +53,7 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
       
       try {
         // Log the data being sent to the edge function
-        console.log('Sending data to create-employee function:', {
+        const employeeData = {
           name: dbEmployee.name,
           username: dbEmployee.username,
           password: dbEmployee.password,
@@ -63,27 +63,32 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
           pix_key: dbEmployee.pix_key || null,
           role: dbEmployee.role,
           permissions: dbEmployee.permissions
+        };
+        
+        console.log('Sending data to create-employee function:', employeeData);
+        
+        // Use direct URL with full project reference to avoid issues with redirects
+        const projectRef = "flhdgdpewxooxtxqqhdz"; // From your Supabase config
+        const apiKey = supabase.auth.anon.anon_key;
+        
+        // Make a direct fetch call to the edge function
+        const response = await fetch(`https://${projectRef}.supabase.co/functions/v1/create-employee`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'apikey': apiKey
+          },
+          body: JSON.stringify(employeeData)
         });
         
-        // Chamar a Edge Function para criar o funcionário
-        const { data, error } = await supabase.functions.invoke('create-employee', {
-          body: {
-            name: dbEmployee.name,
-            username: dbEmployee.username, 
-            password: dbEmployee.password,
-            cpf: dbEmployee.cpf || null,
-            phone: dbEmployee.phone || null,
-            birth_date: dbEmployee.birth_date || null,
-            pix_key: dbEmployee.pix_key || null,
-            role: dbEmployee.role,
-            permissions: dbEmployee.permissions
-          }
-        });
-        
-        if (error) {
-          console.error('Error calling create-employee function:', error);
-          throw new Error(`Falha ao criar funcionário: ${error.message}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response from create-employee function:', response.status, errorText);
+          throw new Error(`Falha ao criar funcionário: ${response.status} ${errorText}`);
         }
+        
+        const data = await response.json();
         
         if (!data || !data.success) {
           console.error('Failed to create employee:', data?.error || 'Unknown error');

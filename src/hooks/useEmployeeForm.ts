@@ -147,6 +147,8 @@ export const useEmployeeForm = (
         employeeData.password = password;
       }
       
+      console.log('Submitting employee data:', employeeData, 'isNew:', isNew);
+      
       await onSave(employeeData, isNew);
       toast({
         title: isNew ? 'Funcionário criado' : 'Funcionário atualizado',
