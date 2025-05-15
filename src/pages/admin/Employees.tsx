@@ -26,7 +26,7 @@ const AdminEmployees = () => {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
-  // Forçar atualização dos dados quando a página é montada
+  // Force data refresh when the component mounts
   useEffect(() => {
     console.log('AdminEmployees: Component mounted, fetching data');
     fetchEmployees();
@@ -111,26 +111,12 @@ const AdminEmployees = () => {
           </Button>
         </div>
         
-        {isLoading ? (
-          <p className="text-center py-4">Carregando funcionários...</p>
-        ) : (
-          <>
-            {Array.isArray(employees) && employees.length > 0 ? (
-              <EmployeeTable 
-                employees={employees}
-                isLoading={isLoading}
-                onEdit={handleOpenDialog}
-                onDelete={handleOpenDeleteDialog}
-              />
-            ) : (
-              <div className="rounded-md border p-8">
-                <p className="text-center text-muted-foreground">
-                  Nenhum funcionário cadastrado. Utilize o botão "Adicionar Funcionário" para começar.
-                </p>
-              </div>
-            )}
-          </>
-        )}
+        <EmployeeTable 
+          employees={employees}
+          isLoading={isLoading}
+          onEdit={handleOpenDialog}
+          onDelete={handleOpenDeleteDialog}
+        />
         
         <EmployeeDialog
           isOpen={isDialogOpen}

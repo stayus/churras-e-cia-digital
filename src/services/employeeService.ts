@@ -7,26 +7,32 @@ import { formatDatabaseToAppEmployee, formatAppToDatabaseEmployee, DatabaseEmplo
  * Fetch employees from the database
  */
 export async function fetchEmployeesFromDatabase(): Promise<Employee[]> {
-  // Usar service role key (via edge function) para evitar problemas de RLS
-  const { data, error } = await supabase
-    .from('employees')
-    .select('*')
-    .order('name');
+  try {
+    console.log('Starting to fetch employees from database...');
     
-  if (error) {
-    console.error('Error fetching employees:', error);
+    // Use service role client via the edge function to bypass RLS
+    const { data: response, error: functionError } = await supabase.functions.invoke('get-employees', {
+      method: 'GET'
+    });
+    
+    if (functionError) {
+      console.error('Error calling get-employees function:', functionError);
+      throw functionError;
+    }
+    
+    if (!response || !response.data) {
+      console.log('No employees found or invalid response format');
+      return [];
+    }
+    
+    console.log(`Found ${response.data.length} employees via edge function`);
+    
+    // Format database data to application format
+    return response.data.map(employee => formatDatabaseToAppEmployee(employee));
+  } catch (error) {
+    console.error('Error in fetchEmployeesFromDatabase:', error);
     throw error;
   }
-  
-  if (!data || data.length === 0) {
-    console.log('No employees found in database');
-    return [];
-  }
-  
-  console.log(`Found ${data.length} employees in database`);
-  
-  // Format database data to application format
-  return data.map(employee => formatDatabaseToAppEmployee(employee));
 }
 
 /**
@@ -74,10 +80,10 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
       return true;
     } else if (employee.id) {
       console.log('Updating employee:', employee.id);
-      // Atualizar funcionário existente - usando a tabela direta
-      const { error } = await supabase
-        .from('employees')
-        .update({
+      
+      const { data, error } = await supabase.functions.invoke('update-employee', {
+        body: {
+          id: employee.id,
           name: dbEmployee.name,
           username: dbEmployee.username,
           cpf: dbEmployee.cpf,
@@ -86,14 +92,20 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
           pix_key: dbEmployee.pix_key,
           role: dbEmployee.role,
           permissions: dbEmployee.permissions
-        })
-        .eq('id', employee.id);
-        
+        }
+      });
+      
       if (error) {
-        console.error('Error updating employee:', error);
+        console.error('Error calling update-employee function:', error);
         throw error;
       }
       
+      if (!data.success) {
+        console.error('Failed to update employee:', data.error);
+        throw new Error(data.error || 'Failed to update employee');
+      }
+      
+      console.log('Employee updated successfully:', data);
       return true;
     }
     
@@ -109,28 +121,23 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
  */
 export async function deleteEmployeeFromDatabase(employeeId: string): Promise<boolean> {
   try {
-    // Check if employee is admin
-    const { data } = await supabase
-      .from('employees')
-      .select('username')
-      .eq('id', employeeId)
-      .single();
-      
-    if (data && data.username === 'admin') {
-      throw new Error('O usuário administrador não pode ser removido.');
-    }
+    console.log('Deleting employee:', employeeId);
     
-    // Delete employee
-    const { error } = await supabase
-      .from('employees')
-      .delete()
-      .eq('id', employeeId);
-      
+    const { data, error } = await supabase.functions.invoke('delete-employee', {
+      body: { id: employeeId }
+    });
+    
     if (error) {
-      console.error('Error deleting employee:', error);
+      console.error('Error calling delete-employee function:', error);
       throw error;
     }
     
+    if (!data.success) {
+      console.error('Failed to delete employee:', data.error);
+      throw new Error(data.error || 'Failed to delete employee');
+    }
+    
+    console.log('Employee deleted successfully');
     return true;
   } catch (error) {
     console.error('Error removing employee:', error);
