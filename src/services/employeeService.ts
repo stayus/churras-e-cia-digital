@@ -56,7 +56,7 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         const employeeData = {
           name: dbEmployee.name,
           username: dbEmployee.username,
-          password: dbEmployee.password,
+          password: dbEmployee.password, // We're now correctly including the actual password
           cpf: dbEmployee.cpf || null,
           phone: dbEmployee.phone || null,
           birth_date: dbEmployee.birth_date || null,

@@ -1,4 +1,3 @@
-
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
@@ -148,27 +147,6 @@ serve(async (req) => {
         JSON.stringify({ 
           success: false, 
           error: "Username must contain only lowercase letters, no numbers or spaces" 
-        }),
-        { 
-          status: 400, 
-          headers: { 
-            "Content-Type": "application/json",
-            ...corsHeaders
-          }
-        }
-      );
-    }
-    
-    // Validate password (at least 8 characters, including uppercase, lowercase, number, and special character)
-    if (password.length < 8 || 
-        !/[A-Z]/.test(password) || 
-        !/[a-z]/.test(password) || 
-        !/[0-9]/.test(password) || 
-        !/[^A-Za-z0-9]/.test(password)) {
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "Password must be at least 8 characters and include uppercase, lowercase, number, and special character" 
         }),
         { 
           status: 400, 
