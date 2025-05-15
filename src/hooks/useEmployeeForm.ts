@@ -48,6 +48,7 @@ export const useEmployeeForm = (
   };
 
   const validateForm = (): boolean => {
+    // Enhanced validations
     // Validação de campos obrigatórios
     if (!formData.name?.trim()) {
       toast({
@@ -79,6 +80,16 @@ export const useEmployeeForm = (
       return false;
     }
     
+    // Validate username format (lowercase letters only)
+    if (!/^[a-z]+$/.test(formData.username)) {
+      toast({
+        variant: 'destructive',
+        title: 'Formato inválido',
+        description: 'O nome de usuário deve conter apenas letras minúsculas, sem números ou espaços.'
+      });
+      return false;
+    }
+    
     // Validação de cargo
     if (!formData.role?.trim()) {
       toast({
@@ -95,6 +106,22 @@ export const useEmployeeForm = (
         variant: 'destructive',
         title: 'Senha obrigatória',
         description: 'Gere uma senha para o novo funcionário.'
+      });
+      return false;
+    }
+    
+    // Validate password complexity
+    if (isNew && password && (
+      password.length < 8 || 
+      !/[A-Z]/.test(password) || 
+      !/[a-z]/.test(password) || 
+      !/[0-9]/.test(password) || 
+      !/[^A-Za-z0-9]/.test(password)
+    )) {
+      toast({
+        variant: 'destructive',
+        title: 'Senha inválida',
+        description: 'A senha deve ter pelo menos 8 caracteres e incluir letras maiúsculas, minúsculas, números e caracteres especiais.'
       });
       return false;
     }

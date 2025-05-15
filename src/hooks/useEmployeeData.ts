@@ -48,16 +48,35 @@ export function useEmployeeData() {
         });
         
         // Recarregar lista
-        fetchEmployees();
+        await fetchEmployees();
         return true;
       }
       return false;
     } catch (error: any) {
       console.error('Error saving employee:', error);
+      
+      // Improved error message handling
+      let errorMessage = 'Ocorreu um erro ao salvar o funcionário.';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      // Display a more helpful message if it's a connection error
+      if (errorMessage.includes('Failed to fetch') || 
+          errorMessage.includes('Connection error') ||
+          errorMessage.includes('Edge function error')) {
+        errorMessage = 'Erro de conexão com o servidor. Verifique sua conexão de internet e tente novamente.';
+      }
+      
       toast({
         variant: 'destructive',
         title: 'Erro ao salvar funcionário',
-        description: error instanceof Error ? error.message : (error?.message || 'Ocorreu um erro ao salvar o funcionário.')
+        description: errorMessage
       });
       return false;
     }
@@ -74,16 +93,35 @@ export function useEmployeeData() {
           description: 'O funcionário foi removido com sucesso.'
         });
         
-        fetchEmployees();
+        await fetchEmployees();
         return true;
       }
       return false;
     } catch (error: any) {
       console.error('Error removing employee:', error);
+      
+      // Improved error message handling
+      let errorMessage = 'Ocorreu um erro ao remover o funcionário.';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      // Display a more helpful message if it's a connection error
+      if (errorMessage.includes('Failed to fetch') || 
+          errorMessage.includes('Connection error') ||
+          errorMessage.includes('Edge function error')) {
+        errorMessage = 'Erro de conexão com o servidor. Verifique sua conexão de internet e tente novamente.';
+      }
+      
       toast({
         variant: 'destructive',
         title: 'Erro ao remover funcionário',
-        description: error instanceof Error ? error.message : (error?.message || 'Ocorreu um erro ao remover o funcionário.')
+        description: errorMessage
       });
       return false;
     }
