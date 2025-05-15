@@ -57,7 +57,7 @@ const EmployeeLoginForm: React.FC = () => {
       
       // Navigate to admin panel
       navigate('/admin');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       setErrorMessage('Nome de usuário ou senha incorretos. Por favor, tente novamente.');
       toast({

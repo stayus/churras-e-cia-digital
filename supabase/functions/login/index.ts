@@ -27,6 +27,8 @@ const key = await crypto.subtle.generateKey(
 );
 
 serve(async (req) => {
+  console.log("Login function called");
+  
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", {
@@ -36,6 +38,7 @@ serve(async (req) => {
 
   // Only accept POST requests
   if (req.method !== "POST") {
+    console.error("Method not allowed:", req.method);
     return new Response(JSON.stringify({ success: false, error: "Method not allowed" }), {
       status: 405,
       headers: { 
@@ -47,7 +50,8 @@ serve(async (req) => {
 
   try {
     // Extract login credentials and create Supabase client
-    const { credential, credentialType, password } = await req.json() as LoginRequest;
+    const requestBody = await req.json() as LoginRequest;
+    const { credential, credentialType, password } = requestBody;
     
     // Trim whitespace from credential and password
     const trimmedCredential = credential.trim();
@@ -55,13 +59,37 @@ serve(async (req) => {
     
     console.log(`Processing login request for ${credentialType}: "${trimmedCredential}"`);
     
+    // Make sure environment variables are available
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !supabaseAnonKey || !supabaseServiceRoleKey) {
+      console.error("Missing environment variables");
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Server configuration error" 
+        }),
+        { 
+          status: 500, 
+          headers: { 
+            "Content-Type": "application/json",
+            ...corsHeaders
+          }
+        }
+      );
+    }
+    
+    // Create Supabase client with service role key to bypass RLS
     const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      supabaseUrl,
+      supabaseServiceRoleKey
     );
     
     // Validate required fields
     if (!trimmedCredential || !credentialType || !trimmedPassword) {
+      console.error("Missing required fields");
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -220,14 +248,19 @@ serve(async (req) => {
     // Direct check for admin/admin credentials
     if (trimmedCredential === "admin" && trimmedPassword === "admin") {
       isPasswordCorrect = true;
+      console.log("Admin credentials matched");
     } else if (userData) {
       // For other users, try bcrypt compare first
       try {
+        console.log("Comparing passwords using bcrypt");
         isPasswordCorrect = await compare(trimmedPassword, userData.password);
+        console.log("Password comparison result:", isPasswordCorrect);
       } catch (e) {
         console.error("Bcrypt compare error:", e);
         // Fallback to direct comparison
+        console.log("Falling back to direct comparison");
         isPasswordCorrect = trimmedPassword === userData.password;
+        console.log("Direct comparison result:", isPasswordCorrect);
       }
     }
     
@@ -296,7 +329,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: "Internal server error" 
+        error: "Internal server error",
+        details: error.message
       }),
       { 
         status: 500, 
