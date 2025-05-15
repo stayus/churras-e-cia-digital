@@ -38,15 +38,16 @@ const EmployeeLoginForm: React.FC = () => {
     try {
       await login('username', data.username, data.password);
       
-      // The navigate is handled in ProtectedRoute component
-      // but we'll also navigate here as a fallback
-      navigate('/admin');
-      
+      // Show success message
       toast({
         title: 'Login realizado com sucesso!',
         description: 'Bem-vindo ao sistema.',
       });
+      
+      // Navigate to admin panel
+      navigate('/admin');
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         variant: 'destructive',
         title: 'Falha no login',
@@ -98,7 +99,7 @@ const EmployeeLoginForm: React.FC = () => {
       <CardFooter>
         <Alert className="bg-gray-100 w-full">
           <AlertDescription className="text-xs text-gray-500 text-center">
-            Para acesso ao desenvolvimento, use:<br />
+            Para acesso ao sistema, use:<br />
             <strong>Usuário:</strong> admin | <strong>Senha:</strong> admin
           </AlertDescription>
         </Alert>
