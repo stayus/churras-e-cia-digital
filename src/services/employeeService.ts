@@ -24,14 +24,14 @@ export async function fetchEmployeesFromDatabase(): Promise<Employee[]> {
  * Save an employee to the database
  */
 export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew: boolean): Promise<boolean> {
-  const dbEmployee = formatAppToDatabaseEmployee(employee, isNew);
-  
   try {
+    const dbEmployee = formatAppToDatabaseEmployee(employee, isNew);
+    
     if (isNew) {
       // Insert new employee
       const { error } = await supabase
         .from('employees')
-        .insert(dbEmployee); // This was causing the type error - we removed the array brackets
+        .insert(dbEmployee);
         
       if (error) {
         if (error.code === '23505') {

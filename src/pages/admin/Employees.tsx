@@ -23,6 +23,7 @@ const AdminEmployees = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
+  const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
   const handleOpenDialog = (employee: Employee | null = null) => {
     setSelectedEmployee(employee);
@@ -64,9 +65,24 @@ const AdminEmployees = () => {
   const handleDeleteEmployee = async () => {
     if (!selectedEmployee) return;
     
-    const success = await deleteEmployee(selectedEmployee.id);
-    if (success) {
-      handleCloseDeleteDialog();
+    setIsDeletingEmployee(true);
+    try {
+      const success = await deleteEmployee(selectedEmployee.id);
+      if (success) {
+        toast({
+          title: "Funcionário removido",
+          description: `O funcionário ${selectedEmployee.name} foi removido com sucesso.`
+        });
+        handleCloseDeleteDialog();
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao remover funcionário",
+        description: error instanceof Error ? error.message : "Ocorreu um erro durante a remoção."
+      });
+    } finally {
+      setIsDeletingEmployee(false);
     }
   };
 
@@ -108,7 +124,13 @@ const AdminEmployees = () => {
           onClose={handleCloseDeleteDialog}
           onConfirm={handleDeleteEmployee}
           title="Remover Funcionário"
-          description={`Tem certeza que deseja remover o funcionário ${selectedEmployee?.name}? Esta ação não pode ser desfeita.`}
+          description={
+            selectedEmployee 
+              ? `Tem certeza que deseja remover o funcionário ${selectedEmployee.name}? Esta ação não pode ser desfeita.`
+              : "Tem certeza que deseja remover este funcionário? Esta ação não pode ser desfeita."
+          }
+          confirmLabel={isDeletingEmployee ? "Removendo..." : "Sim, remover"}
+          cancelLabel="Cancelar"
         />
       </div>
     </AdminLayout>
