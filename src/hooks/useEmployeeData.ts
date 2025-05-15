@@ -22,24 +22,29 @@ export function useEmployeeData() {
       }
       
       // Format database data to application format
-      const formattedEmployees: Employee[] = data.map(employee => ({
-        id: employee.id,
-        name: employee.name,
-        username: employee.username,
-        role: employee.role as 'admin' | 'employee' | 'motoboy',
-        registrationNumber: employee.registration_number,
-        cpf: employee.cpf,
-        birthDate: employee.birth_date,
-        phone: employee.phone,
-        pixKey: employee.pix_key,
-        permissions: {
-          manageStock: employee.permissions?.manageStock || false,
-          viewReports: employee.permissions?.viewReports || false,
-          changeOrderStatus: employee.permissions?.changeOrderStatus || false,
-          exportOrderReportPDF: employee.permissions?.exportOrderReportPDF || false,
-          promotionProducts: employee.permissions?.promotionProducts || false
-        }
-      }));
+      const formattedEmployees: Employee[] = data.map(employee => {
+        // Ensure permissions are properly typed
+        const permissions = employee.permissions as Record<string, boolean> || {};
+        
+        return {
+          id: employee.id,
+          name: employee.name,
+          username: employee.username,
+          role: employee.role as 'admin' | 'employee' | 'motoboy',
+          registrationNumber: employee.registration_number,
+          cpf: employee.cpf,
+          birthDate: employee.birth_date,
+          phone: employee.phone,
+          pixKey: employee.pix_key,
+          permissions: {
+            manageStock: permissions.manageStock || false,
+            viewReports: permissions.viewReports || false,
+            changeOrderStatus: permissions.changeOrderStatus || false,
+            exportOrderReportPDF: permissions.exportOrderReportPDF || false,
+            promotionProducts: permissions.promotionProducts || false
+          }
+        };
+      });
       
       setEmployees(formattedEmployees);
     } catch (error) {
