@@ -4,6 +4,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import SettingsTabs from '@/components/admin/settings/SettingsTabs';
 import { BackButton } from '@/components/ui/back-button';
 import { useSettingsData } from '@/hooks/useSettingsData';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const AdminSettings = () => {
   const { settings, isLoading, saveSettings } = useSettingsData();
