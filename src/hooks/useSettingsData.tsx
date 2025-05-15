@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SettingsData } from '@/types/settings';
+import { Json } from '@/integrations/supabase/types';
 import { 
   getDefaultWorkingHours, 
   getDefaultDeliveryTiers, 
@@ -41,14 +42,14 @@ export function useSettingsData() {
           whatsapp_link: 'https://wa.me/5500000000000',
           shipping_fee: 5.0,
           free_shipping_radius_km: 2.0,
-          delivery_tiers: defaultDeliveryTiers,
+          delivery_tiers: defaultDeliveryTiers as unknown as Json,
           store_address: {
             street: '',
             number: '',
             city: '',
             zip: ''
-          },
-          working_hours: defaultWorkingHours
+          } as unknown as Json,
+          working_hours: defaultWorkingHours as unknown as Json
         };
         
         const { data: newSettings, error: createError } = await supabase

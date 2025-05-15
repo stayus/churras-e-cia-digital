@@ -1,22 +1,16 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Plus, Trash } from 'lucide-react';
-import { Card } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { SettingsData } from '@/hooks/useSettingsData';
+import { SettingsData } from '@/types/settings';
+import { DeliveryTier } from '@/types/dashboard';
+import DeliveryTierCard from './delivery/DeliveryTierCard';
+import DeliveryHeader from './delivery/DeliveryHeader';
+import { validateDeliveryTiers } from './delivery/DeliveryTierValidator';
 
 interface DeliverySettingsProps {
   settings: SettingsData;
   onSave: (settings: Partial<SettingsData>) => void;
-}
-
-interface DeliveryTier {
-  id: string;
-  minDistance: number;
-  maxDistance: number;
-  fee: number;
 }
 
 const DeliverySettings: React.FC<DeliverySettingsProps> = ({ settings, onSave }) => {
@@ -60,49 +54,8 @@ const DeliverySettings: React.FC<DeliverySettingsProps> = ({ settings, onSave })
     }));
   };
 
-  const validateTiers = () => {
-    // Sort tiers by minDistance to check for gaps
-    const sortedTiers = [...deliveryTiers].sort((a, b) => a.minDistance - b.minDistance);
-    
-    // Check if the first tier starts at 0
-    if (sortedTiers[0].minDistance !== 0) {
-      toast({
-        title: "Faixa inválida",
-        description: "A primeira faixa deve começar em 0 km.",
-        variant: "destructive"
-      });
-      return false;
-    }
-    
-    // Check for overlaps or gaps between tiers
-    for (let i = 0; i < sortedTiers.length - 1; i++) {
-      if (sortedTiers[i].maxDistance !== sortedTiers[i + 1].minDistance) {
-        toast({
-          title: "Faixas inválidas",
-          description: "As faixas de entrega devem ser contínuas, sem sobreposições ou lacunas.",
-          variant: "destructive"
-        });
-        return false;
-      }
-    }
-    
-    // Check that min is less than max for each tier
-    for (const tier of sortedTiers) {
-      if (tier.minDistance >= tier.maxDistance) {
-        toast({
-          title: "Faixa inválida",
-          description: "A distância mínima deve ser menor que a distância máxima em cada faixa.",
-          variant: "destructive"
-        });
-        return false;
-      }
-    }
-    
-    return true;
-  };
-
   const handleSave = async () => {
-    if (!validateTiers()) {
+    if (!validateDeliveryTiers(deliveryTiers)) {
       return;
     }
     
@@ -135,75 +88,17 @@ const DeliverySettings: React.FC<DeliverySettingsProps> = ({ settings, onSave })
   return (
     <div className="space-y-6">
       <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-medium">Faixas de Entrega</h2>
-          <Button 
-            onClick={addDeliveryTier} 
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Adicionar Faixa
-          </Button>
-        </div>
+        <DeliveryHeader onAddTier={addDeliveryTier} />
         
         <div className="space-y-3">
           {deliveryTiers.map((tier, index) => (
-            <Card key={tier.id} className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium">Faixa de Entrega {index + 1}</h3>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={() => removeDeliveryTier(tier.id)}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </div>
-              
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor={`min-${tier.id}`}>Distância Mínima (Km)</Label>
-                  <Input
-                    id={`min-${tier.id}`}
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    value={tier.minDistance}
-                    onChange={(e) => updateTier(tier.id, 'minDistance', parseFloat(e.target.value) || 0)}
-                    className="mt-1"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor={`max-${tier.id}`}>Distância Máxima (Km)</Label>
-                  <Input
-                    id={`max-${tier.id}`}
-                    type="number"
-                    step="0.1"
-                    min="0"
-                    value={tier.maxDistance}
-                    onChange={(e) => updateTier(tier.id, 'maxDistance', parseFloat(e.target.value) || 0)}
-                    className="mt-1"
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor={`fee-${tier.id}`}>Taxa de Entrega (R$)</Label>
-                  <Input
-                    id={`fee-${tier.id}`}
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={tier.fee}
-                    onChange={(e) => updateTier(tier.id, 'fee', parseFloat(e.target.value) || 0)}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </Card>
+            <DeliveryTierCard 
+              key={tier.id}
+              tier={tier}
+              index={index}
+              onRemove={removeDeliveryTier}
+              onUpdate={updateTier}
+            />
           ))}
         </div>
       </div>
