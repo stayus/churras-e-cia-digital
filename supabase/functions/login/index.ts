@@ -130,26 +130,31 @@ serve(async (req) => {
       userData = data;
     }
     
-    // Manual password verification for admin
-    const isAdmin = table === "employees" && userData.username === "admin";
-    const expectedAdminHash = "$2a$10$VgIzXSMUwcoVcSMTu5SV9eYHJHoXYBGvoFdNBepU7UPwskXDQK.Ra";
-    
+    // Verificação simplificada para admin com senha "admin"
     let isPasswordCorrect = false;
     
-    if (isAdmin && password === "Churr@squinhoAdm2025") {
+    if (table === "employees" && userData.username === "admin" && password === "admin") {
       isPasswordCorrect = true;
-    } else if (isAdmin && userData.password === expectedAdminHash) {
-      // Special case for the admin user with expected hash
-      isPasswordCorrect = password === "Churr@squinhoAdm2025";
     } else {
-      // Try a direct comparison for testing only (not secure in production)
-      try {
-        // First attempt with bcrypt
-        isPasswordCorrect = await compare(password, userData.password);
-      } catch (e) {
-        console.error("Bcrypt compare error:", e);
-        // Fallback to direct comparison (ONLY FOR TESTING/DEMO)
-        isPasswordCorrect = password === userData.password;
+      // Caso não seja admin com senha simplificada, tenta os outros métodos
+      const isAdmin = table === "employees" && userData.username === "admin";
+      const expectedAdminHash = "$2a$10$VgIzXSMUwcoVcSMTu5SV9eYHJHoXYBGvoFdNBepU7UPwskXDQK.Ra";
+      
+      if (isAdmin && password === "Churr@squinhoAdm2025") {
+        isPasswordCorrect = true;
+      } else if (isAdmin && userData.password === expectedAdminHash) {
+        // Special case for the admin user with expected hash
+        isPasswordCorrect = password === "Churr@squinhoAdm2025";
+      } else {
+        // Try a direct comparison for testing only (not secure in production)
+        try {
+          // First attempt with bcrypt
+          isPasswordCorrect = await compare(password, userData.password);
+        } catch (e) {
+          console.error("Bcrypt compare error:", e);
+          // Fallback to direct comparison (ONLY FOR TESTING/DEMO)
+          isPasswordCorrect = password === userData.password;
+        }
       }
     }
     
