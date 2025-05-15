@@ -3,3 +3,7 @@ project_id = "flhdgdpewxooxtxqqhdz"
 
 [functions.update-working-hours]
 verify_jwt = true
+
+[functions.login]
+verify_jwt = false
+

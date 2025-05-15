@@ -79,9 +79,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       });
       
-      if (error || !data.success) {
-        console.error('Login error:', error || data.error);
-        throw new Error(data.error || 'Login failed');
+      if (error) {
+        console.error('Login error:', error);
+        throw new Error(error.message || 'Login failed');
+      }
+      
+      if (!data || !data.success) {
+        console.error('Login failed:', data?.error || 'Unknown error');
+        throw new Error(data?.error || 'Login failed');
       }
       
       // Store token and user data
