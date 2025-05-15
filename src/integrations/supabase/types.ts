@@ -171,6 +171,7 @@ export type Database = {
           store_name: string
           store_phone: string
           whatsapp_link: string
+          working_hours: Json | null
         }
         Insert: {
           free_shipping_radius_km?: number
@@ -181,6 +182,7 @@ export type Database = {
           store_name?: string
           store_phone: string
           whatsapp_link: string
+          working_hours?: Json | null
         }
         Update: {
           free_shipping_radius_km?: number
@@ -191,6 +193,7 @@ export type Database = {
           store_name?: string
           store_phone?: string
           whatsapp_link?: string
+          working_hours?: Json | null
         }
         Relationships: []
       }

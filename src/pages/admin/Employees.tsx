@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Employee } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Pencil, Trash2 } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import EmployeeForm from '@/components/admin/employees/EmployeeForm';
 import EmployeeTable from '@/components/admin/employees/EmployeeTable';
@@ -36,7 +35,7 @@ const AdminEmployees = () => {
         id: employee.id,
         name: employee.name,
         username: employee.username,
-        role: employee.role,
+        role: employee.role as 'admin' | 'employee' | 'motoboy',
         registrationNumber: employee.registration_number,
         cpf: employee.cpf,
         birthDate: employee.birth_date,

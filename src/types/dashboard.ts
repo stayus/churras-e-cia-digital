@@ -44,6 +44,7 @@ export interface Employee {
   birthDate?: string;
   phone?: string;
   pixKey?: string;
+  password?: string;  // Adicionado para permitir definir senha durante criação
   permissions: {
     manageStock: boolean;
     viewReports: boolean;

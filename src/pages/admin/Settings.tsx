@@ -43,7 +43,7 @@ const AdminSettings = () => {
         }
         
         // Configura os horários de funcionamento
-        const workingHours: WorkingHours[] = data.working_hours || [];
+        const workingHours: WorkingHours[] = data.working_hours as WorkingHours[] || [];
         
         // Certifica-se de que temos entradas para todos os dias da semana
         const daysOfWeek = [0, 1, 2, 3, 4, 5, 6];
@@ -65,6 +65,14 @@ const AdminSettings = () => {
         // Ordena por dia da semana
         workingHours.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
         
+        // Converte o objeto store_address para o formato esperado
+        const storeAddress = typeof data.store_address === 'object' ? data.store_address : {
+          street: '',
+          number: '',
+          city: '',
+          zip: ''
+        };
+        
         setSettings({
           workingHours,
           pixKey: data.pix_key || '',
@@ -72,12 +80,7 @@ const AdminSettings = () => {
           freeShippingRadiusKm: data.free_shipping_radius_km || 0,
           storeName: data.store_name || '',
           storePhone: data.store_phone || '',
-          storeAddress: data.store_address || {
-            street: '',
-            number: '',
-            city: '',
-            zip: ''
-          },
+          storeAddress,
           whatsappLink: data.whatsapp_link || ''
         });
       } catch (error) {
