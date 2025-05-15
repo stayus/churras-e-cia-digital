@@ -1,4 +1,3 @@
-
 export interface DashboardStats {
   dailyRevenue: number;
   totalOrders: number;
@@ -8,6 +7,8 @@ export interface DashboardStats {
     cartao: number;
     dinheiro: number;
   };
+  totalSales: number;
+  totalCustomers: number;
 }
 
 export interface WorkingHours {

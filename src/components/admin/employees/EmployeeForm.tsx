@@ -48,7 +48,13 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
       )}
       
       <EmployeePermissions 
-        permissions={formData.permissions || {}}
+        permissions={formData.permissions || {
+          manageStock: false,
+          viewReports: false,
+          changeOrderStatus: false,
+          exportOrderReportPDF: false,
+          promotionProducts: false
+        }}
         handlePermissionChange={handlePermissionChange}
       />
       

@@ -1,16 +1,18 @@
 
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
-import DashboardStats from '@/components/admin/dashboard/DashboardStats';
+import { DashboardStats } from '@/components/admin/dashboard/DashboardStats';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardStats as DashboardStatsType } from '@/types/dashboard';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState<DashboardStatsType>({
     dailyRevenue: 0,
     totalOrders: 0,
     canceledOrders: 0,
+    totalSales: 0,
+    totalCustomers: 0,
     paymentMethods: {
       pix: 0,
       cartao: 0,
@@ -52,10 +54,15 @@ const AdminDashboard = () => {
           .filter(order => order.status !== 'canceled')
           .reduce((sum, order) => sum + order.total, 0);
         
+        // Busca clientes únicos que fizeram pedidos hoje
+        const uniqueCustomers = new Set(ordersData.map(order => order.customer_id));
+        
         setStats({
           dailyRevenue,
           totalOrders,
           canceledOrders,
+          totalSales: dailyRevenue, // Use dailyRevenue for totalSales
+          totalCustomers: uniqueCustomers.size,
           paymentMethods: {
             pix: pixPayments,
             cartao: cardPayments,

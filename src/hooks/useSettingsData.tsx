@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { WorkingHours } from '@/types/dashboard';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
 
 export interface SettingsData {
   id: string;
@@ -73,6 +74,9 @@ export function useSettingsData() {
   const saveSettings = async (newSettings: SettingsData) => {
     setIsSaving(true);
     try {
+      // Convert workingHours to a safe JSON format for Supabase
+      const workingHoursForDb = newSettings.workingHours as unknown as Json;
+      
       const { error } = await supabase
         .from('settings')
         .update({
@@ -83,7 +87,7 @@ export function useSettingsData() {
           shipping_fee: newSettings.shippingFee,
           free_shipping_radius_km: newSettings.freeShippingRadiusKm,
           store_address: newSettings.storeAddress,
-          working_hours: newSettings.workingHours
+          working_hours: workingHoursForDb
         })
         .eq('id', newSettings.id);
         
