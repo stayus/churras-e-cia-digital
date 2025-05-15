@@ -10,12 +10,14 @@ interface PasswordGeneratorProps {
   password: string;
   setPassword: (password: string) => void;
   generatePassword: () => string;
+  disabled?: boolean;
 }
 
 const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({
   password,
   setPassword,
-  generatePassword
+  generatePassword,
+  disabled = false
 }) => {
   const generateAndSetPassword = () => {
     const newPassword = generatePassword();
@@ -39,12 +41,14 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({
           value={password}
           readOnly
           placeholder="Clique em 'Gerar Senha'"
+          disabled={disabled}
         />
         <Button
           type="button"
           variant="outline"
           onClick={generateAndSetPassword}
           className="whitespace-nowrap"
+          disabled={disabled}
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Gerar Senha
@@ -54,6 +58,7 @@ const PasswordGenerator: React.FC<PasswordGeneratorProps> = ({
             type="button"
             variant="outline"
             onClick={copyPasswordToClipboard}
+            disabled={disabled}
           >
             <Copy className="h-4 w-4" />
             <span className="sr-only">Copiar</span>

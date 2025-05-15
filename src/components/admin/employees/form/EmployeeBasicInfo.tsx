@@ -9,12 +9,14 @@ interface EmployeeBasicInfoProps {
   formData: Partial<Employee>;
   handleChange: (field: string, value: any) => void;
   isNew: boolean;
+  disabled?: boolean;
 }
 
 const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({ 
   formData, 
   handleChange,
-  isNew
+  isNew,
+  disabled = false
 }) => {
   // Format phone number as user types (XX) XXXXX-XXXX
   const formatPhone = (value: string) => {
@@ -77,6 +79,7 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
             }
           }}
           required
+          disabled={disabled}
         />
         <p className="text-xs text-muted-foreground">Digite o nome completo (nome e sobrenome)</p>
       </div>
@@ -89,7 +92,7 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
           value={formData.username || ''}
           onChange={(e) => handleChange('username', e.target.value.toLowerCase())}
           required
-          disabled={!isNew} // Não permitir edição do username
+          disabled={!isNew || disabled} // Não permitir edição do username
         />
       </div>
       
@@ -104,6 +107,7 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
             handleChange('cpf', formatted);
           }}
           maxLength={14} // XXX.XXX.XXX-XX (14 characters)
+          disabled={disabled}
         />
       </div>
       
@@ -114,6 +118,7 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
           type="date"
           value={formData.birthDate || ''}
           onChange={(e) => handleChange('birthDate', e.target.value)}
+          disabled={disabled}
         />
       </div>
       
@@ -128,6 +133,7 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
             handleChange('phone', formatted);
           }}
           maxLength={15} // (XX) XXXXX-XXXX (15 characters)
+          disabled={disabled}
         />
       </div>
       
@@ -139,6 +145,7 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
           value={formData.role || ''}
           onChange={(e) => handleChange('role', e.target.value)}
           required
+          disabled={disabled}
         />
       </div>
       
@@ -149,6 +156,7 @@ const EmployeeBasicInfo: React.FC<EmployeeBasicInfoProps> = ({
           placeholder="Chave PIX para pagamentos"
           value={formData.pixKey || ''}
           onChange={(e) => handleChange('pixKey', e.target.value)}
+          disabled={disabled}
         />
       </div>
     </div>

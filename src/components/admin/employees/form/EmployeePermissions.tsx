@@ -7,11 +7,13 @@ import { Employee } from '@/types/dashboard';
 interface EmployeePermissionsProps {
   permissions: Employee['permissions'];
   handlePermissionChange: (permission: keyof Employee['permissions'], checked: boolean) => void;
+  disabled?: boolean;
 }
 
 const EmployeePermissions: React.FC<EmployeePermissionsProps> = ({ 
   permissions,
-  handlePermissionChange 
+  handlePermissionChange,
+  disabled = false
 }) => {
   return (
     <div>
@@ -24,6 +26,7 @@ const EmployeePermissions: React.FC<EmployeePermissionsProps> = ({
             onCheckedChange={(checked) => 
               handlePermissionChange('changeOrderStatus', checked === true)
             }
+            disabled={disabled}
           />
           <Label htmlFor="permission-status">Alterar status do pedido</Label>
         </div>
@@ -35,6 +38,7 @@ const EmployeePermissions: React.FC<EmployeePermissionsProps> = ({
             onCheckedChange={(checked) => 
               handlePermissionChange('manageStock', checked === true)
             }
+            disabled={disabled}
           />
           <Label htmlFor="permission-stock">Alterar status do produto</Label>
         </div>
@@ -46,6 +50,7 @@ const EmployeePermissions: React.FC<EmployeePermissionsProps> = ({
             onCheckedChange={(checked) => 
               handlePermissionChange('viewReports', checked === true)
             }
+            disabled={disabled}
           />
           <Label htmlFor="permission-reports">Visualizar relatório de vendas do dia</Label>
         </div>
@@ -57,6 +62,7 @@ const EmployeePermissions: React.FC<EmployeePermissionsProps> = ({
             onCheckedChange={(checked) => 
               handlePermissionChange('exportOrderReportPDF', checked === true)
             }
+            disabled={disabled}
           />
           <Label htmlFor="permission-export">Exportação de relatório em PDF</Label>
         </div>
@@ -68,6 +74,7 @@ const EmployeePermissions: React.FC<EmployeePermissionsProps> = ({
             onCheckedChange={(checked) => 
               handlePermissionChange('promotionProducts', checked === true)
             }
+            disabled={disabled}
           />
           <Label htmlFor="permission-promotion">Colocar produtos em promoção</Label>
         </div>
