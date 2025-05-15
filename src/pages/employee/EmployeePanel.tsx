@@ -27,7 +27,6 @@ const EmployeePanel = () => {
 
   // Determine which tabs to display based on user permissions
   const showOrdersTab = user?.permissions?.changeOrderStatus;
-  const showReportsTab = user?.permissions?.viewReports;
   const showPromotionsTab = user?.permissions?.promotionProducts;
   const showStockTab = user?.permissions?.manageStock;
   const showExportsTab = user?.permissions?.exportOrderReportPDF;
@@ -36,12 +35,11 @@ const EmployeePanel = () => {
   useEffect(() => {
     if (!loading) {
       if (showOrdersTab) setActiveTab("orders");
-      else if (showReportsTab) setActiveTab("reports");
       else if (showPromotionsTab) setActiveTab("promotions");
       else if (showStockTab) setActiveTab("stock");
       else if (showExportsTab) setActiveTab("exports");
     }
-  }, [loading, showOrdersTab, showReportsTab, showPromotionsTab, showStockTab, showExportsTab]);
+  }, [loading, showOrdersTab, showPromotionsTab, showStockTab, showExportsTab]);
 
   if (loading) {
     return (
@@ -69,11 +67,6 @@ const EmployeePanel = () => {
                 Gerenciar Pedidos
               </TabsTrigger>
             )}
-            {showReportsTab && (
-              <TabsTrigger value="reports" className="flex-1">
-                Relatório de Vendas
-              </TabsTrigger>
-            )}
             {showPromotionsTab && (
               <TabsTrigger value="promotions" className="flex-1">
                 Gerenciar Promoções
@@ -99,19 +92,6 @@ const EmployeePanel = () => {
                 </CardHeader>
                 <CardContent className="p-0">
                   <OrdersList />
-                </CardContent>
-              </Card>
-            </TabsContent>
-          )}
-          
-          {showReportsTab && (
-            <TabsContent value="reports">
-              <Card>
-                <CardHeader className="bg-muted/40">
-                  <CardTitle>Relatório de Vendas</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <SalesReport />
                 </CardContent>
               </Card>
             </TabsContent>

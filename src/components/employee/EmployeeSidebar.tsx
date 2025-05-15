@@ -12,10 +12,10 @@ import {
   SidebarFooter
 } from '@/components/ui/sidebar';
 import {
-  ShoppingCart,
-  FileBarChart,
+  List, 
+  Percent,
   Package,
-  Settings,
+  FileExport,
   LogOut
 } from 'lucide-react';
 
@@ -29,7 +29,6 @@ const EmployeeSidebar = () => {
 
   // Determinar quais menus mostrar com base nas permissões
   const showOrdersMenu = user?.permissions?.changeOrderStatus;
-  const showReportsMenu = user?.permissions?.viewReports;
   const showPromotionsMenu = user?.permissions?.promotionProducts;
   const showStockMenu = user?.permissions?.manageStock;
   const showExportsMenu = user?.permissions?.exportOrderReportPDF;
@@ -39,19 +38,13 @@ const EmployeeSidebar = () => {
     {
       name: 'Pedidos',
       path: '/employee',
-      icon: ShoppingCart,
+      icon: List,
       show: showOrdersMenu
-    },
-    {
-      name: 'Relatórios',
-      path: '/employee/reports',
-      icon: FileBarChart,
-      show: showReportsMenu
     },
     {
       name: 'Promoções',
       path: '/employee/promotions',
-      icon: Package,
+      icon: Percent,
       show: showPromotionsMenu
     },
     {
@@ -63,7 +56,7 @@ const EmployeeSidebar = () => {
     {
       name: 'Exportações',
       path: '/employee/exports',
-      icon: FileBarChart,
+      icon: FileExport,
       show: showExportsMenu
     }
   ].filter(item => item.show);
