@@ -163,6 +163,7 @@ export type Database = {
       }
       settings: {
         Row: {
+          delivery_tiers: Json | null
           free_shipping_radius_km: number
           id: string
           pix_key: string
@@ -174,6 +175,7 @@ export type Database = {
           working_hours: Json | null
         }
         Insert: {
+          delivery_tiers?: Json | null
           free_shipping_radius_km?: number
           id?: string
           pix_key: string
@@ -185,6 +187,7 @@ export type Database = {
           working_hours?: Json | null
         }
         Update: {
+          delivery_tiers?: Json | null
           free_shipping_radius_km?: number
           id?: string
           pix_key?: string
