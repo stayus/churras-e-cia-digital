@@ -12,13 +12,15 @@ interface EmployeeFormProps {
   onSave: (employee: Partial<Employee>, isNew: boolean) => void;
   onCancel: () => void;
   generatePassword: () => string;
+  isSaving?: boolean;
 }
 
 const EmployeeForm: React.FC<EmployeeFormProps> = ({ 
   employee, 
   onSave, 
   onCancel,
-  generatePassword
+  generatePassword,
+  isSaving = false
 }) => {
   const {
     formData,
@@ -60,7 +62,7 @@ const EmployeeForm: React.FC<EmployeeFormProps> = ({
       
       <FormButtons 
         onCancel={onCancel}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSubmitting || isSaving}
         isNew={isNew}
       />
     </form>

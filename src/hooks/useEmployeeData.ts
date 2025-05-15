@@ -12,16 +12,18 @@ import { generateSecurePassword } from '@/utils/employeeFormatters';
 export function useEmployeeData() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { toast } = useToast();
 
   // Use useCallback to prevent recreation of the function on each render
   const fetchEmployees = useCallback(async () => {
-    setIsLoading(true);
     try {
+      setIsRefreshing(true);
       console.log('Fetching employees from database...');
       const formattedEmployees = await fetchEmployeesFromDatabase();
       console.log('Employees fetched successfully:', formattedEmployees);
       setEmployees(formattedEmployees);
+      return true;
     } catch (error) {
       console.error('Error fetching employees:', error);
       toast({
@@ -31,8 +33,10 @@ export function useEmployeeData() {
       });
       // Definir como array vazio em caso de erro
       setEmployees([]);
+      return false;
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   }, [toast]);
 
@@ -47,7 +51,7 @@ export function useEmployeeData() {
           description: `Funcionário ${employee.name} foi ${isNew ? 'adicionado' : 'atualizado'} com sucesso.`
         });
         
-        // Recarregar lista
+        // Recarregar lista de funcionários após salvar
         await fetchEmployees();
         return true;
       }
@@ -137,6 +141,7 @@ export function useEmployeeData() {
   return {
     employees,
     isLoading,
+    isRefreshing,
     fetchEmployees,
     saveEmployee,
     deleteEmployee,

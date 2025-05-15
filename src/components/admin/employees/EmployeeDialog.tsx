@@ -1,8 +1,13 @@
 
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Employee } from '@/types/dashboard';
-import EmployeeForm from '@/components/admin/employees/EmployeeForm';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import EmployeeForm from './EmployeeForm';
 
 interface EmployeeDialogProps {
   isOpen: boolean;
@@ -11,34 +16,35 @@ interface EmployeeDialogProps {
   onSave: (employee: Partial<Employee>, isNew: boolean) => void;
   onCancel: () => void;
   generatePassword: () => string;
+  isSaving?: boolean;
 }
 
-const EmployeeDialog: React.FC<EmployeeDialogProps> = ({
+export default function EmployeeDialog({
   isOpen,
   onOpenChange,
   employee,
   onSave,
   onCancel,
-  generatePassword
-}) => {
+  generatePassword,
+  isSaving = false
+}: EmployeeDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle>
-            {employee ? 'Edit Employee' : 'Add Employee'}
+            {employee ? 'Editar Funcionário' : 'Adicionar Funcionário'}
           </DialogTitle>
         </DialogHeader>
         
-        <EmployeeForm
-          employee={employee}
-          onSave={onSave}
-          onCancel={onCancel}
+        <EmployeeForm 
+          employee={employee} 
+          onSave={onSave} 
+          onCancel={onCancel} 
           generatePassword={generatePassword}
+          isSaving={isSaving}
         />
       </DialogContent>
     </Dialog>
   );
-};
-
-export default EmployeeDialog;
+}

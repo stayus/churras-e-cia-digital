@@ -1,3 +1,4 @@
+
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
@@ -25,15 +26,18 @@ interface EmployeeData {
   };
 }
 
+// CORS headers for allowing cross-origin requests
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey, x-client-info',
+};
+
 serve(async (req) => {
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      },
+      headers: corsHeaders,
     });
   }
 
@@ -43,20 +47,43 @@ serve(async (req) => {
       status: 405,
       headers: { 
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
+        ...corsHeaders
       },
     });
   }
 
   try {
+    console.log("Create-employee function called");
+    
     // Get request body and create Supabase client
-    const { name, username, cpf, phone, birth_date, pix_key, role, password, permissions } = await req.json() as EmployeeData;
+    const requestData = await req.json();
+    console.log("Received data:", JSON.stringify(requestData));
+    
+    const { name, username, cpf, phone, birth_date, pix_key, role, password, permissions } = requestData as EmployeeData;
     
     // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error("Missing Supabase environment variables");
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Server configuration error" 
+        }),
+        { 
+          status: 500, 
+          headers: { 
+            "Content-Type": "application/json",
+            ...corsHeaders
+          }
+        }
+      );
+    }
+    
+    console.log("Creating Supabase client");
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
     
     // Validate required fields
     if (!name || !username || !role || !password) {
@@ -69,7 +96,7 @@ serve(async (req) => {
           status: 400, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
@@ -87,7 +114,7 @@ serve(async (req) => {
           status: 400, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
@@ -104,7 +131,7 @@ serve(async (req) => {
           status: 400, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
@@ -125,12 +152,13 @@ serve(async (req) => {
           status: 400, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
     }
     
+    console.log("Checking if username is already taken");
     // Check if username is already taken
     const { data: existingUser, error: userCheckError } = await supabaseClient
       .from("employees")
@@ -149,7 +177,7 @@ serve(async (req) => {
           status: 500, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
@@ -165,13 +193,14 @@ serve(async (req) => {
           status: 400, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
     }
     
     // Generate registration number
+    console.log("Generating registration number");
     let registrationNumber;
     const { data: lastEmployee, error: registrationError } = await supabaseClient
       .from("employees")
@@ -191,7 +220,7 @@ serve(async (req) => {
           status: 500, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
@@ -206,9 +235,11 @@ serve(async (req) => {
     }
     
     // Hash password
+    console.log("Hashing password");
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
+    console.log("Creating employee record");
     // Create employee record with expanded permissions object
     const { data, error } = await supabaseClient
       .from("employees")
@@ -221,7 +252,7 @@ serve(async (req) => {
           role,
           cpf,
           phone,
-          birth_date: birth_date ? new Date(birth_date) : null,
+          birth_date: birth_date ? new Date(birth_date).toISOString() : null,
           pix_key,
           permissions: {
             manageStock: permissions?.manageStock || false,
@@ -246,12 +277,13 @@ serve(async (req) => {
           status: 500, 
           headers: { 
             "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
+            ...corsHeaders
           }
         }
       );
     }
     
+    console.log("Employee created successfully:", data);
     return new Response(
       JSON.stringify({ 
         success: true, 
@@ -262,7 +294,7 @@ serve(async (req) => {
         status: 200, 
         headers: { 
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          ...corsHeaders
         }
       }
     );
@@ -278,7 +310,7 @@ serve(async (req) => {
         status: 500, 
         headers: { 
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          ...corsHeaders
         }
       }
     );

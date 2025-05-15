@@ -67,28 +67,15 @@ export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew:
         
         console.log('Sending data to create-employee function:', employeeData);
         
-        // Use direct URL with full project reference to avoid issues with redirects
-        const projectRef = "flhdgdpewxooxtxqqhdz"; // From your Supabase config
-        const apiKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsaGRnZHBld3hvb3h0eHFxaGR6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDcxODc4ODgsImV4cCI6MjA2Mjc2Mzg4OH0.ZDT4JO3QQb1zlaD-NeMT0pcAJ-aNhDELNqyB3Gyl9no";
-        
-        // Make a direct fetch call to the edge function
-        const response = await fetch(`https://${projectRef}.supabase.co/functions/v1/create-employee`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`,
-            'apikey': apiKey
-          },
-          body: JSON.stringify(employeeData)
+        // Use the Supabase client to invoke the edge function - this avoids CORS issues
+        const { data, error } = await supabase.functions.invoke('create-employee', {
+          body: employeeData
         });
         
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error response from create-employee function:', response.status, errorText);
-          throw new Error(`Falha ao criar funcionário: ${response.status} ${errorText}`);
+        if (error) {
+          console.error('Error calling create-employee function:', error);
+          throw new Error(`Falha ao criar funcionário: ${error.message}`);
         }
-        
-        const data = await response.json();
         
         if (!data || !data.success) {
           console.error('Failed to create employee:', data?.error || 'Unknown error');

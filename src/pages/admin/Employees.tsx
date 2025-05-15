@@ -4,7 +4,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { useEmployeeData } from '@/hooks/useEmployeeData';
 import { Employee } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, RefreshCcw } from 'lucide-react';
 import EmployeeTable from '@/components/admin/employees/EmployeeTable';
 import DeleteConfirmationDialog from '@/components/admin/DeleteConfirmationDialog';
 import EmployeeDialog from '@/components/admin/employees/EmployeeDialog';
@@ -15,6 +15,8 @@ const AdminEmployees = () => {
   const {
     employees,
     isLoading,
+    isRefreshing,
+    fetchEmployees,
     saveEmployee,
     deleteEmployee,
     generatePassword,
@@ -24,8 +26,7 @@ const AdminEmployees = () => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
-
-  // Remove the useEffect that was causing the loop
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleOpenDialog = (employee: Employee | null = null) => {
     setSelectedEmployee(employee);
@@ -57,11 +58,22 @@ const AdminEmployees = () => {
     setSelectedEmployee(null);
   };
 
+  const handleRefreshEmployees = async () => {
+    await fetchEmployees();
+  };
+
   const handleSaveEmployee = async (employee: Partial<Employee>, isNew: boolean) => {
     console.log('Handling save employee:', { employee, isNew });
-    const success = await saveEmployee(employee, isNew);
-    if (success) {
-      handleCloseDialog();
+    setIsSaving(true);
+    try {
+      const success = await saveEmployee(employee, isNew);
+      if (success) {
+        handleCloseDialog();
+      }
+    } catch (error) {
+      console.error('Error in handleSaveEmployee:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -97,13 +109,24 @@ const AdminEmployees = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Gerenciar Funcionários</h1>
           
-          <Button 
-            className="bg-red-600 hover:bg-red-700"
-            onClick={() => handleOpenDialog()}
-          >
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Adicionar Funcionário
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={handleRefreshEmployees}
+              disabled={isLoading || isRefreshing}
+            >
+              <RefreshCcw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+            
+            <Button 
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => handleOpenDialog()}
+            >
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Adicionar Funcionário
+            </Button>
+          </div>
         </div>
         
         <EmployeeTable 
@@ -120,6 +143,7 @@ const AdminEmployees = () => {
           onSave={handleSaveEmployee}
           onCancel={handleCloseDialog}
           generatePassword={generatePassword}
+          isSaving={isSaving}
         />
         
         <DeleteConfirmationDialog
