@@ -1,5 +1,20 @@
 
 import { Employee } from '@/types/dashboard';
+import { Json } from '@/integrations/supabase/types';
+
+// Type for the database employee format
+export type DatabaseEmployee = {
+  name: string;
+  username: string;
+  password?: string;
+  cpf?: string | null;
+  phone?: string | null;
+  birth_date?: string | null;
+  pix_key?: string | null;
+  role: string;
+  permissions: Json;
+  registration_number?: string;
+};
 
 /**
  * Convert database employee data to application format
@@ -31,16 +46,22 @@ export function formatDatabaseToAppEmployee(dbEmployee: any): Employee {
 /**
  * Convert application employee data to database format
  */
-export function formatAppToDatabaseEmployee(employee: Partial<Employee>, isNew: boolean = false): Record<string, any> {
-  const dbEmployee: Record<string, any> = {
-    name: employee.name,
-    username: employee.username,
+export function formatAppToDatabaseEmployee(employee: Partial<Employee>, isNew: boolean = false): DatabaseEmployee {
+  const dbEmployee: DatabaseEmployee = {
+    name: employee.name || '',
+    username: employee.username || '',
+    role: employee.role || 'employee',
+    permissions: employee.permissions || {
+      manageStock: false,
+      viewReports: false,
+      changeOrderStatus: false,
+      exportOrderReportPDF: false,
+      promotionProducts: false
+    },
     cpf: employee.cpf,
     phone: employee.phone,
     birth_date: employee.birthDate,
     pix_key: employee.pixKey,
-    role: employee.role,
-    permissions: employee.permissions,
   };
   
   if (isNew) {

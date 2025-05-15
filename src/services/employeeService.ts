@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Employee } from '@/types/dashboard';
-import { formatDatabaseToAppEmployee, formatAppToDatabaseEmployee } from '@/utils/employeeFormatters';
+import { formatDatabaseToAppEmployee, formatAppToDatabaseEmployee, DatabaseEmployee } from '@/utils/employeeFormatters';
 
 /**
  * Fetch employees from the database
@@ -25,7 +25,7 @@ export async function fetchEmployeesFromDatabase(): Promise<Employee[]> {
  */
 export async function saveEmployeeToDatabase(employee: Partial<Employee>, isNew: boolean): Promise<boolean> {
   try {
-    const dbEmployee = formatAppToDatabaseEmployee(employee, isNew);
+    const dbEmployee: DatabaseEmployee = formatAppToDatabaseEmployee(employee, isNew);
     
     if (isNew) {
       // Insert new employee
