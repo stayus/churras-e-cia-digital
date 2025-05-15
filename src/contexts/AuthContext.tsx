@@ -57,9 +57,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const storedUser = localStorage.getItem('user');
         
         if (storedToken && storedUser) {
-          const parsedUser = JSON.parse(storedUser);
-          console.log('Stored user found:', parsedUser);
-          setUser(parsedUser);
+          try {
+            const parsedUser = JSON.parse(storedUser);
+            console.log('Stored user found:', parsedUser);
+            setUser(parsedUser);
+          } catch (error) {
+            console.error('Failed to parse stored user:', error);
+            // Clear invalid storage
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          }
         } else {
           console.log('No stored user found');
         }
@@ -76,14 +83,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (credentialType: 'email' | 'username', credential: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log(`Calling login edge function with ${credentialType}:`, credential);
+      // Ensure credentials are trimmed
+      const trimmedCredential = credential.trim();
+      const trimmedPassword = password.trim();
+      
+      console.log(`Calling login edge function with ${credentialType}:`, trimmedCredential);
       
       // Call the Supabase Edge Function for login
       const { data, error } = await supabase.functions.invoke('login', {
         body: {
-          credential,
+          credential: trimmedCredential,
           credentialType,
-          password,
+          password: trimmedPassword,
         },
       });
       
@@ -104,7 +115,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       localStorage.setItem('user', JSON.stringify(data.user));
       
       setUser(data.user);
-      return data.user;
+      return;
     } catch (error) {
       console.error('Login failed:', error);
       throw error;
@@ -134,7 +145,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       });
       
-      if (error || !data.success) {
+      if (error || !data?.success) {
         throw new Error(data?.error || 'Failed to update password');
       }
       

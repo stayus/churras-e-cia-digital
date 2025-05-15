@@ -49,13 +49,19 @@ serve(async (req) => {
     // Extract login credentials and create Supabase client
     const { credential, credentialType, password } = await req.json() as LoginRequest;
     
+    // Trim whitespace from credential and password
+    const trimmedCredential = credential.trim();
+    const trimmedPassword = password.trim();
+    
+    console.log(`Processing login request for ${credentialType}: "${trimmedCredential}"`);
+    
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
     
     // Validate required fields
-    if (!credential || !credentialType || !password) {
+    if (!trimmedCredential || !credentialType || !trimmedPassword) {
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -80,7 +86,7 @@ serve(async (req) => {
       const { data, error } = await supabaseClient
         .from(table)
         .select("id, name, email, password")
-        .eq("email", credential)
+        .eq("email", trimmedCredential)
         .single();
       
       if (error || !data) {
@@ -106,7 +112,8 @@ serve(async (req) => {
       table = "employees";
       
       // Special case for admin/admin
-      if (credential === "admin" && password === "admin") {
+      if (trimmedCredential === "admin" && trimmedPassword === "admin") {
+        console.log("Checking for admin user");
         // Check if admin user exists first
         const { data: adminData, error: adminError } = await supabaseClient
           .from(table)
@@ -115,9 +122,11 @@ serve(async (req) => {
           .maybeSingle();
           
         if (!adminError && adminData) {
+          console.log("Found existing admin user");
           userData = adminData;
         } else {
           // If no admin user, create a default one for demo purposes
+          console.log("Admin user not found, creating default admin");
           const defaultAdmin = {
             name: "Administrador",
             username: "admin",
@@ -160,14 +169,32 @@ serve(async (req) => {
         }
       } else {
         // Regular employee login
+        console.log(`Looking for employee with username: "${trimmedCredential}"`);
         const { data, error } = await supabaseClient
           .from(table)
           .select("id, name, username, password, role, permissions, registration_number")
-          .eq("username", credential)
+          .eq("username", trimmedCredential)
           .maybeSingle(); // Use maybeSingle instead of single to avoid error when no rows found
         
-        if (error || !data) {
+        if (error) {
           console.error("Error fetching employee:", error);
+          return new Response(
+            JSON.stringify({ 
+              success: false, 
+              error: "Database error during authentication" 
+            }),
+            { 
+              status: 500, 
+              headers: { 
+                "Content-Type": "application/json",
+                ...corsHeaders
+              }
+            }
+          );
+        }
+        
+        if (!data) {
+          console.error("Employee not found for username:", trimmedCredential);
           return new Response(
             JSON.stringify({ 
               success: false, 
@@ -191,20 +218,21 @@ serve(async (req) => {
     let isPasswordCorrect = false;
     
     // Direct check for admin/admin credentials
-    if (credential === "admin" && password === "admin") {
+    if (trimmedCredential === "admin" && trimmedPassword === "admin") {
       isPasswordCorrect = true;
     } else if (userData) {
       // For other users, try bcrypt compare first
       try {
-        isPasswordCorrect = await compare(password, userData.password);
+        isPasswordCorrect = await compare(trimmedPassword, userData.password);
       } catch (e) {
         console.error("Bcrypt compare error:", e);
         // Fallback to direct comparison
-        isPasswordCorrect = password === userData.password;
+        isPasswordCorrect = trimmedPassword === userData.password;
       }
     }
     
     if (!isPasswordCorrect) {
+      console.log("Password incorrect for user:", trimmedCredential);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -221,7 +249,7 @@ serve(async (req) => {
     }
     
     // Check if it's the employee's first login (using the default password pattern)
-    const isFirstLogin = table === "employees" && /^MC-\d{4}/.test(password);
+    const isFirstLogin = table === "employees" && /^MC-\d{4}/.test(trimmedPassword);
     
     // Create JWT payload
     const payload = {
@@ -243,6 +271,7 @@ serve(async (req) => {
     // Remove password from userData before returning
     delete userData.password;
     
+    console.log("Login successful for:", trimmedCredential);
     return new Response(
       JSON.stringify({ 
         success: true, 

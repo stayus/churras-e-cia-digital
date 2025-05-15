@@ -42,8 +42,12 @@ const EmployeeLoginForm: React.FC = () => {
     setErrorMessage(null);
     
     try {
-      console.log('Attempting login with:', { username: data.username, password: '***' });
-      await login('username', data.username, data.password);
+      // Trim whitespace from credentials before sending
+      const username = data.username.trim();
+      const password = data.password.trim();
+      
+      console.log('Attempting login with:', { username, password: '***' });
+      await login('username', username, password);
       
       // Show success message
       toast({
