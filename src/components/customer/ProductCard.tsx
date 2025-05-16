@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Product } from '@/hooks/useProducts';
-import { useCart, CartExtra } from '@/contexts/CartContext';
+import { useCart, CartExtra } from '@/contexts/cart';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
