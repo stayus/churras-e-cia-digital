@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { toast } from '@/hooks/use-toast';
+import { Card } from '@/components/ui/card';
 import CustomerLayout from '@/components/customer/CustomerLayout';
 import ProductGrid from '@/components/customer/ProductGrid';
 import { useProducts } from '@/hooks/useProducts';
@@ -34,12 +33,12 @@ const CustomerDashboard = () => {
     return (
       <CustomerLayout>
         <Card className="mb-6">
-          <CardContent className="pt-6">
+          <div className="pt-6 px-6 pb-6">
             <p className="text-red-500">Erro ao carregar produtos: {error}</p>
             <Button onClick={() => window.location.reload()} className="mt-4">
               Tentar novamente
             </Button>
-          </CardContent>
+          </div>
         </Card>
       </CustomerLayout>
     );

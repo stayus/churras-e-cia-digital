@@ -1,12 +1,12 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 // Types for our auth context
 export type UserRole = 'admin' | 'employee' | 'motoboy' | 'customer';
 
-export interface User {
+export interface UserData {
   id: string;
   name: string;
   role: UserRole;
@@ -25,7 +25,7 @@ export interface User {
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: UserData | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (credentialType: 'email' | 'username', credential: string, password: string) => Promise<void>;
@@ -48,7 +48,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         if (session?.user) {
           // If using Supabase Auth directly
-          const userData: User = {
+          const userData: UserData = {
             id: session.user.id,
             name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Cliente',
             role: 'customer',
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       
       if (session?.user) {
         // If using Supabase Auth directly
-        const userData: User = {
+        const userData: UserData = {
           id: session.user.id,
           name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Cliente',
           role: 'customer',
@@ -117,7 +117,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           throw new Error("Email not confirmed");
         }
         
-        const userData: User = {
+        const userData: UserData = {
           id: data.user.id,
           name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Cliente',
           role: 'customer',
