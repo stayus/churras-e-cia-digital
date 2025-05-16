@@ -247,6 +247,7 @@ serve(async (req) => {
       type: 'signup',
       email,
       options: {
+        // Fix the redirectTo URL to always use email-confirmado instead of email-confirmation
         redirectTo: `${requestBody.redirectUrl || 'http://localhost:3000'}/email-confirmado`,
       }
     });

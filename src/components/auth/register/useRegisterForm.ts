@@ -60,6 +60,7 @@ export const useRegisterForm = () => {
             birth_date: formattedBirthDate,
             address: formattedAddress,
           },
+          // Make sure to use email-confirmado, not email-confirmation
           emailRedirectTo: window.location.origin + '/email-confirmado'
         }
       });

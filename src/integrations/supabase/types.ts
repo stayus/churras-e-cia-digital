@@ -205,7 +205,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      encrypt_customer_password: {
+        Args: { password: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never

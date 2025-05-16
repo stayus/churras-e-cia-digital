@@ -15,8 +15,10 @@ const EmailConfirmedPage = () => {
   useEffect(() => {
     const confirmEmail = async () => {
       try {
-        // Extract token from URL if available
+        // Extract token from various URL formats
+        // Check hash parameters (for #access_token=...)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        // Check query parameters (for ?token=...)
         const queryParams = new URLSearchParams(window.location.search);
         
         const token = hashParams.get('access_token') || queryParams.get('token');

@@ -99,6 +99,7 @@ const App = () => (
               <Route path="/registro" element={<RegisterPage />} />
               <Route path="/registro-concluido" element={<RegisterSuccessPage />} />
               <Route path="/email-confirmado" element={<EmailConfirmedPage />} />
+              {/* Keep email-confirmation as a duplicate route to handle both URL formats */}
               <Route path="/email-confirmation" element={<EmailConfirmedPage />} />
               <Route path="/employee-login" element={<EmployeeLoginPage />} />
               
