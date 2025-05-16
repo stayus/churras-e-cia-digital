@@ -112,6 +112,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  const resendEmailConfirmation = async (email: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: window.location.origin + '/email-confirmado'
+        }
+      });
+      
+      if (error) throw error;
+      return { success: true };
+    } catch (error) {
+      console.error('Failed to resend confirmation email:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -119,7 +140,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading,
       login,
       logout,
-      updatePassword
+      updatePassword,
+      resendEmailConfirmation
     }}>
       {children}
     </AuthContext.Provider>

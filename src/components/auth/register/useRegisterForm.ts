@@ -50,6 +50,9 @@ export const useRegisterForm = () => {
       
       console.log("Processing registration with formatted address:", formattedAddress);
 
+      // Store email in localStorage for confirmation page
+      localStorage.setItem('confirmationEmail', data.email);
+
       // First, sign up the user with Supabase Authentication
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,

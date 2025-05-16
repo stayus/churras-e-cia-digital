@@ -29,4 +29,5 @@ export interface AuthContextType {
   login: (credentialType: 'email' | 'username', credential: string, password: string) => Promise<void>;
   logout: () => void;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
+  resendEmailConfirmation: (email: string) => Promise<{ success: boolean }>;
 }

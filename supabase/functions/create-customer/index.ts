@@ -242,13 +242,16 @@ serve(async (req) => {
       );
     }
     
+    // Get the base URL - strip any paths
+    const baseUrl = (requestBody.redirectUrl || 'http://localhost:3000').replace(/\/[^/]*$/, '');
+    
     // Send confirmation email
     const { error: emailError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'signup',
       email,
       options: {
         // Fix the redirectTo URL to always use email-confirmado instead of email-confirmation
-        redirectTo: `${requestBody.redirectUrl || 'http://localhost:3000'}/email-confirmado`,
+        redirectTo: `${baseUrl}/email-confirmado`,
       }
     });
     

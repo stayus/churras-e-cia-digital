@@ -2,8 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/hooks/use-toast';
 
 const EmailConfirmedPage = () => {
   const navigate = useNavigate();
@@ -11,6 +13,25 @@ const EmailConfirmedPage = () => {
   const [countdown, setCountdown] = useState(5);
   const [isConfirmed, setIsConfirmed] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isResending, setIsResending] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  
+  // Extract error parameters from URL
+  const getErrorFromUrl = () => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const queryParams = new URLSearchParams(window.location.search);
+    
+    const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
+    const errorDesc = hashParams.get('error_description') || queryParams.get('error_description');
+    
+    if (errorCode === 'otp_expired') {
+      return "O link de confirmação de e-mail expirou. Por favor, solicite um novo link.";
+    } else if (errorCode) {
+      return errorDesc || "Ocorreu um erro ao verificar seu e-mail.";
+    }
+    
+    return null;
+  };
   
   useEffect(() => {
     const confirmEmail = async () => {
@@ -22,6 +43,21 @@ const EmailConfirmedPage = () => {
         const queryParams = new URLSearchParams(window.location.search);
         
         const token = hashParams.get('access_token') || queryParams.get('token');
+        const errorFromUrl = getErrorFromUrl();
+        
+        // Check if we have an error in the URL
+        if (errorFromUrl) {
+          console.log("Error detected in URL:", errorFromUrl);
+          setError(errorFromUrl);
+          setIsConfirmed(false);
+          
+          // Try to get user email from local storage or URL
+          const email = localStorage.getItem('confirmationEmail') || hashParams.get('email') || queryParams.get('email');
+          if (email) {
+            setUserEmail(email);
+          }
+          return;
+        }
         
         if (!token) {
           console.log("No token found in URL, checking for existing session");
@@ -31,6 +67,7 @@ const EmailConfirmedPage = () => {
           if (session?.user?.email_confirmed_at) {
             console.log("User is already confirmed");
             setIsConfirmed(true);
+            setUserEmail(session.user.email || null);
           } else {
             console.log("No session or user not confirmed");
             setError("Não foi possível confirmar o e-mail. O link pode ter expirado ou ser inválido.");
@@ -48,6 +85,7 @@ const EmailConfirmedPage = () => {
         if (session?.user?.email_confirmed_at) {
           console.log("Email confirmed successfully");
           setIsConfirmed(true);
+          setUserEmail(session.user.email || null);
         } else {
           console.log("Confirmation failed");
           setError("Não foi possível confirmar o e-mail. O link pode ter expirado ou ser inválido.");
@@ -80,6 +118,47 @@ const EmailConfirmedPage = () => {
       return () => clearInterval(timer);
     }
   }, [isConfirmed, navigate]);
+
+  const handleResendConfirmation = async () => {
+    if (!userEmail) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "E-mail não encontrado. Por favor, tente se registrar novamente."
+      });
+      return;
+    }
+
+    try {
+      setIsResending(true);
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: userEmail,
+        options: {
+          emailRedirectTo: window.location.origin + '/email-confirmado',
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "E-mail enviado",
+        description: "Um novo link de confirmação foi enviado para o seu e-mail."
+      });
+
+      // Save email in localStorage for future reference
+      localStorage.setItem('confirmationEmail', userEmail);
+    } catch (error) {
+      console.error("Error resending confirmation:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível reenviar o e-mail de confirmação."
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   if (isConfirmed === null) {
     // Loading state
@@ -133,9 +212,37 @@ const EmailConfirmedPage = () => {
                 </p>
               </>
             ) : (
-              <p className="text-sm text-gray-600 mb-4">
-                Por favor, tente novamente com um link válido ou entre em contato com o suporte para obter ajuda.
-              </p>
+              <>
+                <p className="text-sm text-gray-600 mb-4">
+                  {error?.includes("expirou") 
+                    ? "O link de confirmação expirou. Solicite um novo link para concluir seu cadastro."
+                    : "Por favor, tente novamente com um link válido ou entre em contato com o suporte para obter ajuda."}
+                </p>
+                {userEmail && (
+                  <Button 
+                    variant="outline" 
+                    className="mt-4 w-full"
+                    onClick={handleResendConfirmation}
+                    disabled={isResending}
+                  >
+                    {isResending ? (
+                      <>
+                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                        Reenviando...
+                      </>
+                    ) : (
+                      "Reenviar email de confirmação"
+                    )}
+                  </Button>
+                )}
+                <Button 
+                  variant="link" 
+                  className="mt-4"
+                  onClick={() => navigate('/login')}
+                >
+                  Voltar para página de login
+                </Button>
+              </>
             )}
           </CardContent>
         </Card>
