@@ -18,7 +18,7 @@ export interface Product {
   image_url: string;
   is_out_of_stock: boolean;
   promotion_price: number | null;
-  extras?: ProductExtra[];
+  extras: ProductExtra[];
 }
 
 export const useProducts = () => {
@@ -42,16 +42,33 @@ export const useProducts = () => {
         }
         
         // Transform the data to match our Product type
-        const formattedProducts: Product[] = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          price: item.price,
-          image_url: item.image_url,
-          is_out_of_stock: item.is_out_of_stock,
-          promotion_price: item.promotion_price,
-          extras: Array.isArray(item.extras) ? item.extras as unknown as ProductExtra[] : []
-        }));
+        const formattedProducts: Product[] = data.map(item => {
+          // Parse extras properly
+          let parsedExtras: ProductExtra[] = [];
+          if (item.extras) {
+            // Handle different possible formats of extras in the database
+            if (Array.isArray(item.extras)) {
+              parsedExtras = item.extras as ProductExtra[];
+            } else if (typeof item.extras === 'string') {
+              try {
+                parsedExtras = JSON.parse(item.extras);
+              } catch (e) {
+                console.error('Error parsing extras:', e);
+              }
+            }
+          }
+          
+          return {
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            image_url: item.image_url,
+            is_out_of_stock: item.is_out_of_stock,
+            promotion_price: item.promotion_price,
+            extras: parsedExtras
+          };
+        });
         
         setProducts(formattedProducts);
       } catch (error: any) {

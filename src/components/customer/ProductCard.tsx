@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { Product } from '@/hooks/useProducts';
-import { useCart } from '@/contexts/CartContext';
+import { useCart, CartExtra } from '@/contexts/CartContext';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -27,14 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const extras = product.extras ? product.extras.filter(extra => selectedExtras[extra.id]) : [];
     
     // Adicionar ao carrinho com o formato esperado pelo CartContext
-    addItem({
-      id: product.id,
-      name: product.name,
-      price: displayPrice,
-      quantity,
-      imageUrl: product.image_url,
-      extras
-    });
+    addItem(product, extras as CartExtra[]);
     
     // Fechar diálogo e resetar estado
     setDialogOpen(false);

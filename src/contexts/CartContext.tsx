@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Json } from '@/integrations/supabase/types';
 
 // Types
@@ -31,7 +31,7 @@ export interface CartItem {
   quantity: number;
   extras?: CartExtra[];
   imageUrl?: string;
-  totalPrice?: number;
+  totalPrice: number;
 }
 
 export interface Address {
@@ -109,7 +109,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'ADD_ITEM': {
       const { product, extras } = action.payload;
-      const existingItemIndex = state.items.findIndex(item => item.product.id === product.id);
+      const existingItemIndex = state.items.findIndex(item => item.id === product.id);
       
       if (existingItemIndex >= 0) {
         // Update existing item
@@ -133,9 +133,12 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       } else {
         // Add new item
         const newItem: CartItem = {
-          product,
+          id: product.id,
+          name: product.name,
+          price: product.promotion_price || product.price,
           quantity: 1,
-          extras,
+          extras: extras,
+          imageUrl: product.image_url,
           totalPrice: calculateItemTotal(product, 1, extras)
         };
 
@@ -150,7 +153,7 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
     }
     
     case 'REMOVE_ITEM': {
-      const updatedItems = state.items.filter(item => item.product.id !== action.payload.productId);
+      const updatedItems = state.items.filter(item => item.id !== action.payload.productId);
       const newTotalPrice = updatedItems.reduce((sum, item) => sum + item.totalPrice, 0);
       
       return {
@@ -167,11 +170,17 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       }
       
       const updatedItems = state.items.map(item => {
-        if (item.product.id === productId) {
+        if (item.id === productId) {
+          // We need to recalculate the totalPrice here
+          // Since we don't have access to the original product, we need to calculate based on unit price
+          const unitPrice = item.price;
+          const extrasTotal = item.extras ? item.extras.reduce((sum, extra) => sum + extra.price, 0) : 0;
+          const itemTotalPrice = (unitPrice + extrasTotal) * quantity;
+          
           return {
             ...item,
             quantity,
-            totalPrice: calculateItemTotal(item.product, quantity, item.extras)
+            totalPrice: itemTotalPrice
           };
         }
         return item;
