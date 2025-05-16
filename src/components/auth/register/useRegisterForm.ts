@@ -51,13 +51,13 @@ export const useRegisterForm = () => {
       console.log("Inserting customer with formatted address:", formattedAddress);
       
       // Insert directly into customers table
-      // The password will be encrypted by the database trigger we created
+      // Corrigindo a estrutura para corresponder às colunas existentes no banco
       const { error: insertError } = await supabase
         .from('customers')
         .insert([{
           name: data.fullName,
           email: data.email,
-          birth_date: formattedBirthDate,
+          // Removido birth_date pois a coluna não existe
           password: data.password, 
           addresses: [formattedAddress]
         }]);
