@@ -1,5 +1,4 @@
-
-import { CartState, CartAction, Product, CartExtra } from './types';
+import { CartState, CartAction, Product, CartExtra, CartItem } from './types';
 
 // Initial state
 export const initialState: CartState = {
