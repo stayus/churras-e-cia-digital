@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Session, User } from '@supabase/supabase-js';
 
 // Types for our auth context
 export type UserRole = 'admin' | 'employee' | 'motoboy' | 'customer';
@@ -20,6 +21,7 @@ export interface User {
     promotionProducts?: boolean;
   };
   isFirstLogin?: boolean;
+  email_confirmed_at?: string | null;
 }
 
 interface AuthContextType {
@@ -47,76 +49,114 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Check if the user is already logged in
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log("Auth state change:", event, session?.user?.id);
+        setSession(session);
         
-        if (storedToken && storedUser) {
-          try {
-            const parsedUser = JSON.parse(storedUser);
-            console.log('Stored user found:', parsedUser);
-            setUser(parsedUser);
-          } catch (error) {
-            console.error('Failed to parse stored user:', error);
-            // Clear invalid storage
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-          }
+        if (session?.user) {
+          // If using Supabase Auth directly
+          const userData: User = {
+            id: session.user.id,
+            name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Cliente',
+            role: 'customer',
+            email: session.user.email,
+            email_confirmed_at: session.user.email_confirmed_at
+          };
+          
+          setUser(userData);
         } else {
-          console.log('No stored user found');
+          setUser(null);
         }
-      } catch (error) {
-        console.error('Authentication error:', error);
-      } finally {
-        setIsLoading(false);
       }
-    };
+    );
 
-    checkAuth();
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Existing session:", session?.user?.id);
+      setSession(session);
+      
+      if (session?.user) {
+        // If using Supabase Auth directly
+        const userData: User = {
+          id: session.user.id,
+          name: session.user.user_metadata?.name || session.user.email?.split('@')[0] || 'Cliente',
+          role: 'customer',
+          email: session.user.email,
+          email_confirmed_at: session.user.email_confirmed_at
+        };
+        
+        setUser(userData);
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (credentialType: 'email' | 'username', credential: string, password: string) => {
     setIsLoading(true);
     try {
-      // Ensure credentials are trimmed
-      const trimmedCredential = credential.trim();
-      const trimmedPassword = password.trim();
-      
-      console.log(`Calling login edge function with ${credentialType}:`, trimmedCredential);
-      
-      // Call the Supabase Edge Function for login
-      const { data, error } = await supabase.functions.invoke('login', {
-        body: {
-          credential: trimmedCredential,
-          credentialType,
-          password: trimmedPassword,
-        },
-      });
-      
-      if (error) {
-        console.error('Login error:', error);
-        throw new Error(error.message || 'Login failed');
+      if (credentialType === 'email') {
+        // Customer login
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: credential,
+          password: password,
+        });
+        
+        if (error) throw error;
+        
+        if (!data.user.email_confirmed_at) {
+          throw new Error("Email not confirmed");
+        }
+        
+        const userData: User = {
+          id: data.user.id,
+          name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'Cliente',
+          role: 'customer',
+          email: data.user.email,
+          email_confirmed_at: data.user.email_confirmed_at
+        };
+        
+        setUser(userData);
+        return;
+      } else {
+        // Employee login with username - use the login edge function
+        const { data, error } = await supabase.functions.invoke('login', {
+          body: {
+            credential,
+            credentialType,
+            password,
+          },
+        });
+        
+        if (error) {
+          console.error('Login error:', error);
+          throw new Error(error.message || 'Login failed');
+        }
+        
+        if (!data || !data.success) {
+          console.error('Login failed:', data?.error || 'Unknown error');
+          throw new Error(data?.error || 'Login failed');
+        }
+        
+        console.log('Login successful, response data:', data);
+        
+        // Store token and user data
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        setUser(data.user);
+        return;
       }
-      
-      if (!data || !data.success) {
-        console.error('Login failed:', data?.error || 'Unknown error');
-        throw new Error(data?.error || 'Login failed');
-      }
-      
-      console.log('Login successful, response data:', data);
-      
-      // Store token and user data
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      setUser(data.user);
-      return;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login failed:', error);
       throw error;
     } finally {
@@ -124,10 +164,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    setSession(null);
   };
 
   const updatePassword = async (oldPassword: string, newPassword: string) => {
@@ -166,7 +208,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   return (
     <AuthContext.Provider value={{
       user,
-      isAuthenticated: !!user,
+      isAuthenticated: !!user && !!user.email_confirmed_at,
       isLoading,
       login,
       logout,

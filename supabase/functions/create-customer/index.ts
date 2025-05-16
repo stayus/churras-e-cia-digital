@@ -59,10 +59,10 @@ serve(async (req) => {
     
     // Create Supabase client
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
     
     console.log("Creating Supabase client with URL:", supabaseUrl);
-    const supabaseClient = createClient(supabaseUrl, supabaseKey);
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
     
     // Validate required fields
     if (!name || !email || !password || !address) {
@@ -136,21 +136,41 @@ serve(async (req) => {
         }
       );
     }
-    
-    // Check if email is already in use
-    console.log("Checking if email is already in use:", email);
-    const { data: existingUser, error: userCheckError } = await supabaseClient
-      .from("customers")
-      .select("id")
-      .eq("email", email)
-      .single();
-    
-    if (userCheckError && userCheckError.code !== "PGRST116") {
-      console.error("Error checking for existing user:", userCheckError);
+
+    // First, create the user in Supabase Auth
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password,
+      email_confirm: false,
+      user_metadata: {
+        name,
+        birthDate
+      }
+    });
+
+    if (authError) {
+      console.error("Error creating auth user:", authError);
       return new Response(
         JSON.stringify({ 
           success: false, 
-          error: "Database error while checking email"
+          error: authError.message 
+        }),
+        { 
+          status: 500, 
+          headers: { 
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*"
+          }
+        }
+      );
+    }
+
+    if (!authData.user) {
+      console.error("No user returned from auth");
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          error: "Failed to create user"
         }),
         { 
           status: 500, 
@@ -162,30 +182,7 @@ serve(async (req) => {
       );
     }
     
-    if (existingUser) {
-      console.error("Email already in use:", email);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: "Email already in use" 
-        }),
-        { 
-          status: 400, 
-          headers: { 
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*"
-          }
-        }
-      );
-    }
-    
-    // Hash password
-    console.log("Hashing password");
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
     // Format the address
-    // Adicionar um ID para o endereço para facilitar operações futuras
     const formattedAddress = {
       id: `addr_${Date.now()}`,
       ...address
@@ -193,30 +190,43 @@ serve(async (req) => {
     
     const addresses = [formattedAddress];
     
+    // Hash password for storage in customers table
+    console.log("Hashing password for customers table");
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
     // Create customer data object
     const customerData = {
+      id: authData.user.id,
       name,
       email,
       password: hashedPassword,
       addresses
     };
     
-    // Adicionar data de nascimento se fornecida
+    // Add birth date if provided
     if (birthDate) {
       customerData.birth_date = birthDate;
     }
     
-    console.log("Creating customer with data:", JSON.stringify(customerData));
+    console.log("Creating customer record with data:", JSON.stringify(customerData));
     
     // Create customer record
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabaseAdmin
       .from("customers")
       .insert([customerData])
       .select("id")
       .single();
     
     if (error) {
-      console.error("Error creating customer:", error);
+      console.error("Error creating customer record:", error);
+      // If customer record fails, try to delete the auth user
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
+      } catch (deleteError) {
+        console.error("Failed to clean up auth user after customer creation error:", deleteError);
+      }
+      
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -232,10 +242,21 @@ serve(async (req) => {
       );
     }
     
-    console.log("Customer created successfully:", data);
+    // Send confirmation email
+    const { error: emailError } = await supabaseAdmin.auth.admin.generateLink({
+      type: 'signup',
+      email,
+      options: {
+        redirectTo: `${requestBody.redirectUrl || 'http://localhost:3000'}/email-confirmado`,
+      }
+    });
     
-    // Aqui você normalmente enviaria um email de confirmação
-    // Mas para este exemplo, vamos apenas retornar sucesso
+    if (emailError) {
+      console.error("Error sending confirmation email:", emailError);
+      // Continue despite email error since account was created
+    }
+    
+    console.log("Customer created successfully:", data);
     
     return new Response(
       JSON.stringify({ 

@@ -48,39 +48,47 @@ export const useRegisterForm = () => {
         zip: data.zip.replace(/[^0-9]/g, '') // Remove formatting from zip code
       };
       
-      console.log("Inserting customer with formatted address:", formattedAddress);
-      
-      // Insert directly into customers table
-      // Corrigindo a estrutura para corresponder às colunas existentes no banco
-      const { error: insertError } = await supabase
-        .from('customers')
-        .insert([{
-          name: data.fullName,
-          email: data.email,
-          // Removido birth_date pois a coluna não existe
-          password: data.password, 
-          addresses: [formattedAddress]
-        }]);
+      console.log("Processing registration with formatted address:", formattedAddress);
 
-      if (insertError) {
-        console.error("Database error:", insertError);
-        throw insertError;
-      }
-
-      toast({
-        title: "Cadastro realizado com sucesso!",
-        description: "Você já pode fazer login com suas credenciais.",
+      // First, sign up the user with Supabase Authentication
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            name: data.fullName,
+            birth_date: formattedBirthDate,
+            address: formattedAddress,
+          },
+          emailRedirectTo: window.location.origin + '/email-confirmado'
+        }
       });
 
-      // Redirect to registration completed page
-      navigate("/registro-concluido", { state: { email: data.email } });
+      if (signUpError) {
+        console.error("Auth signup error:", signUpError);
+        throw signUpError;
+      }
+
+      // Check if user was created successfully
+      if (authData?.user) {
+        toast({
+          title: "Cadastro iniciado com sucesso!",
+          description: "Enviamos um email de confirmação. Verifique sua caixa de entrada para ativar sua conta.",
+        });
+
+        // Redirect to registration completed page
+        navigate("/registro-concluido", { state: { email: data.email } });
+      } else {
+        throw new Error("Erro ao criar usuário");
+      }
 
     } catch (error: any) {
       console.error("Erro ao registrar:", error);
       let errorMessage = "Ocorreu um erro ao criar sua conta";
       
       // Check for specific error messages
-      if (error.message?.includes("duplicate key") || error.message?.includes("already exists")) {
+      if (error.message?.includes("duplicate key") || error.message?.includes("already exists") || 
+          error.message?.includes("User already registered")) {
         errorMessage = "Este e-mail já está sendo utilizado";
       } else if (error.message?.includes("violates row level security")) {
         errorMessage = "Erro de permissão ao criar conta";

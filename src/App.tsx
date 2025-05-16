@@ -100,6 +100,7 @@ const App = () => (
               <Route path="/registro" element={<RegisterPage />} />
               <Route path="/registro-concluido" element={<RegisterSuccessPage />} />
               <Route path="/email-confirmado" element={<EmailConfirmedPage />} />
+              <Route path="/email-confirmation" element={<EmailConfirmedPage />} />
               <Route path="/employee-login" element={<EmployeeLoginPage />} />
               
               {/* Protected routes with role-based access */}
