@@ -16,7 +16,6 @@ import {
   Package,
   Users,
   FileBarChart,
-  Settings,
   ShoppingCart,
   LogOut
 } from 'lucide-react';
@@ -54,11 +53,6 @@ const AdminSidebar = () => {
       name: 'Pedidos',
       path: '/admin/pedidos',
       icon: ShoppingCart
-    },
-    {
-      name: 'Configurações',
-      path: '/admin/configuracoes',
-      icon: Settings
     }
   ];
 
