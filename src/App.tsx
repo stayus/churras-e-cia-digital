@@ -9,6 +9,9 @@ import { CartProvider } from "@/contexts/CartContext";
 
 // Pages
 import LoginPage from "@/pages/Login";
+import RegisterPage from "@/pages/Register";
+import RegisterSuccessPage from "@/pages/RegisterSuccess";
+import EmailConfirmedPage from "@/pages/EmailConfirmed";
 import EmployeeLoginPage from "@/pages/EmployeeLogin";
 import HomePage from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
@@ -29,6 +32,7 @@ import EmployeePanel from "@/pages/employee/EmployeePanel";
 import MotoboyPanel from "@/pages/motoboy/MotoboyPanel";
 
 // Customer pages
+import CustomerDashboard from "@/pages/customer/Dashboard";
 import CatalogPage from "@/pages/Catalog";
 import CartPage from "@/pages/Cart";
 import OrdersPage from "@/pages/Orders";
@@ -93,6 +97,9 @@ const App = () => (
             <Routes>
               {/* Public routes */}
               <Route path="/login" element={<LoginPage />} />
+              <Route path="/registro" element={<RegisterPage />} />
+              <Route path="/registro-concluido" element={<RegisterSuccessPage />} />
+              <Route path="/email-confirmado" element={<EmailConfirmedPage />} />
               <Route path="/employee-login" element={<EmployeeLoginPage />} />
               
               {/* Protected routes with role-based access */}
@@ -123,10 +130,6 @@ const App = () => (
               <Route 
                 path="/admin/relatorios" 
                 element={<ProtectedRoute element={<AdminReports />} allowedRoles={['admin']} />} 
-              />
-              <Route 
-                path="/admin/configuracoes" 
-                element={<ProtectedRoute element={<AdminSettings />} allowedRoles={['admin']} />} 
               />
               <Route 
                 path="/admin/pedidos" 
@@ -164,7 +167,7 @@ const App = () => (
               {/* Customer routes */}
               <Route 
                 path="/" 
-                element={<HomePage />} 
+                element={<ProtectedRoute element={<CustomerDashboard />} allowedRoles={['customer']} />} 
               />
               <Route 
                 path="/catalogo" 

@@ -11,11 +11,13 @@ interface CustomerData {
   name: string;
   email: string;
   password: string;
+  birthDate?: string;
   address: {
     street: string;
     number: string;
     city: string;
     zip: string;
+    complement?: string;
     lat?: number;
     lng?: number;
   };
@@ -46,7 +48,7 @@ serve(async (req) => {
 
   try {
     // Get request body
-    const { name, email, password, address } = await req.json() as CustomerData;
+    const { name, email, password, birthDate, address } = await req.json() as CustomerData;
     
     // Create Supabase client
     const supabaseClient = createClient(
@@ -167,20 +169,32 @@ serve(async (req) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-    // Format the address array
-    const addresses = [address];
+    // Format the address
+    // Adicionar um ID para o endereço para facilitar operações futuras
+    const formattedAddress = {
+      id: `addr_${Date.now()}`,
+      ...address
+    };
+    
+    const addresses = [formattedAddress];
+    
+    // Create customer data object
+    const customerData: any = {
+      name,
+      email,
+      password: hashedPassword,
+      addresses
+    };
+    
+    // Adicionar data de nascimento se fornecida
+    if (birthDate) {
+      customerData.birth_date = birthDate;
+    }
     
     // Create customer record
     const { data, error } = await supabaseClient
       .from("customers")
-      .insert([
-        {
-          name,
-          email,
-          password: hashedPassword,
-          addresses
-        }
-      ])
+      .insert([customerData])
       .select("id")
       .single();
     
@@ -201,8 +215,8 @@ serve(async (req) => {
       );
     }
     
-    // Here you would normally send a confirmation email
-    // But for this example, we'll just return success
+    // Aqui você normalmente enviaria um email de confirmação
+    // Mas para este exemplo, vamos apenas retornar sucesso
     
     return new Response(
       JSON.stringify({ 
