@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -13,7 +12,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { format, parse } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 // Esquema de validação do formulário
 const registerSchema = z.object({
@@ -45,6 +43,7 @@ type RegisterFormData = z.infer<typeof registerSchema>;
 
 const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const form = useForm<RegisterFormData>({
@@ -64,36 +63,52 @@ const RegisterForm = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     setIsLoading(true);
+    setError(null);
+    
     try {
-      // Separar nome e sobrenome
-      const nameParts = data.fullName.trim().split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-
+      console.log("Form data:", data);
+      
       // Formatar data de nascimento para o formato ISO (yyyy-MM-dd)
       const birthDateFormatted = parse(data.birthDate, "dd/MM/yyyy", new Date());
+      const formattedBirthDate = format(birthDateFormatted, "yyyy-MM-dd");
       
       // Criar objeto de endereço
       const address = {
         street: data.street,
         number: data.number,
         city: data.city,
-        zip: data.zip,
+        zip: data.zip.replace(/[^0-9]/g, ''), // Remover formatação do CEP
       };
+      
+      console.log("Sending customer data:", {
+        name: data.fullName,
+        email: data.email,
+        birthDate: formattedBirthDate,
+        password: data.password,
+        address
+      });
 
       // Enviar dados para a função Edge Function
       const { data: responseData, error } = await supabase.functions.invoke("create-customer", {
         body: { 
           name: data.fullName,
           email: data.email,
-          birthDate: format(birthDateFormatted, "yyyy-MM-dd"),
+          birthDate: formattedBirthDate,
           password: data.password, 
           address 
         }
       });
 
+      console.log("Response from create-customer:", responseData, error);
+
       if (error) {
+        console.error("Function error:", error);
         throw error;
+      }
+      
+      if (!responseData?.success) {
+        console.error("Registration error:", responseData);
+        throw new Error(responseData?.error || "Erro no cadastro");
       }
 
       toast({
@@ -112,6 +127,8 @@ const RegisterForm = () => {
       if (error.message?.includes("Email already in use")) {
         errorMessage = "Este e-mail já está sendo utilizado";
       }
+      
+      setError(errorMessage);
       
       toast({
         variant: "destructive",
@@ -153,6 +170,12 @@ const RegisterForm = () => {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
           <FormField
             control={form.control}
             name="fullName"

@@ -24,6 +24,9 @@ interface CustomerData {
 }
 
 serve(async (req) => {
+  // Log the request for debugging
+  console.log("Received request:", req.method);
+  
   // CORS preflight
   if (req.method === "OPTIONS") {
     return new Response("ok", {
@@ -48,16 +51,22 @@ serve(async (req) => {
 
   try {
     // Get request body
-    const { name, email, password, birthDate, address } = await req.json() as CustomerData;
+    const requestBody = await req.json();
+    console.log("Request body:", requestBody);
+    
+    const { name, email, password, birthDate, address } = requestBody as CustomerData;
+    console.log("Parsed customer data:", { name, email, birthDate, address });
     
     // Create Supabase client
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    
+    console.log("Creating Supabase client with URL:", supabaseUrl);
+    const supabaseClient = createClient(supabaseUrl, supabaseKey);
     
     // Validate required fields
     if (!name || !email || !password || !address) {
+      console.error("Missing required fields:", { name, email, password: !!password, address });
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -76,6 +85,7 @@ serve(async (req) => {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
+      console.error("Invalid email format:", email);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -93,6 +103,7 @@ serve(async (req) => {
     
     // Validate password (at least 8 characters)
     if (password.length < 8) {
+      console.error("Password too short");
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -110,6 +121,7 @@ serve(async (req) => {
     
     // Validate address
     if (!address.street || !address.number || !address.city || !address.zip) {
+      console.error("Incomplete address:", address);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -126,6 +138,7 @@ serve(async (req) => {
     }
     
     // Check if email is already in use
+    console.log("Checking if email is already in use:", email);
     const { data: existingUser, error: userCheckError } = await supabaseClient
       .from("customers")
       .select("id")
@@ -150,6 +163,7 @@ serve(async (req) => {
     }
     
     if (existingUser) {
+      console.error("Email already in use:", email);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -166,6 +180,7 @@ serve(async (req) => {
     }
     
     // Hash password
+    console.log("Hashing password");
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     
@@ -179,7 +194,7 @@ serve(async (req) => {
     const addresses = [formattedAddress];
     
     // Create customer data object
-    const customerData: any = {
+    const customerData = {
       name,
       email,
       password: hashedPassword,
@@ -190,6 +205,8 @@ serve(async (req) => {
     if (birthDate) {
       customerData.birth_date = birthDate;
     }
+    
+    console.log("Creating customer with data:", JSON.stringify(customerData));
     
     // Create customer record
     const { data, error } = await supabaseClient
@@ -214,6 +231,8 @@ serve(async (req) => {
         }
       );
     }
+    
+    console.log("Customer created successfully:", data);
     
     // Aqui você normalmente enviaria um email de confirmação
     // Mas para este exemplo, vamos apenas retornar sucesso

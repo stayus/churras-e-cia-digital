@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -98,9 +98,11 @@ const CustomerLoginForm: React.FC<CustomerLoginFormProps> = ({ onTabChange }) =>
       </CardContent>
       
       <CardFooter className="flex justify-center">
-        <Button variant="link" className="text-red-600">
-          Criar uma conta
-        </Button>
+        <Link to="/registro">
+          <Button variant="link" className="text-red-600">
+            Criar uma conta
+          </Button>
+        </Link>
       </CardFooter>
     </>
   );
