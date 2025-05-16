@@ -35,43 +35,31 @@ export const useRegisterForm = () => {
     try {
       console.log("Form data:", data);
       
-      // Formatar data de nascimento para o formato ISO (yyyy-MM-dd)
+      // Format birth date to ISO (yyyy-MM-dd)
       const birthDateFormatted = parse(data.birthDate, "dd/MM/yyyy", new Date());
       const formattedBirthDate = format(birthDateFormatted, "yyyy-MM-dd");
       
-      // Criar objeto de endereço
-      const address = {
+      // Create address object with proper format for database storage
+      const formattedAddress = {
+        id: `addr_${Date.now()}`,
         street: data.street,
         number: data.number,
         city: data.city,
-        zip: data.zip.replace(/[^0-9]/g, ''), // Remover formatação do CEP
+        zip: data.zip.replace(/[^0-9]/g, '') // Remove formatting from zip code
       };
       
-      const customerData = { 
-        name: data.fullName,
-        email: data.email,
-        birthDate: formattedBirthDate,
-        password: data.password, 
-        address
-      };
+      console.log("Inserting customer with formatted address:", formattedAddress);
       
-      console.log("Sending customer data:", customerData);
-
-      // Inserir diretamente na tabela customers, a Edge Function cuidará da criptografia da senha
+      // Insert directly into customers table
+      // The password will be encrypted by the database trigger we created
       const { error: insertError } = await supabase
         .from('customers')
         .insert([{
           name: data.fullName,
           email: data.email,
           birth_date: formattedBirthDate,
-          password: data.password, // A senha será criptografada pela trigger no banco
-          addresses: [{ 
-            id: `addr_${Date.now()}`,
-            street: data.street,
-            number: data.number,
-            city: data.city,
-            zip: data.zip.replace(/[^0-9]/g, '')
-          }]
+          password: data.password, 
+          addresses: [formattedAddress]
         }]);
 
       if (insertError) {
@@ -84,14 +72,14 @@ export const useRegisterForm = () => {
         description: "Você já pode fazer login com suas credenciais.",
       });
 
-      // Redirecionar para página de confirmação de email
+      // Redirect to registration completed page
       navigate("/registro-concluido", { state: { email: data.email } });
 
     } catch (error: any) {
       console.error("Erro ao registrar:", error);
       let errorMessage = "Ocorreu um erro ao criar sua conta";
       
-      // Verificar mensagens de erro específicas
+      // Check for specific error messages
       if (error.message?.includes("duplicate key") || error.message?.includes("already exists")) {
         errorMessage = "Este e-mail já está sendo utilizado";
       } else if (error.message?.includes("violates row level security")) {
