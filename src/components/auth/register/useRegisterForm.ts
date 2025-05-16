@@ -47,40 +47,41 @@ export const useRegisterForm = () => {
         zip: data.zip.replace(/[^0-9]/g, ''), // Remover formatação do CEP
       };
       
-      console.log("Sending customer data:", {
+      const customerData = { 
         name: data.fullName,
         email: data.email,
         birthDate: formattedBirthDate,
-        password: data.password,
+        password: data.password, 
         address
-      });
+      };
+      
+      console.log("Sending customer data:", customerData);
 
-      // Enviar dados para a função Edge Function
-      const { data: responseData, error } = await supabase.functions.invoke("create-customer", {
-        body: { 
+      // Inserir diretamente na tabela customers, a Edge Function cuidará da criptografia da senha
+      const { error: insertError } = await supabase
+        .from('customers')
+        .insert([{
           name: data.fullName,
           email: data.email,
-          birthDate: formattedBirthDate,
-          password: data.password, 
-          address 
-        }
-      });
+          birth_date: formattedBirthDate,
+          password: data.password, // A senha será criptografada pela trigger no banco
+          addresses: [{ 
+            id: `addr_${Date.now()}`,
+            street: data.street,
+            number: data.number,
+            city: data.city,
+            zip: data.zip.replace(/[^0-9]/g, '')
+          }]
+        }]);
 
-      console.log("Response from create-customer:", responseData, error);
-
-      if (error) {
-        console.error("Function error:", error);
-        throw error;
-      }
-      
-      if (!responseData?.success) {
-        console.error("Registration error:", responseData);
-        throw new Error(responseData?.error || "Erro no cadastro");
+      if (insertError) {
+        console.error("Database error:", insertError);
+        throw insertError;
       }
 
       toast({
         title: "Cadastro realizado com sucesso!",
-        description: "Um email de confirmação foi enviado para o seu endereço.",
+        description: "Você já pode fazer login com suas credenciais.",
       });
 
       // Redirecionar para página de confirmação de email
@@ -90,9 +91,11 @@ export const useRegisterForm = () => {
       console.error("Erro ao registrar:", error);
       let errorMessage = "Ocorreu um erro ao criar sua conta";
       
-      // Verificar mensagens de erro específicas da API
-      if (error.message?.includes("Email already in use")) {
+      // Verificar mensagens de erro específicas
+      if (error.message?.includes("duplicate key") || error.message?.includes("already exists")) {
         errorMessage = "Este e-mail já está sendo utilizado";
+      } else if (error.message?.includes("violates row level security")) {
+        errorMessage = "Erro de permissão ao criar conta";
       }
       
       setError(errorMessage);
