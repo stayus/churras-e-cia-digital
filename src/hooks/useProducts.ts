@@ -48,10 +48,23 @@ export const useProducts = () => {
           if (item.extras) {
             // Handle different possible formats of extras in the database
             if (Array.isArray(item.extras)) {
-              parsedExtras = item.extras as ProductExtra[];
+              // Type assertion to ensure each item has the correct properties
+              parsedExtras = (item.extras as any[]).map(extra => ({
+                id: extra.id?.toString() || '',
+                name: extra.name?.toString() || '',
+                price: typeof extra.price === 'number' ? extra.price : 0
+              }));
             } else if (typeof item.extras === 'string') {
               try {
-                parsedExtras = JSON.parse(item.extras);
+                // Parse string and validate the structure
+                const parsedData = JSON.parse(item.extras);
+                if (Array.isArray(parsedData)) {
+                  parsedExtras = parsedData.map(extra => ({
+                    id: extra.id?.toString() || '',
+                    name: extra.name?.toString() || '',
+                    price: typeof extra.price === 'number' ? extra.price : 0
+                  }));
+                }
               } catch (e) {
                 console.error('Error parsing extras:', e);
               }
