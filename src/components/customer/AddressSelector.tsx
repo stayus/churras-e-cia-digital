@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -8,16 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check, Plus, Pencil, Trash, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-
-interface Address {
-  id: string;
-  street: string;
-  number: string;
-  city: string;
-  zip: string;
-  complement?: string;
-  label?: string;
-}
+import { Address } from '@/contexts/CartContext';
+import { Json } from '@/integrations/supabase/types';
 
 interface AddressSelectorProps {
   userId: string;
@@ -60,7 +51,8 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
           
         if (error) throw error;
         
-        const addressList = data?.addresses ? data.addresses as Address[] : [];
+        // Type cast the JSON data to Address[]
+        const addressList = data?.addresses ? (data.addresses as any as Address[]) : [];
         setAddresses(addressList);
         
         // Se houver endereços e nenhum foi selecionado, selecione o primeiro
@@ -146,7 +138,7 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
         
       if (error) throw error;
       
-      let updatedAddresses = [...(data?.addresses as Address[] || [])];
+      let updatedAddresses = [...((data?.addresses as any) as Address[] || [])];
       
       // Adicionar ou atualizar endereço
       const newAddress: Address = {
@@ -169,11 +161,11 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
         updatedAddresses.push(newAddress);
       }
       
-      // Salvar no banco de dados
+      // Salvar no banco de dados - Cast Address[] to Json for Supabase
       const { error: updateError } = await supabase
         .from('customers')
         .update({
-          addresses: updatedAddresses
+          addresses: updatedAddresses as unknown as Json
         })
         .eq('id', userId);
         
@@ -219,14 +211,14 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
         
       if (error) throw error;
       
-      const currentAddresses = data?.addresses as Address[] || [];
+      const currentAddresses = (data?.addresses as any) as Address[] || [];
       const updatedAddresses = currentAddresses.filter(addr => addr.id !== addressId);
       
       // Salvar no banco de dados
       const { error: updateError } = await supabase
         .from('customers')
         .update({
-          addresses: updatedAddresses
+          addresses: updatedAddresses as unknown as Json
         })
         .eq('id', userId);
         

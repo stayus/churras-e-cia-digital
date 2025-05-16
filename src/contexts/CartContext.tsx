@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useState, useReducer, ReactNode } from 'react';
+import { Json } from '@/integrations/supabase/types';
 
 // Types
 export interface Product {
@@ -11,30 +12,36 @@ export interface Product {
   is_out_of_stock: boolean;
   promotion_price?: number;
   extras: Array<{
+    id: string;
     name: string;
     price: number;
   }>;
 }
 
 export interface CartExtra {
+  id: string;
   name: string;
   price: number;
 }
 
 export interface CartItem {
-  product: Product;
+  id: string;
+  name: string;
+  price: number;
   quantity: number;
-  extras: CartExtra[];
-  totalPrice: number;
+  extras?: CartExtra[];
+  imageUrl?: string;
+  totalPrice?: number;
 }
 
 export interface Address {
+  id: string;
   street: string;
   number: string;
   city: string;
   zip: string;
-  lat?: number;
-  lng?: number;
+  complement?: string;
+  label?: string;
 }
 
 export type PaymentMethod = 'pix' | 'dinheiro' | 'cartao';

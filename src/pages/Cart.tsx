@@ -21,6 +21,7 @@ import {
   SheetHeader, SheetTitle, SheetTrigger 
 } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
+import { Json } from '@/integrations/supabase/types';
 
 const CartPage = () => {
   const { cart, updateQuantity, removeItem, clearCart } = useCart();
@@ -68,7 +69,7 @@ const CartPage = () => {
       setIsSubmitting(true);
       
       // Obter endereço selecionado se não for retirada no local
-      let orderAddress = { pickup: true };
+      let orderAddress: any = { pickup: true };
       
       if (!isPickup) {
         // Buscar endereço do cliente no Supabase
@@ -92,16 +93,25 @@ const CartPage = () => {
         orderAddress = selectedAddress;
       }
       
+      // Transformar itens do carrinho para o formato esperado pelo backend
+      const orderItems = cart.items.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        extras: item.extras || []
+      }));
+      
       // Criar pedido no banco de dados
       const { data: order, error } = await supabase
         .from('orders')
         .insert({
           customer_id: user!.id,
-          items: cart.items,
+          items: orderItems as unknown as Json,
           total: total,
           status: isPickup ? 'awaiting_pickup' : 'received',
           payment_method: paymentMethod,
-          address: orderAddress,
+          address: orderAddress as Json,
           observations: observations || null
         })
         .select('id')

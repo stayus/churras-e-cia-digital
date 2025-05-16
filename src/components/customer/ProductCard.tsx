@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Product } from '@/hooks/useProducts';
 import { useCart } from '@/contexts/CartContext';
@@ -27,14 +26,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     // Filtrar extras selecionados
     const extras = product.extras ? product.extras.filter(extra => selectedExtras[extra.id]) : [];
     
-    // Adicionar ao carrinho
+    // Adicionar ao carrinho com o formato esperado pelo CartContext
     addItem({
       id: product.id,
       name: product.name,
       price: displayPrice,
       quantity,
-      extras,
-      imageUrl: product.image_url
+      imageUrl: product.image_url,
+      extras
     });
     
     // Fechar diálogo e resetar estado

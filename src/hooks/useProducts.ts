@@ -2,6 +2,13 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
+
+export interface ProductExtra {
+  id: string;
+  name: string;
+  price: number;
+}
 
 export interface Product {
   id: string;
@@ -11,11 +18,7 @@ export interface Product {
   image_url: string;
   is_out_of_stock: boolean;
   promotion_price: number | null;
-  extras?: Array<{
-    id: string;
-    name: string;
-    price: number;
-  }>;
+  extras?: ProductExtra[];
 }
 
 export const useProducts = () => {
@@ -38,7 +41,19 @@ export const useProducts = () => {
           throw error;
         }
         
-        setProducts(data);
+        // Transform the data to match our Product type
+        const formattedProducts: Product[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          image_url: item.image_url,
+          is_out_of_stock: item.is_out_of_stock,
+          promotion_price: item.promotion_price,
+          extras: Array.isArray(item.extras) ? item.extras as unknown as ProductExtra[] : []
+        }));
+        
+        setProducts(formattedProducts);
       } catch (error: any) {
         console.error('Error fetching products:', error);
         setError(error.message || 'Erro ao carregar produtos');
