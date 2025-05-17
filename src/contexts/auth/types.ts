@@ -26,7 +26,7 @@ export interface AuthContextType {
   user: UserData | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (credentialType: 'email' | 'username', credential: string, password: string) => Promise<void>;
+  login: (credentialType: 'email' | 'username', credential: string, password: string) => Promise<UserData>;
   logout: () => void;
   updatePassword: (oldPassword: string, newPassword: string) => Promise<void>;
   resendEmailConfirmation: (email: string) => Promise<{ success: boolean }>;

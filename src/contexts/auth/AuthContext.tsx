@@ -78,7 +78,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (credentialType: 'email' | 'username', credential: string, password: string) => {
+  const login = async (credentialType: 'email' | 'username', credential: string, password: string): Promise<UserData> => {
     setIsLoading(true);
     try {
       let userData;

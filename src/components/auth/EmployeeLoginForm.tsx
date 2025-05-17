@@ -56,11 +56,10 @@ const EmployeeLoginForm: React.FC = () => {
       });
       
       // Navigate based on user role
-      console.log('User role after login:', userData.role);
-      if (userData.role === 'admin') {
+      if (userData?.role === 'admin') {
         console.log('Redirecting to admin panel');
         navigate('/admin');
-      } else if (userData.role === 'motoboy') {
+      } else if (userData?.role === 'motoboy') {
         console.log('Redirecting to motoboy panel');
         navigate('/motoboy');
       } else {
