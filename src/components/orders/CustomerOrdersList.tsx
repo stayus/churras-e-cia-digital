@@ -28,7 +28,7 @@ export const CustomerOrdersList: React.FC = () => {
       if (error) throw error;
       
       // Parse JSON data from Supabase to match the Order type
-      const parsedOrders: Order[] = data.map(order => ({
+      const parsedOrders: Order[] = data.map((order: any) => ({
         ...order,
         address: typeof order.address === 'string' ? JSON.parse(order.address) : order.address,
         items: Array.isArray(order.items) 
@@ -36,7 +36,13 @@ export const CustomerOrdersList: React.FC = () => {
               ...item,
               extras: Array.isArray(item.extras) ? item.extras : []
             })) as OrderItem[]
-          : []
+          : [],
+        // Make sure status is one of the allowed values
+        status: (order.status === 'received' || 
+                order.status === 'preparing' || 
+                order.status === 'delivering' || 
+                order.status === 'completed') 
+                ? order.status : 'received'
       }));
       
       setOrders(parsedOrders);
