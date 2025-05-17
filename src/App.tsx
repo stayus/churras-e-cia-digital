@@ -1,3 +1,4 @@
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -171,6 +172,11 @@ const App = () => (
                 <Route 
                   path="/" 
                   element={<ProtectedRoute element={<CustomerDashboard />} allowedRoles={['customer']} />} 
+                />
+                {/* Add cliente route as an alias to the home route for backward compatibility */}
+                <Route 
+                  path="/cliente" 
+                  element={<Navigate to="/" replace />} 
                 />
                 <Route 
                   path="/catalogo" 
