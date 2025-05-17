@@ -62,6 +62,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setIsLoading(false);
     });
 
+    // Enable realtime for orders table when a user is authenticated
+    // This is important for the customer to receive real-time updates on their orders
+    const enableRealtimeForOrders = async () => {
+      try {
+        await supabase.rpc('supabase_realtime', { table: 'orders' });
+        console.log("Realtime enabled for orders table");
+      } catch (error) {
+        console.error("Failed to enable realtime for orders:", error);
+      }
+    };
+    
+    enableRealtimeForOrders();
+
     return () => subscription.unsubscribe();
   }, []);
 

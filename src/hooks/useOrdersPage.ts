@@ -1,11 +1,22 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/auth";
 
 export const useOrdersPage = () => {
-  // Future state and logic for the orders page can be added here
+  const { user } = useAuth();
+  const [pageTitle, setPageTitle] = useState("Meus Pedidos");
+  
+  useEffect(() => {
+    // Personalize title with user name if available
+    if (user?.name) {
+      setPageTitle(`Pedidos de ${user.name.split(' ')[0]}`);
+    } else {
+      setPageTitle("Meus Pedidos");
+    }
+  }, [user]);
   
   return {
-    pageTitle: "Meus Pedidos",
+    pageTitle,
     historyTitle: "Histórico de Pedidos"
   };
 };
