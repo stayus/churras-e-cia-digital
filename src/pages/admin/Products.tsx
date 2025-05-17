@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
 import { PlusCircle, Loader2 } from "lucide-react";
 import ProductFormDialog from "@/components/admin/products/ProductFormDialog";
+import ProductDebugger from "@/components/admin/products/ProductDebugger";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { useProducts, Product } from "@/hooks/useProducts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -28,12 +29,21 @@ const AdminProducts = () => {
     fetchProducts(); // Atualizar lista de produtos
   };
 
+  // Efetuar refresh dos produtos quando a página carrega
+  useEffect(() => {
+    console.log("AdminProducts montado - buscando produtos");
+    fetchProducts();
+  }, []);
+
   return (
     <AdminLayout>
       <div className="p-6">
         <BackButton to="/admin" label="Voltar ao Dashboard" />
         
         <h1 className="text-3xl font-bold mb-6">Gerenciar Produtos</h1>
+        
+        {/* Debugger de produtos */}
+        <ProductDebugger />
         
         <Card className="mb-6">
           <CardHeader className="flex flex-row items-center justify-between">

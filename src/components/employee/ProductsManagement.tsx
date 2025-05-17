@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Toggle } from "@/components/ui/toggle";
-import { Loader2 } from "lucide-react";
+import { Loader2, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { 
   Table,
@@ -37,6 +37,8 @@ const ProductsManagement = () => {
   const fetchProducts = async () => {
     try {
       setLoading(true);
+      console.log("ProductsManagement: Buscando produtos do banco de dados");
+      
       const { data, error } = await supabase
         .from("products")
         .select("id, name, description, price, image_url, is_out_of_stock, promotion_price")
@@ -45,6 +47,8 @@ const ProductsManagement = () => {
       if (error) {
         throw error;
       }
+
+      console.log("ProductsManagement: Produtos recebidos:", data);
 
       // Map database fields to client model
       const formattedProducts: Product[] = data.map((item) => ({
@@ -149,6 +153,7 @@ const ProductsManagement = () => {
   };
 
   useEffect(() => {
+    console.log("ProductsManagement montado - buscando produtos");
     fetchProducts();
     
     // Set up a real-time subscription for products
@@ -157,13 +162,17 @@ const ProductsManagement = () => {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'products' },
-        () => {
+        (payload) => {
+          console.log("Alteração detectada na tabela products:", payload);
           fetchProducts(); // Refresh products when there's a change
         }
       )
       .subscribe();
 
+    console.log('Escuta em tempo real configurada para a tabela products no ProductsManagement');
+
     return () => {
+      console.log('Removendo escuta em tempo real do ProductsManagement');
       subscription.unsubscribe();
     };
   }, []);
@@ -193,15 +202,6 @@ const ProductsManagement = () => {
     product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
-        <span>Carregando produtos...</span>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -212,6 +212,15 @@ const ProductsManagement = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         <div className="flex space-x-2">
+          <Button
+            variant="outline"
+            onClick={fetchProducts}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Atualizar
+          </Button>
+          
           {selectedProducts.length > 0 && (
             <>
               <Button
@@ -252,7 +261,16 @@ const ProductsManagement = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredProducts.length > 0 ? (
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="h-24">
+                  <div className="flex justify-center items-center">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground mr-2" />
+                    <span>Carregando produtos...</span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
                 <TableRow key={product.id}>
                   <TableCell>

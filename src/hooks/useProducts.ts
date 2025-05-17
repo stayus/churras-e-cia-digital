@@ -38,6 +38,8 @@ export const useProducts = () => {
       setLoading(true);
       setError(null);
       
+      console.log("Buscando produtos do Supabase...");
+      
       const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -46,6 +48,8 @@ export const useProducts = () => {
       if (error) {
         throw error;
       }
+      
+      console.log("Produtos recebidos:", data);
       
       // Transform the data to match our Product type
       const formattedProducts: Product[] = data.map(item => {
@@ -89,6 +93,7 @@ export const useProducts = () => {
         };
       });
       
+      console.log("Produtos formatados:", formattedProducts);
       setProducts(formattedProducts);
     } catch (error: any) {
       console.error('Error fetching products:', error);
@@ -153,16 +158,20 @@ export const useProducts = () => {
     fetchProducts();
     
     // Configurar escuta em tempo real para atualizações de produtos
-    const subscription = supabase
+    const channel = supabase
       .channel('public:products')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+        console.log('Alteração detectada na tabela products:', payload);
         // Atualizar a lista de produtos quando houver alterações
         fetchProducts();
       })
       .subscribe();
       
+    console.log('Escuta em tempo real configurada para a tabela products');
+    
     return () => {
-      supabase.removeChannel(subscription);
+      console.log('Removendo escuta em tempo real');
+      supabase.removeChannel(channel);
     };
   }, []);
   
