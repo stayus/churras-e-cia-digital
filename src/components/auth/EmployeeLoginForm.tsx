@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,7 +23,7 @@ const employeeLoginSchema = z.object({
 type EmployeeLoginFormValues = z.infer<typeof employeeLoginSchema>;
 
 const EmployeeLoginForm: React.FC = () => {
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -47,7 +47,7 @@ const EmployeeLoginForm: React.FC = () => {
       const password = data.password.trim();
       
       console.log('Attempting login with:', { username, password: '***' });
-      await login('username', username, password);
+      const userData = await login('username', username, password);
       
       // Show success message
       toast({
@@ -56,11 +56,15 @@ const EmployeeLoginForm: React.FC = () => {
       });
       
       // Navigate based on user role
-      if (user?.role === 'admin') {
-        console.log("Redirecting to admin panel");
+      console.log('User role after login:', userData.role);
+      if (userData.role === 'admin') {
+        console.log('Redirecting to admin panel');
         navigate('/admin');
+      } else if (userData.role === 'motoboy') {
+        console.log('Redirecting to motoboy panel');
+        navigate('/motoboy');
       } else {
-        console.log("Redirecting to employee panel");
+        console.log('Redirecting to employee panel');
         navigate('/employee');
       }
     } catch (error: any) {

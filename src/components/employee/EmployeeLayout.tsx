@@ -1,6 +1,6 @@
 
-import React, { ReactNode } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { ReactNode, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth';
 import { useNavigate } from 'react-router-dom';
 
 interface EmployeeLayoutProps {
@@ -8,17 +8,45 @@ interface EmployeeLayoutProps {
 }
 
 const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Verifica se o usuário está autenticado e não é um cliente
-  // Qualquer usuário que não seja 'customer' é considerado funcionário
-  const isEmployee = user && user.role !== 'customer';
+  console.log("EmployeeLayout - Auth state:", {
+    isAuthenticated, 
+    isLoading,
+    userRole: user?.role
+  });
 
-  // Redireciona se não for funcionário
-  if (!isEmployee) {
-    navigate('/login');
-    return null;
+  // Verify if the user is authenticated and is not a customer
+  useEffect(() => {
+    if (isLoading) {
+      return; // Wait until loading is complete
+    }
+    
+    if (!isAuthenticated) {
+      console.log("EmployeeLayout - Redirecting to employee login: User not authenticated");
+      navigate('/employee-login');
+      return;
+    }
+
+    // Redirecionar se o usuário for um cliente
+    if (!user || user.role === 'customer') {
+      console.log("EmployeeLayout - Redirecting: User is a customer");
+      navigate('/');
+      return;
+    }
+    
+    // Redirecionar se o usuário for um admin (deve usar o painel de admin)
+    if (user.role === 'admin') {
+      console.log("EmployeeLayout - Redirecting: User is admin");
+      navigate('/admin');
+      return;
+    }
+  }, [isAuthenticated, isLoading, user, navigate]);
+
+  // Se ainda estamos verificando autenticação ou o usuário é um cliente, mostrar carregando
+  if (isLoading || !isAuthenticated || !user || user.role === 'customer') {
+    return <div className="flex h-screen items-center justify-center">Carregando...</div>;
   }
 
   return (

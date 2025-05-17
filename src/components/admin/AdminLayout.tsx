@@ -16,28 +16,36 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  console.log("AdminLayout - Auth state:", { 
+    isAuthenticated, 
+    isLoading, 
+    userRole: user?.role
+  });
+
   // Verify if the user is authenticated and is an administrator
-  // Use effect to avoid redirection issues during rendering
   useEffect(() => {
+    if (isLoading) {
+      return; // Wait until loading is complete
+    }
+    
     if (!isAuthenticated) {
-      console.log("Redirecting to login: User not authenticated");
+      console.log("AdminLayout - Redirecting to employee login: User not authenticated");
       navigate('/employee-login');
       return;
     }
 
     if (!user || user.role !== 'admin') {
-      console.log("Redirecting to login: User not admin", user?.role);
+      console.log("AdminLayout - Redirecting to employee login: User not admin", user?.role);
       navigate('/employee-login');
-      return;
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, isLoading, user, navigate]);
 
-  // If we're still checking authentication, show nothing
-  if (!isAuthenticated || !user || user.role !== 'admin') {
-    return null;
+  // If we're still checking authentication or user doesn't have admin role, show loading
+  if (isLoading || !isAuthenticated || !user || user.role !== 'admin') {
+    return <div className="flex h-screen items-center justify-center">Carregando...</div>;
   }
 
   return (

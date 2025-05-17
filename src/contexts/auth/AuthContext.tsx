@@ -81,15 +81,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentialType: 'email' | 'username', credential: string, password: string) => {
     setIsLoading(true);
     try {
+      let userData;
+      
       if (credentialType === 'email') {
         // Customer login
-        const userData = await loginWithEmail(credential, password);
-        setUser(userData);
+        userData = await loginWithEmail(credential, password);
       } else {
         // Employee login with username
-        const userData = await loginWithUsername(credential, password);
-        setUser(userData);
+        userData = await loginWithUsername(credential, password);
       }
+      
+      setUser(userData);
+      return userData; // Return user data for redirection logic
+      
     } catch (error: any) {
       console.error('Login failed:', error);
       throw error;
@@ -157,7 +161,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   return (
     <AuthContext.Provider value={{
       user,
-      isAuthenticated: !!user && !!user.email_confirmed_at,
+      isAuthenticated: !!user && (!user.email || !!user.email_confirmed_at),
       isLoading,
       login,
       logout,

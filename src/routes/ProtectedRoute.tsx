@@ -28,6 +28,15 @@ export const ProtectedRoute = ({ element, allowedRoles = [] }: ProtectedRoutePro
 
   if (!isAuthenticated) {
     console.log("ProtectedRoute - Not authenticated, redirecting to login");
+    // Redirecionar para página de login apropriada com base no papel esperado
+    if (allowedRoles.includes('admin') || 
+        allowedRoles.includes('employee') || 
+        allowedRoles.includes('motoboy') ||
+        allowedRoles.includes('tesoureiro') || 
+        allowedRoles.includes('analista') || 
+        allowedRoles.includes('cozinheira')) {
+      return <Navigate to="/employee-login" replace />;
+    }
     return <Navigate to="/login" replace />;
   }
 
@@ -47,6 +56,8 @@ export const ProtectedRoute = ({ element, allowedRoles = [] }: ProtectedRoutePro
       // Redirect based on user role
       if (user.role === 'admin') {
         return <Navigate to="/admin" replace />;
+      } else if (user.role === 'motoboy') {
+        return <Navigate to="/motoboy" replace />;
       } else if (user.role !== 'customer') {
         // Qualquer funcionário (não cliente) vai para o painel de funcionário
         return <Navigate to="/employee" replace />;
