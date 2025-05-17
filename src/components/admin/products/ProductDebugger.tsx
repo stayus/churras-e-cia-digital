@@ -4,12 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Product, useProducts } from '@/hooks/useProducts';
-import { Loader2, RefreshCw, Database } from 'lucide-react';
+import { Loader2, RefreshCw, Database, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const ProductDebugger: React.FC = () => {
   const { toast } = useToast();
-  const { products, fetchProducts } = useProducts();
+  const { products, fetchProducts, setupRealtime } = useProducts();
   const [isChecking, setIsChecking] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [isEnablingRealtime, setIsEnablingRealtime] = useState(false);
@@ -51,22 +51,12 @@ const ProductDebugger: React.FC = () => {
     try {
       setIsEnablingRealtime(true);
       
-      const { data, error } = await supabase.functions.invoke('enable-realtime', {
-        body: {}
+      await setupRealtime();
+      
+      toast({
+        title: "Realtime configurado",
+        description: "Configuração de Realtime para a tabela de produtos foi aplicada com sucesso."
       });
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (data.success) {
-        toast({
-          title: "Realtime configurado",
-          description: "Configuração de Realtime para a tabela de produtos foi aplicada com sucesso."
-        });
-      } else {
-        throw new Error(data.error || "Erro ao configurar Realtime");
-      }
     } catch (error: any) {
       console.error("Erro ao configurar Realtime:", error);
       toast({
@@ -126,7 +116,7 @@ const ProductDebugger: React.FC = () => {
             {isEnablingRealtime ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <RefreshCw className="h-4 w-4" />
+              <Zap className="h-4 w-4" />
             )}
             Configurar Realtime
           </Button>

@@ -13,52 +13,43 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase credentials')
+    }
+    
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      supabaseUrl,
+      supabaseKey,
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
         },
       }
     )
+
+    const { sql } = await req.json()
     
-    console.log('Setting up realtime for products table...')
-
-    // Execute direct SQL to set REPLICA IDENTITY FULL
-    const { error: sqlError } = await supabaseClient.rpc(
-      'execute_sql',
-      { 
-        sql: 'ALTER TABLE products REPLICA IDENTITY FULL;' 
-      }
-    )
-
-    if (sqlError) {
-      console.error('Error setting REPLICA IDENTITY FULL:', sqlError)
-      throw sqlError
+    if (!sql || typeof sql !== 'string') {
+      throw new Error('SQL query is required')
     }
     
-    console.log('REPLICA IDENTITY set successfully')
-
-    // Add the table to the realtime publication
-    const { error: pubError } = await supabaseClient.rpc(
-      'execute_sql',
-      { 
-        sql: 'ALTER PUBLICATION supabase_realtime ADD TABLE products;' 
-      }
-    )
-
-    if (pubError) {
-      console.error('Error adding table to publication:', pubError)
-      throw pubError
+    console.log(`Executing SQL: ${sql}`)
+    
+    // Connect to database using postgres extension
+    const { data, error } = await supabaseClient.rpc('exec_sql', { query: sql })
+    
+    if (error) {
+      console.error('SQL execution error:', error)
+      throw error
     }
     
-    console.log('Table added to publication successfully')
-
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Realtime configured successfully for the products table'
+        data
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -66,7 +57,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error('Error in function:', error)
+    console.error('Error in execute-sql function:', error)
     return new Response(
       JSON.stringify({
         success: false,

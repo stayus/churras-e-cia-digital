@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Json } from '@/integrations/supabase/types';
 
 export interface ProductExtra {
@@ -32,6 +32,7 @@ export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
   
   const fetchProducts = async () => {
     try {
@@ -43,13 +44,19 @@ export const useProducts = () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .order('name');
+        .order('created_at', { ascending: false });
         
       if (error) {
         throw error;
       }
       
       console.log("Produtos recebidos:", data);
+      
+      if (!data || data.length === 0) {
+        console.log("Nenhum produto encontrado no banco de dados");
+        setProducts([]);
+        return;
+      }
       
       // Transform the data to match our Product type
       const formattedProducts: Product[] = data.map(item => {
@@ -108,6 +115,32 @@ export const useProducts = () => {
     }
   };
   
+  // Configure realtime for products table
+  const setupRealtime = async () => {
+    try {
+      console.log("Configurando realtime para a tabela products...");
+      
+      const { data, error } = await supabase.functions.invoke('enable-realtime', {
+        body: {}
+      });
+      
+      if (error) {
+        console.error("Erro ao configurar realtime:", error);
+        return;
+      }
+      
+      console.log("Resposta da configuração realtime:", data);
+      
+      if (data.success) {
+        console.log("Realtime configurado com sucesso para a tabela products");
+      } else {
+        console.error("Falha ao configurar realtime:", data.error);
+      }
+    } catch (error) {
+      console.error("Erro ao configurar realtime:", error);
+    }
+  };
+  
   // Função para adicionar um produto utilizando a edge function
   const addProduct = async (productData: AddProductData): Promise<Product | null> => {
     try {
@@ -157,15 +190,32 @@ export const useProducts = () => {
   useEffect(() => {
     fetchProducts();
     
-    // Configurar escuta em tempo real para atualizações de produtos
+    // Configure realtime when the hook is first mounted
+    setupRealtime();
+    
+    // Configure real-time subscription
     const channel = supabase
       .channel('public:products')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
-        console.log('Alteração detectada na tabela products:', payload);
-        // Atualizar a lista de produtos quando houver alterações
-        fetchProducts();
-      })
-      .subscribe();
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'products' 
+        }, 
+        (payload) => {
+          console.log('Alteração detectada na tabela products:', payload);
+          fetchProducts(); // Refresh products when there's a change
+        }
+      )
+      .subscribe(status => {
+        console.log('Status da subscrição realtime:', status);
+        
+        if (status === 'SUBSCRIBED') {
+          console.log('Subscrição ativa para mudanças na tabela products');
+        } else if (status === 'CHANNEL_ERROR') {
+          console.error('Erro na subscrição realtime para products');
+        }
+      });
       
     console.log('Escuta em tempo real configurada para a tabela products');
     
@@ -180,6 +230,7 @@ export const useProducts = () => {
     loading, 
     error, 
     fetchProducts,
-    addProduct
+    addProduct,
+    setupRealtime
   };
 };

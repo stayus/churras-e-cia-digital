@@ -25,7 +25,39 @@ serve(async (req) => {
 
     console.log('Verificando todos os produtos no banco de dados')
 
-    // Buscar todos os produtos
+    // Execute a SQL query to check if the products table exists and has data
+    const { data: tableCheck, error: tableError } = await supabaseClient.rpc(
+      'execute_sql',
+      { 
+        sql: `SELECT EXISTS (
+          SELECT 1 FROM information_schema.tables 
+          WHERE table_schema = 'public' 
+          AND table_name = 'products'
+        ) AS table_exists;` 
+      }
+    )
+
+    if (tableError) {
+      console.error('Erro ao verificar tabela products:', tableError)
+      throw tableError
+    }
+
+    console.log('Verificação da tabela:', tableCheck)
+    
+    if (!tableCheck || !tableCheck[0].table_exists) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'A tabela products não existe no banco de dados'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400,
+        }
+      )
+    }
+
+    // Buscar todos os produtos utilizando o service role para ignorar RLS
     const { data: products, error } = await supabaseClient
       .from('products')
       .select('*')
