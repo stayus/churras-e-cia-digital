@@ -11,7 +11,8 @@ import OrdersPage from "@/pages/Orders";
 
 import { ProtectedRoute } from './ProtectedRoute';
 
-const CustomerRoutes: React.FC = () => (
+// Export a fragment containing all customer routes
+const CustomerRoutes = (
   <>
     <Route 
       path="/" 

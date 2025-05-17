@@ -12,7 +12,8 @@ import AdminOrders from "@/pages/admin/Orders";
 
 import { ProtectedRoute } from './ProtectedRoute';
 
-const AdminRoutes: React.FC = () => (
+// Export a fragment containing all admin routes
+const AdminRoutes = (
   <>
     <Route 
       path="/admin" 

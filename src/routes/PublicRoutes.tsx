@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Route } from 'react-router-dom';
 
@@ -12,7 +13,8 @@ import PasswordChangePage from "@/pages/PasswordChange";
 
 import { ProtectedRoute } from './ProtectedRoute';
 
-const PublicRoutes: React.FC = () => (
+// Export a fragment containing all public routes
+const PublicRoutes = (
   <>
     {/* Public routes */}
     <Route path="/login" element={<LoginPage />} />

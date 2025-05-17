@@ -7,7 +7,8 @@ import EmployeePanel from "@/pages/employee/EmployeePanel";
 
 import { ProtectedRoute } from './ProtectedRoute';
 
-const EmployeeRoutes: React.FC = () => (
+// Export a fragment containing all employee routes
+const EmployeeRoutes = (
   <>
     <Route 
       path="/employee" 

@@ -7,7 +7,8 @@ import MotoboyPanel from "@/pages/motoboy/MotoboyPanel";
 
 import { ProtectedRoute } from './ProtectedRoute';
 
-const MotoboyRoutes: React.FC = () => (
+// Export a fragment containing all motoboy routes
+const MotoboyRoutes = (
   <>
     <Route 
       path="/motoboy" 
