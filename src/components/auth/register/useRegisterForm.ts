@@ -53,6 +53,10 @@ export const useRegisterForm = () => {
       // Store email in localStorage for confirmation page
       localStorage.setItem('confirmationEmail', data.email);
 
+      // Get the current app base URL dynamically
+      const baseUrl = window.location.origin;
+      console.log("App base URL for email redirection:", baseUrl);
+
       // First, sign up the user with Supabase Authentication
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
@@ -63,8 +67,8 @@ export const useRegisterForm = () => {
             birth_date: formattedBirthDate,
             address: formattedAddress,
           },
-          // Use absolute URL for email confirmation redirect
-          emailRedirectTo: `${window.location.origin}/email-confirmado`
+          // Use current site URL for email confirmation redirect
+          emailRedirectTo: `${baseUrl}/email-confirmado`
         }
       });
 

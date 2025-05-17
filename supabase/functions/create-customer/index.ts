@@ -242,15 +242,18 @@ serve(async (req) => {
       );
     }
     
-    // Get the base URL - strip any paths
-    const baseUrl = (requestBody.redirectUrl || 'http://localhost:3000').replace(/\/[^/]*$/, '');
+    // Extract the base URL from the request headers or body
+    // Default to the production URL if not specified
+    const requestUrl = req.headers.get('origin') || requestBody.redirectUrl;
+    const baseUrl = requestUrl || 'https://preview--churras-e-cia-digital.lovable.app';
+    console.log("Using base URL for email confirmation:", baseUrl);
     
     // Send confirmation email
     const { error: emailError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'signup',
       email,
       options: {
-        // Fix the redirectTo URL to always use email-confirmado instead of email-confirmation
+        // Make sure to use the correct URL for email confirmation
         redirectTo: `${baseUrl}/email-confirmado`,
       }
     });
