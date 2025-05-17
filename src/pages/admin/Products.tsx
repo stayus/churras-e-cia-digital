@@ -6,62 +6,12 @@ import { BackButton } from "@/components/ui/back-button";
 import { PlusCircle, Loader2 } from "lucide-react";
 import ProductFormDialog from "@/components/admin/products/ProductFormDialog";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { supabase } from "@/integrations/supabase/client"; 
-import { useToast } from "@/hooks/use-toast";
-import { Product } from "@/hooks/useProducts";
+import { useProducts, Product } from "@/hooks/useProducts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const AdminProducts = () => {
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
-
-  // Função para buscar produtos
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      console.log("Buscando produtos...");
-      
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('name');
-
-      if (error) {
-        throw error;
-      }
-
-      console.log("Produtos encontrados:", data);
-      setProducts(data as Product[]);
-    } catch (error: any) {
-      console.error('Erro ao buscar produtos:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Erro ao carregar produtos',
-        description: error.message || 'Não foi possível obter a lista de produtos.',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Carregar produtos quando o componente montar
-  useEffect(() => {
-    fetchProducts();
-
-    // Configurar escuta em tempo real para atualizações
-    const subscription = supabase
-      .channel('products-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
-        fetchProducts();
-      })
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
-  }, []);
+  const { products, loading, fetchProducts } = useProducts();
 
   // Função para formatar preço como currency
   const formatCurrency = (value: number) => {
