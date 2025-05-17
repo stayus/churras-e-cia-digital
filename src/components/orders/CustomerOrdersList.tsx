@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/auth";
 import { supabase } from "@/integrations/supabase/client";
-import { Order, statusTextMap, statusColorMap, calculateTotalItems, formatPaymentMethod } from "@/types/orders";
+import { Order, OrderItem, statusTextMap, statusColorMap, calculateTotalItems, formatPaymentMethod } from "@/types/orders";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -27,7 +27,19 @@ export const CustomerOrdersList: React.FC = () => {
       
       if (error) throw error;
       
-      setOrders(data as Order[]);
+      // Parse JSON data from Supabase to match the Order type
+      const parsedOrders: Order[] = data.map(order => ({
+        ...order,
+        address: typeof order.address === 'string' ? JSON.parse(order.address) : order.address,
+        items: Array.isArray(order.items) 
+          ? order.items.map((item: any) => ({
+              ...item,
+              extras: Array.isArray(item.extras) ? item.extras : []
+            })) as OrderItem[]
+          : []
+      }));
+      
+      setOrders(parsedOrders);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {

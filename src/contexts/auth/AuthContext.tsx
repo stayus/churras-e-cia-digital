@@ -66,7 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // This is important for the customer to receive real-time updates on their orders
     const enableRealtimeForOrders = async () => {
       try {
-        await supabase.rpc('supabase_realtime', { table: 'orders' });
+        await supabase.channel('orders-channel').subscribe();
         console.log("Realtime enabled for orders table");
       } catch (error) {
         console.error("Failed to enable realtime for orders:", error);

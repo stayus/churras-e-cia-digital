@@ -2,7 +2,7 @@
 import { CustomerOrdersList } from "@/components/orders/CustomerOrdersList";
 import { useOrdersPage } from "@/hooks/useOrdersPage";
 import CustomerLayout from "@/components/customer/CustomerLayout";
-import { Helmet } from "react-helmet";
+import { Helmet } from "react-helmet-async";
 
 const OrdersPage = () => {
   const { pageTitle } = useOrdersPage();
