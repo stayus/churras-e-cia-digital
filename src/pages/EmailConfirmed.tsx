@@ -6,10 +6,12 @@ import { CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/auth';
 
 const EmailConfirmedPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { resendEmailConfirmation } = useAuth();
   const [countdown, setCountdown] = useState(5);
   const [isConfirmed, setIsConfirmed] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,62 +34,89 @@ const EmailConfirmedPage = () => {
     
     return null;
   };
+
+  // Extract session tokens from URL hash fragment or query parameters
+  const getTokenFromUrl = () => {
+    // Hash format: #access_token=...&refresh_token=...&type=signup
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    
+    // Query format: ?token=...
+    const queryParams = new URLSearchParams(window.location.search);
+    
+    return {
+      accessToken: hashParams.get('access_token'),
+      refreshToken: hashParams.get('refresh_token'),
+      type: hashParams.get('type'),
+      token: queryParams.get('token'),
+      email: hashParams.get('email') || queryParams.get('email')
+    };
+  };
   
   useEffect(() => {
     const confirmEmail = async () => {
       try {
-        // Extract token from various URL formats
-        // Check hash parameters (for #access_token=...)
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        // Check query parameters (for ?token=...)
-        const queryParams = new URLSearchParams(window.location.search);
+        console.log("Confirming email, URL:", window.location.href);
         
-        const token = hashParams.get('access_token') || queryParams.get('token');
+        // Extract tokens and errors from URL
+        const urlTokens = getTokenFromUrl();
         const errorFromUrl = getErrorFromUrl();
+        
+        // Try to get user email from various sources
+        const email = urlTokens.email || 
+                     localStorage.getItem('confirmationEmail') || 
+                     null;
+        
+        if (email) {
+          setUserEmail(email);
+          console.log("Found email:", email);
+        }
         
         // Check if we have an error in the URL
         if (errorFromUrl) {
           console.log("Error detected in URL:", errorFromUrl);
           setError(errorFromUrl);
           setIsConfirmed(false);
-          
-          // Try to get user email from local storage or URL
-          const email = localStorage.getItem('confirmationEmail') || hashParams.get('email') || queryParams.get('email');
-          if (email) {
-            setUserEmail(email);
-          }
           return;
         }
         
-        if (!token) {
-          console.log("No token found in URL, checking for existing session");
-          // Check if the user has already confirmed their email
-          const { data: { session } } = await supabase.auth.getSession();
+        // If we have a token, the confirmation is automatic (handled by Supabase)
+        // Just check if we're now confirmed by getting the session
+        if (urlTokens.accessToken || urlTokens.token) {
+          console.log("Found token in URL, checking confirmation status");
           
-          if (session?.user?.email_confirmed_at) {
-            console.log("User is already confirmed");
-            setIsConfirmed(true);
-            setUserEmail(session.user.email || null);
-          } else {
-            console.log("No session or user not confirmed");
-            setError("Não foi possível confirmar o e-mail. O link pode ter expirado ou ser inválido.");
-            setIsConfirmed(false);
-          }
+          // Wait a moment for Supabase to process the token
+          setTimeout(async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session?.user?.email_confirmed_at) {
+              console.log("Email confirmed successfully");
+              setIsConfirmed(true);
+              setUserEmail(session.user.email || null);
+            } else {
+              console.log("Session found but email not confirmed");
+              setError("Não foi possível confirmar o e-mail. O link pode ter expirado ou ser inválido.");
+              setIsConfirmed(false);
+            }
+          }, 1000);
+          
           return;
         }
         
-        console.log("Found token, verifying email");
-        
-        // The token is handled automatically by Supabase Auth
-        // Just check if we're now confirmed
+        // No token in URL, check if the user is already confirmed
+        console.log("No token found in URL, checking for existing session");
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user?.email_confirmed_at) {
-          console.log("Email confirmed successfully");
+          console.log("User is already confirmed");
           setIsConfirmed(true);
           setUserEmail(session.user.email || null);
+        } else if (session?.user) {
+          console.log("User found but email not confirmed");
+          setError("Seu email ainda não foi confirmado. Por favor, verifique sua caixa de entrada ou solicite um novo link de confirmação.");
+          setIsConfirmed(false);
+          setUserEmail(session.user.email || null);
         } else {
-          console.log("Confirmation failed");
+          console.log("No session or user not confirmed");
           setError("Não foi possível confirmar o e-mail. O link pode ter expirado ou ser inválido.");
           setIsConfirmed(false);
         }
@@ -131,15 +160,7 @@ const EmailConfirmedPage = () => {
 
     try {
       setIsResending(true);
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: userEmail,
-        options: {
-          emailRedirectTo: window.location.origin + '/email-confirmado',
-        }
-      });
-
-      if (error) throw error;
+      await resendEmailConfirmation(userEmail);
 
       toast({
         title: "E-mail enviado",
@@ -214,7 +235,7 @@ const EmailConfirmedPage = () => {
             ) : (
               <>
                 <p className="text-sm text-gray-600 mb-4">
-                  {error?.includes("expirou") 
+                  {error?.includes("expirou") || error?.includes("expirado")
                     ? "O link de confirmação expirou. Solicite um novo link para concluir seu cadastro."
                     : "Por favor, tente novamente com um link válido ou entre em contato com o suporte para obter ajuda."}
                 </p>

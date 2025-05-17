@@ -20,8 +20,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log("Auth state change:", event, session?.user?.id);
+      async (event, session) => {
+        console.log("Auth state change:", event, session?.user?.id, "email confirmed:", session?.user?.email_confirmed_at);
         setSession(session);
         
         if (session?.user) {
@@ -43,7 +43,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("Existing session:", session?.user?.id);
+      console.log("Existing session:", session?.user?.id, "email confirmed:", session?.user?.email_confirmed_at);
       setSession(session);
       
       if (session?.user) {
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: window.location.origin + '/email-confirmado'
+          emailRedirectTo: `${window.location.origin}/email-confirmado`
         }
       });
       

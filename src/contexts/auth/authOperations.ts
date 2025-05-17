@@ -11,7 +11,8 @@ export async function loginWithEmail(email: string, password: string): Promise<U
   if (error) throw error;
   
   if (!data.user.email_confirmed_at) {
-    throw new Error("Email not confirmed");
+    localStorage.setItem('confirmationEmail', email);
+    throw new Error("Email não confirmado. Por favor, verifique seu email para ativar sua conta.");
   }
   
   const userData: UserData = {
