@@ -1,4 +1,3 @@
-
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
@@ -34,6 +33,7 @@ import MotoboyPanel from "@/pages/motoboy/MotoboyPanel";
 
 // Customer pages
 import CustomerDashboard from "@/pages/customer/Dashboard";
+import AccountPage from "@/pages/customer/Account";
 import CatalogPage from "@/pages/Catalog";
 import CartPage from "@/pages/Cart";
 import OrdersPage from "@/pages/Orders";
@@ -177,6 +177,10 @@ const App = () => (
                 <Route 
                   path="/cliente" 
                   element={<Navigate to="/" replace />} 
+                />
+                <Route 
+                  path="/minha-conta" 
+                  element={<ProtectedRoute element={<AccountPage />} allowedRoles={['customer']} />} 
                 />
                 <Route 
                   path="/catalogo" 
