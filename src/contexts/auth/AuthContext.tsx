@@ -115,15 +115,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const resendEmailConfirmation = async (email: string) => {
     setIsLoading(true);
     try {
-      // Get the current app base URL dynamically
-      const baseUrl = window.location.origin;
-      console.log("App base URL for email redirection:", baseUrl);
+      // Define redirect URL for email confirmation
+      // Use deployed URL for production and localhost for development
+      const redirectUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://preview--churras-e-cia-digital.lovable.app/email-confirmado' 
+        : `${window.location.origin}/email-confirmado`;
+      
+      console.log("Using redirect URL for resend confirmation:", redirectUrl);
       
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${baseUrl}/email-confirmado`
+          emailRedirectTo: redirectUrl
         }
       });
       

@@ -1,4 +1,3 @@
-
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
@@ -242,10 +241,11 @@ serve(async (req) => {
       );
     }
     
-    // Extract the base URL from the request headers or body
-    // Default to the production URL if not specified
+    // Define the URL for email confirmation based on environment
+    // Use production URL as default, fallback to header or request URL if available
+    const productionUrl = 'https://preview--churras-e-cia-digital.lovable.app';
     const requestUrl = req.headers.get('origin') || requestBody.redirectUrl;
-    const baseUrl = requestUrl || 'https://preview--churras-e-cia-digital.lovable.app';
+    const baseUrl = requestUrl || productionUrl;
     console.log("Using base URL for email confirmation:", baseUrl);
     
     // Send confirmation email
@@ -253,7 +253,7 @@ serve(async (req) => {
       type: 'signup',
       email,
       options: {
-        // Make sure to use the correct URL for email confirmation
+        // Always use the production URL or the request origin for email confirmation
         redirectTo: `${baseUrl}/email-confirmado`,
       }
     });

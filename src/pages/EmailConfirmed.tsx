@@ -26,6 +26,8 @@ const EmailConfirmedPage = () => {
     const errorCode = hashParams.get('error_code') || queryParams.get('error_code');
     const errorDesc = hashParams.get('error_description') || queryParams.get('error_description');
     
+    console.log("Error from URL:", { errorCode, errorDesc });
+    
     if (errorCode === 'otp_expired') {
       return "O link de confirmação de e-mail expirou. Por favor, solicite um novo link.";
     } else if (errorCode) {
@@ -42,6 +44,9 @@ const EmailConfirmedPage = () => {
     
     // Query format: ?token=...
     const queryParams = new URLSearchParams(window.location.search);
+    
+    console.log("URL hash:", window.location.hash);
+    console.log("URL search:", window.location.search);
     
     return {
       accessToken: hashParams.get('access_token'),
@@ -60,6 +65,9 @@ const EmailConfirmedPage = () => {
         // Extract tokens and errors from URL
         const urlTokens = getTokenFromUrl();
         const errorFromUrl = getErrorFromUrl();
+        
+        console.log("URL tokens:", urlTokens);
+        console.log("Error from URL:", errorFromUrl);
         
         // Try to get user email from various sources
         const email = urlTokens.email || 
@@ -117,7 +125,11 @@ const EmailConfirmedPage = () => {
           setUserEmail(session.user.email || null);
         } else {
           console.log("No session or user not confirmed");
-          setError("Não foi possível confirmar o e-mail. O link pode ter expirado ou ser inválido.");
+          if (email) {
+            setError("O link de confirmação expirou ou é inválido. Por favor, solicite um novo link de confirmação.");
+          } else {
+            setError("Não foi possível confirmar o e-mail. O link pode ter expirado ou ser inválido.");
+          }
           setIsConfirmed(false);
         }
       } catch (error) {

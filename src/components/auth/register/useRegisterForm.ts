@@ -57,6 +57,14 @@ export const useRegisterForm = () => {
       const baseUrl = window.location.origin;
       console.log("App base URL for email redirection:", baseUrl);
 
+      // Define redirect URL for email confirmation
+      // Use deployed URL for production and localhost for development
+      const redirectUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://preview--churras-e-cia-digital.lovable.app/email-confirmado' 
+        : `${baseUrl}/email-confirmado`;
+      
+      console.log("Using redirect URL for auth:", redirectUrl);
+
       // First, sign up the user with Supabase Authentication
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
@@ -67,8 +75,8 @@ export const useRegisterForm = () => {
             birth_date: formattedBirthDate,
             address: formattedAddress,
           },
-          // Use current site URL for email confirmation redirect
-          emailRedirectTo: `${baseUrl}/email-confirmado`
+          // Use explicit URL for email confirmation redirect
+          emailRedirectTo: redirectUrl
         }
       });
 
