@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
 
@@ -11,12 +11,23 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ element, allowedRoles = [] }: ProtectedRouteProps) => {
   const { isAuthenticated, user, isLoading } = useAuth();
+  
+  useEffect(() => {
+    console.log("ProtectedRoute - Auth state:", { 
+      isAuthenticated, 
+      isLoading, 
+      userRole: user?.role,
+      requiredRoles: allowedRoles
+    });
+  }, [isAuthenticated, isLoading, user, allowedRoles]);
 
   if (isLoading) {
+    console.log("ProtectedRoute - Loading...");
     return <div className="flex h-screen items-center justify-center">Carregando...</div>;
   }
 
   if (!isAuthenticated) {
+    console.log("ProtectedRoute - Not authenticated, redirecting to login");
     return <Navigate to="/login" replace />;
   }
 
@@ -32,6 +43,7 @@ export const ProtectedRoute = ({ element, allowedRoles = [] }: ProtectedRoutePro
       allowedRoles.includes(user.role);
     
     if (!hasAllowedRole) {
+      console.log("ProtectedRoute - User does not have required role. Redirecting based on role:", user.role);
       // Redirect based on user role
       if (user.role === 'admin') {
         return <Navigate to="/admin" replace />;
@@ -46,8 +58,10 @@ export const ProtectedRoute = ({ element, allowedRoles = [] }: ProtectedRoutePro
 
   // Check if user needs to change password (first login)
   if (user?.isFirstLogin && window.location.pathname !== '/change-password') {
+    console.log("ProtectedRoute - First login, redirecting to password change");
     return <Navigate to="/change-password" replace />;
   }
 
+  console.log("ProtectedRoute - Access granted");
   return <>{element}</>;
 };

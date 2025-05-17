@@ -23,7 +23,7 @@ const employeeLoginSchema = z.object({
 type EmployeeLoginFormValues = z.infer<typeof employeeLoginSchema>;
 
 const EmployeeLoginForm: React.FC = () => {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -55,8 +55,14 @@ const EmployeeLoginForm: React.FC = () => {
         description: 'Bem-vindo ao sistema.',
       });
       
-      // Navigate to admin panel
-      navigate('/admin');
+      // Navigate based on user role
+      if (user?.role === 'admin') {
+        console.log("Redirecting to admin panel");
+        navigate('/admin');
+      } else {
+        console.log("Redirecting to employee panel");
+        navigate('/employee');
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       setErrorMessage('Nome de usuário ou senha incorretos. Por favor, tente novamente.');

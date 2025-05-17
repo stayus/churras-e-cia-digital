@@ -1,6 +1,6 @@
 
-import React, { ReactNode } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import React, { ReactNode, useEffect } from 'react';
+import { useAuth } from '@/contexts/auth';
 import { useNavigate } from 'react-router-dom';
 import {
   SidebarProvider,
@@ -16,15 +16,27 @@ interface AdminLayoutProps {
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Verifica se o usuário está autenticado e é um administrador
-  const isAdmin = user && user.role === 'admin';
+  // Verify if the user is authenticated and is an administrator
+  // Use effect to avoid redirection issues during rendering
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log("Redirecting to login: User not authenticated");
+      navigate('/employee-login');
+      return;
+    }
 
-  // Redireciona se não for administrador
-  if (!isAdmin) {
-    navigate('/login');
+    if (!user || user.role !== 'admin') {
+      console.log("Redirecting to login: User not admin", user?.role);
+      navigate('/employee-login');
+      return;
+    }
+  }, [isAuthenticated, user, navigate]);
+
+  // If we're still checking authentication, show nothing
+  if (!isAuthenticated || !user || user.role !== 'admin') {
     return null;
   }
 
