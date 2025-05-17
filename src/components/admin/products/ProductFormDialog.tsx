@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
+import { useProducts, AddProductData } from '@/hooks/useProducts';
 
 // Product form schema with validation
 const productSchema = z.object({
@@ -37,6 +38,8 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
   isEditing = false,
 }) => {
   const { toast } = useToast();
+  const { addProduct } = useProducts();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -50,28 +53,33 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
 
   const handleSubmit = async (data: ProductFormValues) => {
     try {
-      // Save to Supabase
-      const { error } = await supabase.from('products').insert([{
+      setIsSubmitting(true);
+      console.log("Produto a ser adicionado:", data);
+      
+      // Usando a função addProduct do hook useProducts que usa a edge function
+      const productData: AddProductData = {
         name: data.name,
         description: data.description,
         price: data.price,
-        image_url: data.image_url || 'https://placehold.co/300x200?text=Produto',
-      }]);
-
-      if (error) throw error;
-
-      toast({
-        title: 'Produto adicionado',
-        description: 'O produto foi adicionado com sucesso.',
-      });
+        image_url: data.image_url || undefined
+      };
+      
+      const result = await addProduct(productData);
+      
+      if (!result) {
+        throw new Error("Não foi possível adicionar o produto");
+      }
+      
       onSubmit(data);
-    } catch (error) {
-      console.error('Error adding product:', error);
+    } catch (error: any) {
+      console.error('Erro ao adicionar produto:', error);
       toast({
         variant: 'destructive',
         title: 'Erro',
-        description: 'Não foi possível adicionar o produto.',
+        description: error.message || 'Não foi possível adicionar o produto.',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -90,6 +98,7 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
             <Input
               id="name"
               placeholder="Ex: X-Burger Especial"
+              disabled={isSubmitting}
               {...form.register('name')}
             />
             {form.formState.errors.name && (
@@ -102,6 +111,7 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
             <Textarea
               id="description"
               placeholder="Descreva os ingredientes e detalhes do produto"
+              disabled={isSubmitting}
               {...form.register('description')}
             />
             {form.formState.errors.description && (
@@ -116,6 +126,7 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
               type="number"
               step="0.01"
               placeholder="0.00"
+              disabled={isSubmitting}
               {...form.register('price', { valueAsNumber: true })}
             />
             {form.formState.errors.price && (
@@ -128,6 +139,7 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
             <Input
               id="image_url"
               placeholder="https://exemplo.com/imagem.jpg"
+              disabled={isSubmitting}
               {...form.register('image_url')}
             />
             {form.formState.errors.image_url && (
@@ -136,11 +148,26 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
           </div>
           
           <DialogFooter className="mt-6">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              disabled={isSubmitting}
+            >
               Cancelar
             </Button>
-            <Button type="submit">
-              {isEditing ? 'Atualizar' : 'Adicionar'}
+            <Button 
+              type="submit"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {isEditing ? 'Atualizando...' : 'Adicionando...'}
+                </>
+              ) : (
+                isEditing ? 'Atualizar' : 'Adicionar'
+              )}
             </Button>
           </DialogFooter>
         </form>
