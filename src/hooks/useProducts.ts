@@ -23,16 +23,15 @@ export const useProducts = () => {
       
       console.log("useProducts: Buscando produtos do Supabase...");
       
-      // Try the standard approach first
+      // Try the standard approach first - direct database query
       const { data, error } = await supabase
         .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
         
       if (error) {
-        console.error('Error fetching products with standard approach, trying edge function:', error);
+        console.error('Error fetching products with standard approach:', error);
         
-        // If standard approach fails, try the edge function
+        // If standard approach fails, try the get-products edge function
         console.log("Tentando alternativa com edge function get-products...");
         const { data: edgeResponse, error: edgeError } = await supabase.functions.invoke('get-products');
         
@@ -49,6 +48,7 @@ export const useProducts = () => {
           }
           
           if (!checkResponse || !checkResponse.data) {
+            console.log("check-products não retornou dados:", checkResponse);
             throw new Error('Dados não retornados pela função check-products');
           }
           
@@ -63,6 +63,7 @@ export const useProducts = () => {
         }
         
         if (!edgeResponse || !edgeResponse.data) {
+          console.log("get-products não retornou dados:", edgeResponse);
           throw new Error('Dados não retornados pela função get-products');
         }
         
@@ -78,9 +79,17 @@ export const useProducts = () => {
       
       console.log("useProducts: Produtos recebidos através de consulta direta:", data);
       
-      if (!data || data.length === 0) {
+      if (!data) {
+        console.warn("useProducts: data is null or undefined");
+        setProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      if (data.length === 0) {
         console.log("useProducts: Nenhum produto encontrado no banco de dados");
         setProducts([]);
+        setLoading(false);
         return;
       }
       

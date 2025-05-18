@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Product, useProducts } from '@/hooks/useProducts';
-import { Loader2, RefreshCw, Database, Zap } from 'lucide-react';
+import { Loader2, RefreshCw, Database, Zap, Eye } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const ProductDebugger: React.FC = () => {
   const { toast } = useToast();
@@ -13,6 +14,7 @@ const ProductDebugger: React.FC = () => {
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [isEnablingRealtime, setIsEnablingRealtime] = useState(false);
   const [checkError, setCheckError] = useState<string | null>(null);
+  const [directQueryResult, setDirectQueryResult] = useState<any>(null);
 
   const handleCheckDatabase = async () => {
     try {
@@ -39,6 +41,39 @@ const ProductDebugger: React.FC = () => {
         variant: "destructive",
         title: "Erro",
         description: error.message || "Não foi possível verificar os produtos no banco de dados."
+      });
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const handleDirectQuery = async () => {
+    try {
+      setIsChecking(true);
+      setCheckError(null);
+      
+      console.log("Executando consulta direta para produtos...");
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
+      
+      if (error) {
+        setCheckError(error.message);
+        throw error;
+      }
+      
+      setDirectQueryResult(data);
+      toast({
+        title: "Consulta direta concluída",
+        description: `Encontrados ${data?.length || 0} produtos no banco de dados.`
+      });
+    } catch (error: any) {
+      console.error("Erro na consulta direta:", error);
+      setCheckError(error.message || "Erro desconhecido");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Não foi possível realizar a consulta direta."
       });
     } finally {
       setIsChecking(false);
@@ -98,6 +133,20 @@ const ProductDebugger: React.FC = () => {
           
           <Button 
             variant="outline" 
+            onClick={handleDirectQuery}
+            disabled={isChecking}
+            className="flex items-center gap-2"
+          >
+            {isChecking ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Eye className="h-4 w-4" />
+            )}
+            Consulta Direta
+          </Button>
+          
+          <Button 
+            variant="outline" 
             onClick={handleRefreshProducts}
             className="flex items-center gap-2"
           >
@@ -133,7 +182,7 @@ const ProductDebugger: React.FC = () => {
             <ul className="text-sm border rounded-md p-2 max-h-40 overflow-y-auto">
               {products.map(product => (
                 <li key={product.id} className="py-1 border-b last:border-0">
-                  {product.name} - R$ {product.price.toFixed(2)}
+                  {product.name} - R$ {product.price.toFixed(2)} - {product.category}
                 </li>
               ))}
             </ul>
@@ -144,11 +193,24 @@ const ProductDebugger: React.FC = () => {
         
         {dbProducts.length > 0 && (
           <div className="mt-4">
-            <h3 className="text-sm font-medium mb-2">Encontrados no banco de dados ({dbProducts.length}):</h3>
+            <h3 className="text-sm font-medium mb-2">Encontrados pela função check-products ({dbProducts.length}):</h3>
             <ul className="text-sm border rounded-md p-2 max-h-40 overflow-y-auto">
               {dbProducts.map(product => (
                 <li key={product.id} className="py-1 border-b last:border-0">
-                  {product.name} - R$ {product.price.toFixed(2)}
+                  {product.name} - R$ {product.price.toFixed(2)} - {product.category}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {directQueryResult && directQueryResult.length > 0 && (
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Resultado da consulta direta ({directQueryResult.length}):</h3>
+            <ul className="text-sm border rounded-md p-2 max-h-40 overflow-y-auto">
+              {directQueryResult.map((product: any) => (
+                <li key={product.id} className="py-1 border-b last:border-0">
+                  {product.name} - R$ {product.price.toFixed(2)} - {product.category}
                 </li>
               ))}
             </ul>

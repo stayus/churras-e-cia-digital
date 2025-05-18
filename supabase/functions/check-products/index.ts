@@ -33,7 +33,6 @@ serve(async (req) => {
     const { data: products, error } = await supabaseAdmin
       .from('products')
       .select('*')
-      .order('created_at', { ascending: false })
 
     if (error) {
       console.error('Erro ao buscar produtos:', error)

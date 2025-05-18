@@ -48,6 +48,7 @@ export const useProductsRealtime = (onProductChange: () => void) => {
           }, 
           (payload) => {
             console.log('Alteração detectada na tabela products:', payload);
+            onProductChange(); // Refresh products when there's a change
           }
         )
         .subscribe((status) => {
@@ -75,7 +76,7 @@ export const useProductsRealtime = (onProductChange: () => void) => {
       
       return false;
     }
-  }, [toast]);
+  }, [toast, onProductChange]);
 
   // Set up realtime subscription
   useEffect(() => {

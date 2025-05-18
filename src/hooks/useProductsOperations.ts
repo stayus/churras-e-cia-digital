@@ -18,8 +18,7 @@ export const useProductOperations = () => {
       // Try direct database query first
       const { data: directData, error: directError } = await supabase
         .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
         
       if (!directError && directData) {
         console.log("Produtos obtidos diretamente:", directData);
@@ -34,9 +33,7 @@ export const useProductOperations = () => {
       console.log("Consulta direta falhou, tentando com edge function check-products");
       
       // If direct query fails, try the edge function
-      const { data, error } = await supabase.functions.invoke('check-products', {
-        body: {}
-      });
+      const { data, error } = await supabase.functions.invoke('check-products');
       
       if (error) {
         console.error("Erro ao invocar função check-products:", error);
@@ -129,6 +126,26 @@ export const useProductOperations = () => {
     try {
       console.log(`Atualizando produto ${productId} com dados:`, data);
       
+      // Try direct update first
+      const { data: updateResponse, error: updateError } = await supabase
+        .from('products')
+        .update(data)
+        .eq('id', productId)
+        .select()
+        .single();
+        
+      if (!updateError) {
+        console.log("Produto atualizado com sucesso via API direta:", updateResponse);
+        toast({
+          title: "Produto atualizado",
+          description: "O produto foi atualizado com sucesso."
+        });
+        return updateResponse;
+      }
+      
+      console.log("Atualização direta falhou, tentando com edge function:", updateError);
+      
+      // If direct update fails, try the edge function
       const { data: response, error } = await supabase.functions.invoke('update-product', {
         body: { productId, data }
       });

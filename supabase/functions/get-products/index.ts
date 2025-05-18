@@ -31,8 +31,7 @@ serve(async (req) => {
     console.log('Fetching products from database');
     const { data, error } = await supabaseAdmin
       .from('products')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('*');
     
     if (error) {
       console.error('Error fetching products from database:', error);

@@ -1,6 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.14.0"
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.1"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -41,15 +41,16 @@ serve(async (req) => {
       throw new Error(`Products table access error: ${tableError.message}`)
     }
     
-    // Enable realtime for products table using RPC
-    // This simply ensures we have database access
+    // No need to explicitly enable realtime as it's managed by Supabase
+    // Just verifying we have access to the table is enough
     console.log("Products table verified, setting up realtime channel")
     
     // Success - return confirmation
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Realtime enabled for products table'
+        message: 'Realtime enabled for products table',
+        data: tableInfo
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
