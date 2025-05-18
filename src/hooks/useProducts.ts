@@ -21,7 +21,7 @@ export const useProducts = () => {
       setLoading(true);
       setError(null);
       
-      console.log("Buscando produtos do Supabase...");
+      console.log("useProducts: Buscando produtos do Supabase...");
       
       const { data, error } = await supabase
         .from('products')
@@ -32,10 +32,10 @@ export const useProducts = () => {
         throw error;
       }
       
-      console.log("Produtos recebidos:", data);
+      console.log("useProducts: Produtos recebidos:", data);
       
       if (!data || data.length === 0) {
-        console.log("Nenhum produto encontrado no banco de dados");
+        console.log("useProducts: Nenhum produto encontrado no banco de dados");
         setProducts([]);
         return;
       }
@@ -43,7 +43,7 @@ export const useProducts = () => {
       // Transform the data to match our Product type
       const formattedProducts = formatDbProducts(data);
       
-      console.log("Produtos formatados:", formattedProducts);
+      console.log("useProducts: Produtos formatados:", formattedProducts);
       setProducts(formattedProducts);
     } catch (error: any) {
       console.error('Error fetching products:', error);
@@ -66,8 +66,13 @@ export const useProducts = () => {
   
   // Fetch products on mount
   useEffect(() => {
+    console.log("useProducts: Hook montado, buscando produtos.");
     fetchProducts();
-  }, [fetchProducts]);
+    
+    // Configurar escuta em tempo real para atualizações de produtos
+    setupRealtime();
+    
+  }, [fetchProducts, setupRealtime]);
   
   return { 
     products, 

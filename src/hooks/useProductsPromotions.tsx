@@ -2,20 +2,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  isOutOfStock: boolean;
-  promotionPrice?: number;
-}
+import { useProducts, Product } from "@/hooks/useProducts";
 
 export const useProductsPromotions = () => {
+  const { products: allProducts, loading: productsLoading } = useProducts();
+  const [loading, setLoading] = useState(productsLoading);
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [discountPercent, setDiscountPercent] = useState<number>(10);
@@ -24,42 +16,15 @@ export const useProductsPromotions = () => {
   const [currentProduct, setCurrentProduct] = useState<Product | null>(null);
   const { toast } = useToast();
 
-  // Fetch products from the database
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("products")
-        .select("id, name, description, price, image_url, is_out_of_stock, promotion_price")
-        .order("name");
-
-      if (error) {
-        throw error;
-      }
-
-      // Map database fields to client model
-      const formattedProducts: Product[] = data.map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        imageUrl: item.image_url,
-        isOutOfStock: item.is_out_of_stock,
-        promotionPrice: item.promotion_price
-      }));
-
-      setProducts(formattedProducts);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao carregar produtos",
-        description: "Não foi possível obter a lista de produtos."
-      });
-    } finally {
+  // Sincronizar com produtos do hook global
+  useEffect(() => {
+    if (!productsLoading) {
+      setProducts(allProducts);
       setLoading(false);
+    } else {
+      setLoading(true);
     }
-  };
+  }, [allProducts, productsLoading]);
 
   // Apply promotion to a product
   const applyPromotion = async () => {
@@ -80,7 +45,7 @@ export const useProductsPromotions = () => {
       // Update local state
       setProducts(products.map(product => 
         product.id === currentProduct.id 
-          ? { ...product, promotionPrice } 
+          ? { ...product, promotion_price: promotionPrice } 
           : product
       ));
 
@@ -119,7 +84,7 @@ export const useProductsPromotions = () => {
       // Update local state
       setProducts(products.map(product => 
         product.id === productId 
-          ? { ...product, promotionPrice: undefined } 
+          ? { ...product, promotion_price: null } 
           : product
       ));
 
@@ -178,7 +143,7 @@ export const useProductsPromotions = () => {
       const updatedProducts = products.map(product => {
         if (selectedProducts.includes(product.id)) {
           const newPrice = Number((product.price * (1 - discountPercent / 100)).toFixed(2));
-          return { ...product, promotionPrice: newPrice };
+          return { ...product, promotion_price: newPrice };
         }
         return product;
       });
@@ -226,7 +191,7 @@ export const useProductsPromotions = () => {
       // Update local state
       setProducts(products.map(product => 
         selectedProducts.includes(product.id) 
-          ? { ...product, promotionPrice: undefined } 
+          ? { ...product, promotion_price: null } 
           : product
       ));
 
@@ -270,10 +235,10 @@ export const useProductsPromotions = () => {
   const openPromotionDialog = (product: Product) => {
     setCurrentProduct(product);
     // Set initial discount to 10% or calculate from existing promotion
-    if (product.promotionPrice) {
-      const calculatedDiscount = Math.round((1 - product.promotionPrice / product.price) * 100);
+    if (product.promotion_price) {
+      const calculatedDiscount = Math.round((1 - product.promotion_price / product.price) * 100);
       setDiscountPercent(calculatedDiscount);
-      setPromotionPrice(product.promotionPrice);
+      setPromotionPrice(product.promotion_price);
     } else {
       setDiscountPercent(10);
       setPromotionPrice(Number((product.price * 0.9).toFixed(2)));
@@ -295,26 +260,6 @@ export const useProductsPromotions = () => {
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  useEffect(() => {
-    fetchProducts();
-    
-    // Set up a real-time subscription for products
-    const subscription = supabase
-      .channel('products-channel')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'products' },
-        () => {
-          fetchProducts(); // Refresh products when there's a change
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
 
   // Update promotion price when discount percent changes
   useEffect(() => {

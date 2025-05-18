@@ -33,6 +33,8 @@ const getCategoryColor = (category: string): string => {
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { name, description, price, image_url, promotion_price, is_out_of_stock, category } = product;
   
+  console.log("Renderizando ProductCard:", product);
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -44,6 +46,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const categoryLabel = getCategoryLabel(category);
   
   const truncateDescription = (text: string, maxLength: number = 80) => {
+    if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
   };

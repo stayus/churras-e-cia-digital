@@ -2,64 +2,38 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  isOutOfStock: boolean;
-  promotionPrice?: number;
-}
+import { useProducts, Product } from "@/hooks/useProducts";
 
 export const useProductsManagement = () => {
+  const { products: allProducts, loading: productsLoading, fetchProducts } = useProducts();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const { toast } = useToast();
 
-  // Fetch products from the database
-  const fetchProducts = async () => {
-    try {
-      setLoading(true);
-      console.log("ProductsManagement: Buscando produtos do banco de dados");
-      
-      const { data, error } = await supabase
-        .from("products")
-        .select("id, name, description, price, image_url, is_out_of_stock, promotion_price")
-        .order("name");
-
-      if (error) {
-        throw error;
-      }
-
-      console.log("ProductsManagement: Produtos recebidos:", data);
-
-      // Map database fields to client model
-      const formattedProducts: Product[] = data.map((item) => ({
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        price: item.price,
-        imageUrl: item.image_url,
-        isOutOfStock: item.is_out_of_stock,
-        promotionPrice: item.promotion_price
+  // Sincronizar com produtos do hook global
+  useEffect(() => {
+    console.log("ProductsManagement: sincronizando produtos", allProducts);
+    if (!productsLoading) {
+      // Adaptando os produtos do hook global para o formato esperado pelo componente
+      const adaptedProducts = allProducts.map(product => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        imageUrl: product.image_url,
+        isOutOfStock: product.is_out_of_stock,
+        promotionPrice: product.promotion_price
       }));
-
-      setProducts(formattedProducts);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao carregar produtos",
-        description: "Não foi possível obter a lista de produtos."
-      });
-    } finally {
+      
+      console.log("ProductsManagement: produtos adaptados", adaptedProducts);
+      setProducts(adaptedProducts);
       setLoading(false);
+    } else {
+      setLoading(true);
     }
-  };
+  }, [allProducts, productsLoading]);
 
   // Toggle stock status for a single product
   const toggleProductStock = async (productId: string, currentStatus: boolean) => {
@@ -163,31 +137,6 @@ export const useProductsManagement = () => {
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  useEffect(() => {
-    console.log("ProductsManagement montado - buscando produtos");
-    fetchProducts();
-    
-    // Set up a real-time subscription for products
-    const subscription = supabase
-      .channel('products-channel')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'products' },
-        (payload) => {
-          console.log("Alteração detectada na tabela products:", payload);
-          fetchProducts(); // Refresh products when there's a change
-        }
-      )
-      .subscribe();
-
-    console.log('Escuta em tempo real configurada para a tabela products no ProductsManagement');
-
-    return () => {
-      console.log('Removendo escuta em tempo real do ProductsManagement');
-      subscription.unsubscribe();
-    };
-  }, []);
 
   return {
     loading,

@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -10,7 +10,7 @@ export const useProductsRealtime = (onProductChange: () => void) => {
   const { toast } = useToast();
   
   // Configure realtime for products table
-  const setupRealtime = async () => {
+  const setupRealtime = useCallback(async () => {
     try {
       console.log("Configurando realtime para a tabela products...");
       
@@ -25,18 +25,18 @@ export const useProductsRealtime = (onProductChange: () => void) => {
       
       console.log("Resposta da configuração realtime:", data);
       
-      if (data.success) {
+      if (data?.success) {
         console.log("Realtime configurado com sucesso para a tabela products");
         toast({
           title: "Sucesso",
           description: "Realtime configurado com sucesso para a tabela de produtos."
         });
       } else {
-        console.error("Falha ao configurar realtime:", data.error);
+        console.error("Falha ao configurar realtime:", data?.error);
         toast({
           variant: "destructive",
           title: "Erro",
-          description: data.error || "Falha ao configurar realtime para produtos."
+          description: data?.error || "Falha ao configurar realtime para produtos."
         });
       }
     } catch (error: any) {
@@ -47,12 +47,13 @@ export const useProductsRealtime = (onProductChange: () => void) => {
         description: error.message || "Falha ao configurar realtime para produtos."
       });
     }
-  };
+  }, [toast]);
 
   // Set up realtime subscription
   useEffect(() => {
+    console.log("useProductsRealtime: Configurando escuta em tempo real");
     const channel = supabase
-      .channel('public:products')
+      .channel('products-changes')
       .on('postgres_changes', 
         { 
           event: '*', 
@@ -85,7 +86,7 @@ export const useProductsRealtime = (onProductChange: () => void) => {
       console.log('Removendo escuta em tempo real');
       supabase.removeChannel(channel);
     };
-  }, [onProductChange]);
+  }, [onProductChange, setupRealtime]);
 
   return { setupRealtime };
 };
