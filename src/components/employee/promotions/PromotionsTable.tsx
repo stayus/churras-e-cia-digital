@@ -11,15 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import PromotionTableRow from "./PromotionTableRow";
 import ProductsLoading from "../products/ProductsLoading";
 import ProductsEmpty from "../products/ProductsEmpty";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  isOutOfStock: boolean;
-  promotionPrice?: number;
-}
+import { Product } from "@/hooks/useProducts";
 
 interface PromotionsTableProps {
   products: Product[];

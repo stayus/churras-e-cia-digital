@@ -16,19 +16,8 @@ export const useProductsManagement = () => {
   useEffect(() => {
     console.log("ProductsManagement: sincronizando produtos", allProducts);
     if (!productsLoading) {
-      // Adaptando os produtos do hook global para o formato esperado pelo componente
-      const adaptedProducts = allProducts.map(product => ({
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        imageUrl: product.image_url,
-        isOutOfStock: product.is_out_of_stock,
-        promotionPrice: product.promotion_price
-      }));
-      
-      console.log("ProductsManagement: produtos adaptados", adaptedProducts);
-      setProducts(adaptedProducts);
+      // Usando os produtos do hook global diretamente sem adaptação adicional
+      setProducts(allProducts);
       setLoading(false);
     } else {
       setLoading(true);
@@ -50,7 +39,7 @@ export const useProductsManagement = () => {
       // Update local state
       setProducts(products.map(product => 
         product.id === productId 
-          ? { ...product, isOutOfStock: !currentStatus } 
+          ? { ...product, is_out_of_stock: !currentStatus } 
           : product
       ));
 
@@ -92,7 +81,7 @@ export const useProductsManagement = () => {
       // Update local state
       setProducts(products.map(product => 
         selectedProducts.includes(product.id) 
-          ? { ...product, isOutOfStock: setAsOutOfStock } 
+          ? { ...product, is_out_of_stock: setAsOutOfStock } 
           : product
       ));
 

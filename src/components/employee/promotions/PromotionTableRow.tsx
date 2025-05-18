@@ -4,15 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Percent } from "lucide-react";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  isOutOfStock: boolean;
-  promotionPrice?: number;
-}
+import { Product } from "@/hooks/useProducts";
 
 interface PromotionTableRowProps {
   product: Product;
@@ -31,12 +23,12 @@ const PromotionTableRow = ({
   onRemovePromotion,
   formatCurrency
 }: PromotionTableRowProps) => {
-  const discountPercent = product.promotionPrice 
-    ? Math.round((1 - product.promotionPrice / product.price) * 100)
+  const discountPercent = product.promotion_price 
+    ? Math.round((1 - product.promotion_price / product.price) * 100)
     : 0;
 
   return (
-    <TableRow key={product.id} className={product.isOutOfStock ? "bg-gray-50" : ""}>
+    <TableRow key={product.id} className={product.is_out_of_stock ? "bg-gray-50" : ""}>
       <TableCell>
         <Checkbox
           checked={isSelected}
@@ -44,14 +36,14 @@ const PromotionTableRow = ({
             onToggleSelection(checked === true)
           }
           aria-label={`Select ${product.name}`}
-          disabled={product.isOutOfStock}
+          disabled={product.is_out_of_stock}
         />
       </TableCell>
       <TableCell className="font-medium">
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
             <span>{product.name}</span>
-            {product.isOutOfStock && (
+            {product.is_out_of_stock && (
               <Badge variant="outline" className="text-xs">Esgotado</Badge>
             )}
           </div>
@@ -63,11 +55,11 @@ const PromotionTableRow = ({
       <TableCell>
         {formatCurrency(product.price)}
       </TableCell>
-      <TableCell className={product.promotionPrice ? "text-green-600 font-medium" : ""}>
-        {product.promotionPrice ? formatCurrency(product.promotionPrice) : "-"}
+      <TableCell className={product.promotion_price ? "text-green-600 font-medium" : ""}>
+        {product.promotion_price ? formatCurrency(product.promotion_price) : "-"}
       </TableCell>
       <TableCell>
-        {product.promotionPrice ? (
+        {product.promotion_price ? (
           <Badge variant="secondary" className="flex items-center">
             {discountPercent}% <Percent className="h-3 w-3 ml-1" />
           </Badge>
@@ -77,13 +69,13 @@ const PromotionTableRow = ({
         <div className="flex justify-end gap-2">
           <Button
             size="sm"
-            variant={product.promotionPrice ? "outline" : "default"}
+            variant={product.promotion_price ? "outline" : "default"}
             onClick={onOpenPromotion}
-            disabled={product.isOutOfStock}
+            disabled={product.is_out_of_stock}
           >
-            {product.promotionPrice ? "Editar" : "Adicionar"}
+            {product.promotion_price ? "Editar" : "Adicionar"}
           </Button>
-          {product.promotionPrice && (
+          {product.promotion_price && (
             <Button
               size="sm"
               variant="ghost"

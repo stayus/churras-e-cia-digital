@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { 
   Table,
   TableBody,
@@ -11,16 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ProductTableRow from "./ProductTableRow";
 import ProductsLoading from "./ProductsLoading";
 import ProductsEmpty from "./ProductsEmpty";
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  isOutOfStock: boolean;
-  promotionPrice?: number;
-}
+import { Product } from "@/hooks/useProducts";
 
 interface ProductsTableProps {
   products: Product[];
@@ -70,7 +60,7 @@ const ProductsTable = ({
                 product={product}
                 isSelected={selectedProducts.includes(product.id)}
                 onToggleSelection={(checked) => onSelectProduct(product.id, checked)}
-                onToggleStock={() => onToggleStock(product.id, product.isOutOfStock)}
+                onToggleStock={() => onToggleStock(product.id, product.is_out_of_stock)}
               />
             ))
           ) : (

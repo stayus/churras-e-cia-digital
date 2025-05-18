@@ -2,15 +2,10 @@
 import { Toggle } from "@/components/ui/toggle";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableRow, TableCell } from "@/components/ui/table";
+import { Product } from "@/hooks/useProducts";
 
 interface ProductTableRowProps {
-  product: {
-    id: string;
-    name: string;
-    description: string;
-    price: number;
-    isOutOfStock: boolean;
-  };
+  product: Product;
   isSelected: boolean;
   onToggleSelection: (checked: boolean) => void;
   onToggleStock: () => void;
@@ -50,25 +45,25 @@ const ProductTableRow = ({
       <TableCell className="text-right">
         <span 
           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            product.isOutOfStock
+            product.is_out_of_stock
               ? "bg-red-100 text-red-800"
               : "bg-green-100 text-green-800"
           }`}
         >
-          {product.isOutOfStock ? "Esgotado" : "Disponível"}
+          {product.is_out_of_stock ? "Esgotado" : "Disponível"}
         </span>
       </TableCell>
       <TableCell>
         <Toggle
           aria-label={
-            product.isOutOfStock
+            product.is_out_of_stock
               ? "Marcar como disponível"
               : "Marcar como esgotado"
           }
-          pressed={product.isOutOfStock}
+          pressed={product.is_out_of_stock}
           onPressedChange={onToggleStock}
         >
-          {product.isOutOfStock ? "Disponível?" : "Esgotar?"}
+          {product.is_out_of_stock ? "Disponível?" : "Esgotar?"}
         </Toggle>
       </TableCell>
     </TableRow>
