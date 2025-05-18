@@ -1,8 +1,9 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { AddProductData, Product } from '@/types/product';
+import { AddProductData, Product, ProductExtra } from '@/types/product';
 import { formatDbProducts } from '@/utils/productUtils';
+import { Json } from '@/integrations/supabase/types';
 
 /**
  * Hook for product CRUD operations
@@ -122,32 +123,45 @@ export const useProductOperations = () => {
   };
 
   // Function to update a product
-  const updateProduct = async (productId: string, data: Partial<Product>): Promise<Product | null> => {
+  const updateProduct = async (productId: string, productData: Partial<Product>): Promise<Product | null> => {
     try {
-      console.log(`Atualizando produto ${productId} com dados:`, data);
+      console.log(`Atualizando produto ${productId} com dados:`, productData);
+      
+      // Convert ProductExtra[] to Json compatible format if it exists
+      const supabaseData: any = { ...productData };
+      
+      // Ensure category is one of the allowed values if present
+      if (supabaseData.category && 
+         !['lanche', 'bebida', 'refeicao', 'sobremesa', 'outro'].includes(supabaseData.category)) {
+        supabaseData.category = 'outro';
+      }
       
       // Try direct update first
       const { data: updateResponse, error: updateError } = await supabase
         .from('products')
-        .update(data)
+        .update(supabaseData)
         .eq('id', productId)
         .select()
         .single();
         
       if (!updateError) {
         console.log("Produto atualizado com sucesso via API direta:", updateResponse);
+        
+        // Convert response back to Product type
+        const formattedProduct = formatDbProducts([updateResponse])[0];
+        
         toast({
           title: "Produto atualizado",
           description: "O produto foi atualizado com sucesso."
         });
-        return updateResponse;
+        return formattedProduct;
       }
       
       console.log("Atualização direta falhou, tentando com edge function:", updateError);
       
       // If direct update fails, try the edge function
       const { data: response, error } = await supabase.functions.invoke('update-product', {
-        body: { productId, data }
+        body: { productId, data: supabaseData }
       });
       
       if (error) {
@@ -159,12 +173,15 @@ export const useProductOperations = () => {
         throw new Error(response.error || "Erro ao atualizar produto");
       }
       
+      // Ensure we format the response to match the Product type
+      const formattedProduct = formatDbProducts([response.data])[0];
+      
       toast({
         title: "Produto atualizado",
         description: "O produto foi atualizado com sucesso."
       });
       
-      return response.data;
+      return formattedProduct;
     } catch (error: any) {
       console.error("Erro ao atualizar produto:", error);
       
