@@ -13,9 +13,16 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase credentials')
+    }
+    
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      supabaseUrl,
+      supabaseKey,
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -26,25 +33,25 @@ serve(async (req) => {
     console.log('Setting up realtime for products table...')
 
     // Execute direct SQL to set REPLICA IDENTITY FULL
-    const { error: sqlError } = await supabaseClient.rpc(
-      'execute_sql',
+    const { data: replicaData, error: replicaError } = await supabaseClient.rpc(
+      'exec_sql',
       { 
-        sql: 'ALTER TABLE products REPLICA IDENTITY FULL;' 
+        query: 'ALTER TABLE products REPLICA IDENTITY FULL;' 
       }
     )
 
-    if (sqlError) {
-      console.error('Error setting REPLICA IDENTITY FULL:', sqlError)
-      throw sqlError
+    if (replicaError) {
+      console.error('Error setting REPLICA IDENTITY FULL:', replicaError)
+      throw replicaError
     }
     
-    console.log('REPLICA IDENTITY set successfully')
+    console.log('REPLICA IDENTITY set successfully', replicaData)
 
     // Add the table to the realtime publication
-    const { error: pubError } = await supabaseClient.rpc(
-      'execute_sql',
+    const { data: pubData, error: pubError } = await supabaseClient.rpc(
+      'exec_sql',
       { 
-        sql: 'ALTER PUBLICATION supabase_realtime ADD TABLE products;' 
+        query: 'ALTER PUBLICATION supabase_realtime ADD TABLE products;' 
       }
     )
 
@@ -53,7 +60,7 @@ serve(async (req) => {
       throw pubError
     }
     
-    console.log('Table added to publication successfully')
+    console.log('Table added to publication successfully', pubData)
 
     return new Response(
       JSON.stringify({

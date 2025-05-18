@@ -13,9 +13,16 @@ serve(async (req) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Missing Supabase credentials')
+    }
+    
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      supabaseUrl,
+      supabaseKey,
       {
         global: {
           headers: { Authorization: req.headers.get('Authorization')! },
@@ -27,9 +34,9 @@ serve(async (req) => {
 
     // Execute a SQL query to check if the products table exists and has data
     const { data: tableCheck, error: tableError } = await supabaseClient.rpc(
-      'execute_sql',
+      'exec_sql',
       { 
-        sql: `SELECT EXISTS (
+        query: `SELECT EXISTS (
           SELECT 1 FROM information_schema.tables 
           WHERE table_schema = 'public' 
           AND table_name = 'products'
@@ -44,7 +51,7 @@ serve(async (req) => {
 
     console.log('Verificação da tabela:', tableCheck)
     
-    if (!tableCheck || !tableCheck[0].table_exists) {
+    if (!tableCheck || !tableCheck.table_exists) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -70,7 +77,7 @@ serve(async (req) => {
 
     console.log(`Encontrados ${products.length} produtos no banco de dados:`)
     products.forEach((product, index) => {
-      console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price}`)
+      console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price} - ${product.category}`)
     })
 
     return new Response(

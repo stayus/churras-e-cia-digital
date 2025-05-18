@@ -36,6 +36,7 @@ const ProductFormDialog: React.FC<ProductFormDialogProps> = ({
         name: data.name,
         description: data.description,
         price: data.price,
+        category: data.category,
         image_url: data.image_url || undefined
       };
       

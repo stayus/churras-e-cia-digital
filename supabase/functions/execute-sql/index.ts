@@ -38,7 +38,7 @@ serve(async (req) => {
     
     console.log(`Executing SQL: ${sql}`)
     
-    // Connect to database using postgres extension
+    // Connect to database using the exec_sql function
     const { data, error } = await supabaseClient.rpc('exec_sql', { query: sql })
     
     if (error) {

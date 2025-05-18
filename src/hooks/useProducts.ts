@@ -18,6 +18,7 @@ export interface Product {
   image_url: string;
   is_out_of_stock: boolean;
   promotion_price: number | null;
+  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
   extras: ProductExtra[];
 }
 
@@ -25,6 +26,7 @@ export interface AddProductData {
   name: string;
   description: string;
   price: number;
+  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
   image_url?: string;
 }
 
@@ -96,6 +98,7 @@ export const useProducts = () => {
           image_url: item.image_url,
           is_out_of_stock: item.is_out_of_stock,
           promotion_price: item.promotion_price,
+          category: item.category || 'outro',
           extras: parsedExtras
         };
       });
@@ -133,11 +136,67 @@ export const useProducts = () => {
       
       if (data.success) {
         console.log("Realtime configurado com sucesso para a tabela products");
+        toast({
+          title: "Sucesso",
+          description: "Realtime configurado com sucesso para a tabela de produtos."
+        });
       } else {
         console.error("Falha ao configurar realtime:", data.error);
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: data.error || "Falha ao configurar realtime para produtos."
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erro ao configurar realtime:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Falha ao configurar realtime para produtos."
+      });
+    }
+  };
+  
+  // Função para verificar produtos diretamente no banco de dados
+  const checkProducts = async () => {
+    try {
+      setLoading(true);
+      
+      console.log("Verificando produtos direto no banco de dados...");
+      
+      const { data, error } = await supabase.functions.invoke('check-products', {
+        body: {}
+      });
+      
+      if (error) {
+        console.error("Erro ao verificar produtos:", error);
+        throw error;
+      }
+      
+      console.log("Resposta da verificação de produtos:", data);
+      
+      if (data.success) {
+        toast({
+          title: "Verificação de produtos",
+          description: `${data.count} produtos encontrados no banco de dados.`
+        });
+        
+        // Atualizar a lista local de produtos
+        await fetchProducts();
+      } else {
+        throw new Error(data.error || "Erro ao verificar produtos");
+      }
+    } catch (error: any) {
+      console.error("Erro ao verificar produtos:", error);
+      setError(error.message || "Erro ao verificar produtos");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Não foi possível verificar os produtos."
+      });
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -190,9 +249,6 @@ export const useProducts = () => {
   useEffect(() => {
     fetchProducts();
     
-    // Configure realtime when the hook is first mounted
-    setupRealtime();
-    
     // Configure real-time subscription
     const channel = supabase
       .channel('public:products')
@@ -214,6 +270,11 @@ export const useProducts = () => {
           console.log('Subscrição ativa para mudanças na tabela products');
         } else if (status === 'CHANNEL_ERROR') {
           console.error('Erro na subscrição realtime para products');
+          
+          // Try to setup realtime after a short delay
+          setTimeout(() => {
+            setupRealtime();
+          }, 1000);
         }
       });
       
@@ -231,6 +292,7 @@ export const useProducts = () => {
     error, 
     fetchProducts,
     addProduct,
-    setupRealtime
+    setupRealtime,
+    checkProducts
   };
 };

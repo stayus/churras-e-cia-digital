@@ -14,6 +14,7 @@ interface Product {
   description: string;
   price: number;
   image_url: string;
+  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
   is_out_of_stock?: boolean;
   promotion_price?: number | null;
   extras?: any[];
@@ -42,8 +43,8 @@ serve(async (req) => {
     console.log("Dados recebidos:", product);
     
     // Verificar dados obrigatórios
-    if (!product.name || !product.description || product.price === undefined) {
-      throw new Error("Dados de produto incompletos. Nome, descrição e preço são obrigatórios.");
+    if (!product.name || !product.description || product.price === undefined || !product.category) {
+      throw new Error("Dados de produto incompletos. Nome, descrição, categoria e preço são obrigatórios.");
     }
 
     // Criar cliente Supabase com chave de serviço para ter acesso total ao banco
@@ -63,6 +64,7 @@ serve(async (req) => {
         name: product.name,
         description: product.description,
         price: product.price,
+        category: product.category,
         image_url: product.image_url || "https://placehold.co/300x200?text=Produto",
         is_out_of_stock: product.is_out_of_stock || false,
         promotion_price: product.promotion_price || null,

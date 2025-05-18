@@ -7,7 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
-import { productSchema, ProductFormValues } from './schema/productSchema';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue 
+} from '@/components/ui/select';
+import { productSchema, ProductFormValues, productCategories } from './schema/productSchema';
 
 interface ProductFormProps {
   onSubmit: (data: ProductFormValues) => Promise<void>;
@@ -29,6 +36,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
       description: '',
       price: 0,
       image_url: '',
+      category: 'outro',
     },
   });
 
@@ -61,6 +69,29 @@ const ProductForm: React.FC<ProductFormProps> = ({
         />
         {form.formState.errors.description && (
           <p className="text-sm font-medium text-destructive">{form.formState.errors.description.message}</p>
+        )}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="category">Categoria*</Label>
+        <Select 
+          disabled={isSubmitting}
+          onValueChange={(value) => form.setValue('category', value as any)}
+          value={form.watch('category')}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione uma categoria" />
+          </SelectTrigger>
+          <SelectContent>
+            {productCategories.map((category) => (
+              <SelectItem key={category.value} value={category.value}>
+                {category.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {form.formState.errors.category && (
+          <p className="text-sm font-medium text-destructive">{form.formState.errors.category.message}</p>
         )}
       </div>
       

@@ -127,6 +127,7 @@ export type Database = {
       }
       products: {
         Row: {
+          category: string
           created_at: string
           description: string
           extras: Json | null
@@ -138,6 +139,7 @@ export type Database = {
           promotion_price: number | null
         }
         Insert: {
+          category: string
           created_at?: string
           description: string
           extras?: Json | null
@@ -149,6 +151,7 @@ export type Database = {
           promotion_price?: number | null
         }
         Update: {
+          category?: string
           created_at?: string
           description?: string
           extras?: Json | null

@@ -1,5 +1,4 @@
 
-# This file is used for local development only.
 project_id = "flhdgdpewxooxtxqqhdz"
 
 [api]
@@ -60,6 +59,9 @@ enabled = false
 [edge_functions]
 enabled = true
 port = 54328
+
+[functions.add-product]
+verify_jwt = true
 
 [functions.check-products]
 verify_jwt = true
