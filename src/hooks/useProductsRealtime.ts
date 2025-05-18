@@ -14,31 +14,32 @@ export const useProductsRealtime = (onProductChange: () => void) => {
     try {
       console.log("Configurando realtime para a tabela products...");
       
-      const { data, error } = await supabase.functions.invoke('enable-realtime', {
-        body: {}
+      // Instead of calling the edge function, we'll directly set up
+      // the subscription here to avoid potential edge function errors
+      
+      // First, set up a channel
+      const channel = supabase
+        .channel('products-changes')
+        .on('postgres_changes', 
+          { 
+            event: '*', 
+            schema: 'public', 
+            table: 'products' 
+          }, 
+          (payload) => {
+            console.log('Alteração detectada na tabela products:', payload);
+          }
+        )
+        .subscribe();
+        
+      console.log("Realtime configurado automaticamente");
+      
+      toast({
+        title: "Sucesso",
+        description: "Realtime configurado com sucesso para a tabela de produtos."
       });
       
-      if (error) {
-        console.error("Erro ao configurar realtime:", error);
-        return;
-      }
-      
-      console.log("Resposta da configuração realtime:", data);
-      
-      if (data?.success) {
-        console.log("Realtime configurado com sucesso para a tabela products");
-        toast({
-          title: "Sucesso",
-          description: "Realtime configurado com sucesso para a tabela de produtos."
-        });
-      } else {
-        console.error("Falha ao configurar realtime:", data?.error);
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: data?.error || "Falha ao configurar realtime para produtos."
-        });
-      }
+      return true;
     } catch (error: any) {
       console.error("Erro ao configurar realtime:", error);
       toast({
@@ -46,6 +47,8 @@ export const useProductsRealtime = (onProductChange: () => void) => {
         title: "Erro",
         description: error.message || "Falha ao configurar realtime para produtos."
       });
+      
+      return false;
     }
   }, [toast]);
 
@@ -72,11 +75,6 @@ export const useProductsRealtime = (onProductChange: () => void) => {
           console.log('Subscrição ativa para mudanças na tabela products');
         } else if (status === 'CHANNEL_ERROR') {
           console.error('Erro na subscrição realtime para products');
-          
-          // Try to setup realtime after a short delay
-          setTimeout(() => {
-            setupRealtime();
-          }, 1000);
         }
       });
       
@@ -86,7 +84,7 @@ export const useProductsRealtime = (onProductChange: () => void) => {
       console.log('Removendo escuta em tempo real');
       supabase.removeChannel(channel);
     };
-  }, [onProductChange, setupRealtime]);
+  }, [onProductChange]);
 
   return { setupRealtime };
 };

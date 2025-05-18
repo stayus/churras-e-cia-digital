@@ -32,26 +32,17 @@ serve(async (req) => {
 
     console.log('Verificando todos os produtos no banco de dados')
 
-    // Execute a SQL query to check if the products table exists and has data
-    const { data: tableCheck, error: tableError } = await supabaseClient.rpc(
-      'exec_sql',
-      { 
-        query: `SELECT EXISTS (
-          SELECT 1 FROM information_schema.tables 
-          WHERE table_schema = 'public' 
-          AND table_name = 'products'
-        ) AS table_exists;` 
-      }
-    )
+    // Instead of using exec_sql, directly query the products table using the Supabase client
+    // First, check if the table exists by trying to get metadata
+    const { data: tableInfo, error: metadataError } = await supabaseClient
+      .from('products')
+      .select('id')
+      .limit(1)
+      .maybeSingle()
 
-    if (tableError) {
-      console.error('Erro ao verificar tabela products:', tableError)
-      throw tableError
-    }
-
-    console.log('Verificação da tabela:', tableCheck)
-    
-    if (!tableCheck || !tableCheck.table_exists) {
+    if (metadataError && metadataError.code === '42P01') {
+      // Table doesn't exist error
+      console.error('Table products does not exist:', metadataError)
       return new Response(
         JSON.stringify({
           success: false,
@@ -75,16 +66,20 @@ serve(async (req) => {
       throw error
     }
 
-    console.log(`Encontrados ${products.length} produtos no banco de dados:`)
-    products.forEach((product, index) => {
-      console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price} - ${product.category}`)
-    })
+    console.log(`Encontrados ${products?.length || 0} produtos no banco de dados:`)
+    if (products && products.length > 0) {
+      products.forEach((product, index) => {
+        console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price} - ${product.category}`)
+      })
+    } else {
+      console.log('Nenhum produto encontrado no banco de dados')
+    }
 
     return new Response(
       JSON.stringify({
         success: true,
-        data: products,
-        count: products.length
+        data: products || [],
+        count: products?.length || 0
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -96,11 +91,11 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message
+        error: error.message || 'Erro desconhecido'
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500,
       }
     )
   }

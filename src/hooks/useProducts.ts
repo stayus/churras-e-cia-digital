@@ -23,13 +23,36 @@ export const useProducts = () => {
       
       console.log("useProducts: Buscando produtos do Supabase...");
       
+      // Try the standard approach first
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
         
       if (error) {
-        throw error;
+        console.error('Error fetching products with standard approach, trying edge function:', error);
+        
+        // If standard approach fails, try the edge function
+        console.log("Tentando alternativa com edge function get-products...");
+        const { data: edgeData, error: edgeError } = await supabase.functions.invoke('get-products');
+        
+        if (edgeError) {
+          console.error('Error with edge function approach too:', edgeError);
+          throw edgeError;
+        }
+        
+        if (!edgeData || !edgeData.data) {
+          throw new Error('Dados não retornados pela função get-products');
+        }
+        
+        console.log("Products received from edge function:", edgeData.data);
+        
+        // Transform the data to match our Product type
+        const formattedProducts = formatDbProducts(edgeData.data);
+        console.log("Produtos formatados (de edge function):", formattedProducts);
+        setProducts(formattedProducts);
+        setLoading(false);
+        return;
       }
       
       console.log("useProducts: Produtos recebidos:", data);
@@ -70,7 +93,14 @@ export const useProducts = () => {
     fetchProducts();
     
     // Configurar escuta em tempo real para atualizações de produtos
-    setupRealtime();
+    const setupRealtimeFunc = async () => {
+      try {
+        await setupRealtime();
+      } catch (err) {
+        console.warn("Não foi possível configurar realtime, mas produtos serão carregados normalmente:", err);
+      }
+    };
+    setupRealtimeFunc();
     
   }, [fetchProducts, setupRealtime]);
   

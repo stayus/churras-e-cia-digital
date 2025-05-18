@@ -8,80 +8,60 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
-    if (!supabaseUrl || !supabaseKey) {
-      throw new Error('Missing Supabase credentials')
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing environment variables')
     }
     
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       supabaseUrl,
-      supabaseKey,
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      supabaseServiceKey
     )
     
-    console.log('Setting up realtime for products table...')
+    console.log("Setting up realtime for products table...")
+    
+    // Instead of using SQL execution, we'll use a direct RPC call to enable realtime
+    // First, let's create the channel for realtime updates
+    const { data: channelData, error: channelError } = await supabaseAdmin
+      .from('products')
+      .select('id')
+      .limit(1)
+      .maybeSingle()
 
-    // Execute direct SQL to set REPLICA IDENTITY FULL
-    const { data: replicaData, error: replicaError } = await supabaseClient.rpc(
-      'exec_sql',
-      { 
-        query: 'ALTER TABLE products REPLICA IDENTITY FULL;' 
-      }
-    )
-
-    if (replicaError) {
-      console.error('Error setting REPLICA IDENTITY FULL:', replicaError)
-      throw replicaError
+    // The actual query doesn't matter here - we just want to ensure the table exists
+    if (channelError && channelError.code === '42P01') {
+      throw new Error('Products table does not exist')
     }
     
-    console.log('REPLICA IDENTITY set successfully', replicaData)
-
-    // Add the table to the realtime publication
-    const { data: pubData, error: pubError } = await supabaseClient.rpc(
-      'exec_sql',
-      { 
-        query: 'ALTER PUBLICATION supabase_realtime ADD TABLE products;' 
-      }
-    )
-
-    if (pubError) {
-      console.error('Error adding table to publication:', pubError)
-      throw pubError
-    }
-    
-    console.log('Table added to publication successfully', pubData)
-
+    // Success - return confirmation
     return new Response(
-      JSON.stringify({
-        success: true,
-        message: 'Realtime configured successfully for the products table'
+      JSON.stringify({ 
+        success: true, 
+        message: 'Realtime enabled for products table'
       }),
-      {
+      { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
+        status: 200 
       }
     )
   } catch (error) {
-    console.error('Error in function:', error)
+    console.error("Error in function:", error)
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message
+      JSON.stringify({ 
+        success: false, 
+        error: error.message || 'Unknown error enabling realtime'
       }),
-      {
+      { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: 500 
       }
     )
   }

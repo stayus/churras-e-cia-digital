@@ -13,18 +13,25 @@ const ProductDebugger: React.FC = () => {
   const [isChecking, setIsChecking] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [isEnablingRealtime, setIsEnablingRealtime] = useState(false);
+  const [checkError, setCheckError] = useState<string | null>(null);
 
   const handleCheckDatabase = async () => {
     try {
       setIsChecking(true);
+      setCheckError(null);
       
+      console.log("Verificando produtos no banco de dados...");
       const { data, error } = await supabase.functions.invoke('check-products', {
         body: {}
       });
       
       if (error) {
+        console.error("Erro na função check-products:", error);
+        setCheckError(`Erro: ${error.message || 'Erro desconhecido'}`);
         throw error;
       }
+      
+      console.log("Resposta do check-products:", data);
       
       if (data.success) {
         setDbProducts(data.data);
@@ -33,7 +40,9 @@ const ProductDebugger: React.FC = () => {
           description: `Encontrados ${data.count} produtos no banco de dados.`
         });
       } else {
-        throw new Error(data.error || "Erro ao verificar produtos no banco de dados");
+        const errorMsg = data.error || "Erro ao verificar produtos no banco de dados";
+        setCheckError(errorMsg);
+        throw new Error(errorMsg);
       }
     } catch (error: any) {
       console.error("Erro ao verificar banco de dados:", error);
@@ -121,6 +130,13 @@ const ProductDebugger: React.FC = () => {
             Configurar Realtime
           </Button>
         </div>
+        
+        {checkError && (
+          <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md text-red-700 text-sm">
+            <p className="font-medium">Erro ao verificar banco de dados:</p>
+            <p>{checkError}</p>
+          </div>
+        )}
         
         <div className="mt-4">
           <h3 className="text-sm font-medium mb-2">Carregados no aplicativo ({products.length}):</h3>

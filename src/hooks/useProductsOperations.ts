@@ -19,11 +19,15 @@ export const useProductOperations = () => {
       });
       
       if (error) {
-        console.error("Erro ao verificar produtos:", error);
+        console.error("Erro ao invocar função check-products:", error);
         throw error;
       }
       
       console.log("Resposta da verificação de produtos:", data);
+      
+      if (!data) {
+        throw new Error("Resposta vazia da função check-products");
+      }
       
       if (data.success) {
         toast({
@@ -37,10 +41,18 @@ export const useProductOperations = () => {
       }
     } catch (error: any) {
       console.error("Erro ao verificar produtos:", error);
+      
+      let errorMessage = error.message || "Não foi possível verificar os produtos.";
+      
+      // Verificar se é um erro específico da função edge
+      if (error.name === 'FunctionsHttpError') {
+        errorMessage = "Erro ao conectar com a função check-products. Certifique-se de que a função está implantada corretamente.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message || "Não foi possível verificar os produtos."
+        description: errorMessage
       });
       return null;
     }
@@ -75,10 +87,18 @@ export const useProductOperations = () => {
       return data.data;
     } catch (error: any) {
       console.error("Erro ao adicionar produto:", error);
+      
+      let errorMessage = error.message || "Não foi possível adicionar o produto.";
+      
+      // Verificar se é um erro específico da função edge
+      if (error.name === 'FunctionsHttpError') {
+        errorMessage = "Erro ao conectar com a função add-product. Certifique-se de que a função está implantada corretamente.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message || "Não foi possível adicionar o produto."
+        description: errorMessage
       });
       return null;
     }
@@ -110,10 +130,18 @@ export const useProductOperations = () => {
       return response.data;
     } catch (error: any) {
       console.error("Erro ao atualizar produto:", error);
+      
+      let errorMessage = error.message || "Não foi possível atualizar o produto.";
+      
+      // Verificar se é um erro específico da função edge
+      if (error.name === 'FunctionsHttpError') {
+        errorMessage = "Erro ao conectar com a função update-product. Certifique-se de que a função está implantada corretamente.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error.message || "Não foi possível atualizar o produto."
+        description: errorMessage
       });
       return null;
     }
