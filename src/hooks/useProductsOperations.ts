@@ -2,6 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { AddProductData, Product } from '@/types/product';
+import { formatDbProducts } from '@/utils/productUtils';
 
 /**
  * Hook for product CRUD operations
@@ -10,10 +11,29 @@ export const useProductOperations = () => {
   const { toast } = useToast();
   
   // Função para verificar produtos diretamente no banco de dados
-  const checkProducts = async () => {
+  const checkProducts = async (): Promise<Product[] | null> => {
     try {
       console.log("Verificando produtos direto no banco de dados...");
       
+      // Try direct database query first
+      const { data: directData, error: directError } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (!directError && directData) {
+        console.log("Produtos obtidos diretamente:", directData);
+        const formattedProducts = formatDbProducts(directData);
+        toast({
+          title: "Verificação de produtos",
+          description: `${directData.length} produtos encontrados no banco de dados.`
+        });
+        return formattedProducts;
+      }
+      
+      console.log("Consulta direta falhou, tentando com edge function check-products");
+      
+      // If direct query fails, try the edge function
       const { data, error } = await supabase.functions.invoke('check-products', {
         body: {}
       });
@@ -30,12 +50,13 @@ export const useProductOperations = () => {
       }
       
       if (data.success) {
+        const formattedProducts = formatDbProducts(data.data);
         toast({
           title: "Verificação de produtos",
           description: `${data.count} produtos encontrados no banco de dados.`
         });
         
-        return data.data;
+        return formattedProducts;
       } else {
         throw new Error(data.error || "Erro ao verificar produtos");
       }
@@ -44,7 +65,6 @@ export const useProductOperations = () => {
       
       let errorMessage = error.message || "Não foi possível verificar os produtos.";
       
-      // Verificar se é um erro específico da função edge
       if (error.name === 'FunctionsHttpError') {
         errorMessage = "Erro ao conectar com a função check-products. Certifique-se de que a função está implantada corretamente.";
       }

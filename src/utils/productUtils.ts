@@ -43,22 +43,22 @@ export const formatDbProducts = (data: any[]): Product[] => {
   if (!data || data.length === 0) return [];
   
   const formattedProducts = data.map(item => {
-    // Parse the category to ensure it's a valid value
-    const validCategories = ['lanche', 'bebida', 'refeicao', 'sobremesa', 'outro'];
-    const category = validCategories.includes(item.category) 
-      ? (item.category as 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro')
-      : 'outro';
-      
-    const product = {
-      id: item.id,
+    // Ensure all required fields exist with default values if missing
+    const category = item.category || 'outro';
+    const extras = item.extras || [];
+    const is_out_of_stock = !!item.is_out_of_stock;
+    const image_url = item.image_url || '';
+    
+    const product: Product = {
+      id: item.id || '',
       name: item.name || '',
       description: item.description || '',
       price: typeof item.price === 'number' ? item.price : 0,
-      image_url: item.image_url || '',
-      is_out_of_stock: !!item.is_out_of_stock,
-      promotion_price: item.promotion_price,
-      category: category,
-      extras: parseProductExtras(item.extras)
+      image_url: image_url,
+      is_out_of_stock: is_out_of_stock,
+      promotion_price: item.promotion_price || null,
+      category: category as 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro',
+      extras: parseProductExtras(extras)
     };
     
     return product;

@@ -13,6 +13,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log('check-products function called')
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
@@ -20,43 +22,15 @@ serve(async (req) => {
       throw new Error('Missing Supabase credentials')
     }
     
-    const supabaseClient = createClient(
+    const supabaseAdmin = createClient(
       supabaseUrl,
-      supabaseKey,
-      {
-        global: {
-          headers: { Authorization: req.headers.get('Authorization')! },
-        },
-      }
+      supabaseKey
     )
 
     console.log('Verificando todos os produtos no banco de dados')
 
-    // Instead of using exec_sql, directly query the products table using the Supabase client
-    // First, check if the table exists by trying to get metadata
-    const { data: tableInfo, error: metadataError } = await supabaseClient
-      .from('products')
-      .select('id')
-      .limit(1)
-      .maybeSingle()
-
-    if (metadataError && metadataError.code === '42P01') {
-      // Table doesn't exist error
-      console.error('Table products does not exist:', metadataError)
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'A tabela products não existe no banco de dados'
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400,
-        }
-      )
-    }
-
     // Buscar todos os produtos utilizando o service role para ignorar RLS
-    const { data: products, error } = await supabaseClient
+    const { data: products, error } = await supabaseAdmin
       .from('products')
       .select('*')
       .order('created_at', { ascending: false })
@@ -69,7 +43,7 @@ serve(async (req) => {
     console.log(`Encontrados ${products?.length || 0} produtos no banco de dados:`)
     if (products && products.length > 0) {
       products.forEach((product, index) => {
-        console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price} - ${product.category}`)
+        console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price} - ${product.category || 'sem categoria'}`)
       })
     } else {
       console.log('Nenhum produto encontrado no banco de dados')

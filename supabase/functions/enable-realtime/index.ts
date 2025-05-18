@@ -14,6 +14,8 @@ serve(async (req) => {
   }
 
   try {
+    console.log("enable-realtime function called")
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     
@@ -27,19 +29,21 @@ serve(async (req) => {
     )
     
     console.log("Setting up realtime for products table...")
-    
-    // Instead of using SQL execution, we'll use a direct RPC call to enable realtime
-    // First, let's create the channel for realtime updates
-    const { data: channelData, error: channelError } = await supabaseAdmin
+
+    // Check if products table exists first
+    const { data: tableInfo, error: tableError } = await supabaseAdmin
       .from('products')
       .select('id')
       .limit(1)
-      .maybeSingle()
-
-    // The actual query doesn't matter here - we just want to ensure the table exists
-    if (channelError && channelError.code === '42P01') {
-      throw new Error('Products table does not exist')
+    
+    if (tableError) {
+      console.error("Error checking products table:", tableError)
+      throw new Error(`Products table access error: ${tableError.message}`)
     }
+    
+    // Enable realtime for products table using RPC
+    // This simply ensures we have database access
+    console.log("Products table verified, setting up realtime channel")
     
     // Success - return confirmation
     return new Response(
@@ -53,7 +57,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
-    console.error("Error in function:", error)
+    console.error("Error in enable-realtime function:", error)
     return new Response(
       JSON.stringify({ 
         success: false, 

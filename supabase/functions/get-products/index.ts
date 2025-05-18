@@ -16,9 +16,16 @@ serve(async (req) => {
   try {
     console.log('get-products function called');
     
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseServiceKey) {
+      throw new Error('Missing environment variables for Supabase connection');
+    }
+    
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      supabaseUrl,
+      supabaseServiceKey
     );
 
     console.log('Fetching products from database');
@@ -36,6 +43,13 @@ serve(async (req) => {
     }
 
     console.log(`Successfully fetched ${data?.length || 0} products`);
+    if (data && data.length > 0) {
+      data.forEach((product, index) => {
+        console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price} - ${product.category || 'sem categoria'}`);
+      });
+    } else {
+      console.log('No products found in database');
+    }
     
     return new Response(
       JSON.stringify({ data }),

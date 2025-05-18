@@ -34,28 +34,49 @@ export const useProducts = () => {
         
         // If standard approach fails, try the edge function
         console.log("Tentando alternativa com edge function get-products...");
-        const { data: edgeData, error: edgeError } = await supabase.functions.invoke('get-products');
+        const { data: edgeResponse, error: edgeError } = await supabase.functions.invoke('get-products');
         
         if (edgeError) {
-          console.error('Error with edge function approach too:', edgeError);
-          throw edgeError;
+          console.error('Error with get-products edge function:', edgeError);
+          
+          // Try with check-products function as last resort
+          console.log("Tentando com check-products como último recurso...");
+          const { data: checkResponse, error: checkError } = await supabase.functions.invoke('check-products');
+          
+          if (checkError) {
+            console.error('Error with check-products edge function too:', checkError);
+            throw new Error('Não foi possível obter produtos através de nenhum método disponível');
+          }
+          
+          if (!checkResponse || !checkResponse.data) {
+            throw new Error('Dados não retornados pela função check-products');
+          }
+          
+          console.log("Products received from check-products function:", checkResponse.data);
+          
+          // Transform the data to match our Product type
+          const formattedProducts = formatDbProducts(checkResponse.data);
+          console.log("Produtos formatados (de check-products function):", formattedProducts);
+          setProducts(formattedProducts);
+          setLoading(false);
+          return;
         }
         
-        if (!edgeData || !edgeData.data) {
+        if (!edgeResponse || !edgeResponse.data) {
           throw new Error('Dados não retornados pela função get-products');
         }
         
-        console.log("Products received from edge function:", edgeData.data);
+        console.log("Products received from edge function:", edgeResponse.data);
         
         // Transform the data to match our Product type
-        const formattedProducts = formatDbProducts(edgeData.data);
+        const formattedProducts = formatDbProducts(edgeResponse.data);
         console.log("Produtos formatados (de edge function):", formattedProducts);
         setProducts(formattedProducts);
         setLoading(false);
         return;
       }
       
-      console.log("useProducts: Produtos recebidos:", data);
+      console.log("useProducts: Produtos recebidos através de consulta direta:", data);
       
       if (!data || data.length === 0) {
         console.log("useProducts: Nenhum produto encontrado no banco de dados");

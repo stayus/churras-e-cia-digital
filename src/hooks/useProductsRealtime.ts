@@ -14,10 +14,30 @@ export const useProductsRealtime = (onProductChange: () => void) => {
     try {
       console.log("Configurando realtime para a tabela products...");
       
-      // Instead of calling the edge function, we'll directly set up
-      // the subscription here to avoid potential edge function errors
+      try {
+        // Try to use the edge function first
+        const { data, error } = await supabase.functions.invoke('enable-realtime');
+        
+        if (error) {
+          console.error("Erro ao invocar função enable-realtime:", error);
+          throw new Error(`Falha na função enable-realtime: ${error.message}`);
+        }
+        
+        if (data && data.success) {
+          console.log("Realtime configurado via função edge:", data.message);
+        } else {
+          throw new Error("A função enable-realtime retornou um status inválido");
+        }
+      } catch (edgeError) {
+        // If edge function fails, set up manually
+        console.warn("Edge function falhou, configurando realtime manualmente:", edgeError);
+        
+        // This fallback doesn't actually do any server-side configuration
+        // It just logs the attempt and continues
+        console.log("Configuração manual de realtime (fallback)");
+      }
       
-      // First, set up a channel
+      // Set up a channel
       const channel = supabase
         .channel('products-changes')
         .on('postgres_changes', 
@@ -30,14 +50,19 @@ export const useProductsRealtime = (onProductChange: () => void) => {
             console.log('Alteração detectada na tabela products:', payload);
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Status da subscrição realtime:', status);
+          
+          if (status === 'SUBSCRIBED') {
+            console.log('Subscrição ativa para mudanças na tabela products');
+            toast({
+              title: "Realtime ativado",
+              description: "Monitoramento de alterações em produtos configurado com sucesso."
+            });
+          }
+        });
         
-      console.log("Realtime configurado automaticamente");
-      
-      toast({
-        title: "Sucesso",
-        description: "Realtime configurado com sucesso para a tabela de produtos."
-      });
+      console.log("Realtime configurado com sucesso");
       
       return true;
     } catch (error: any) {

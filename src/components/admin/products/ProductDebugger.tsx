@@ -5,11 +5,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Product, useProducts } from '@/hooks/useProducts';
 import { Loader2, RefreshCw, Database, Zap } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 
 const ProductDebugger: React.FC = () => {
   const { toast } = useToast();
-  const { products, fetchProducts, setupRealtime } = useProducts();
+  const { products, fetchProducts, setupRealtime, checkProducts } = useProducts();
   const [isChecking, setIsChecking] = useState(false);
   const [dbProducts, setDbProducts] = useState<Product[]>([]);
   const [isEnablingRealtime, setIsEnablingRealtime] = useState(false);
@@ -21,31 +20,21 @@ const ProductDebugger: React.FC = () => {
       setCheckError(null);
       
       console.log("Verificando produtos no banco de dados...");
-      const { data, error } = await supabase.functions.invoke('check-products', {
-        body: {}
-      });
+      const result = await checkProducts();
       
-      if (error) {
-        console.error("Erro na função check-products:", error);
-        setCheckError(`Erro: ${error.message || 'Erro desconhecido'}`);
-        throw error;
-      }
-      
-      console.log("Resposta do check-products:", data);
-      
-      if (data.success) {
-        setDbProducts(data.data);
+      if (result) {
+        setDbProducts(result);
         toast({
           title: "Verificação concluída",
-          description: `Encontrados ${data.count} produtos no banco de dados.`
+          description: `Encontrados ${result.length} produtos no banco de dados.`
         });
       } else {
-        const errorMsg = data.error || "Erro ao verificar produtos no banco de dados";
-        setCheckError(errorMsg);
-        throw new Error(errorMsg);
+        setCheckError("A verificação não retornou nenhum produto");
+        throw new Error("A verificação não retornou nenhum produto");
       }
     } catch (error: any) {
       console.error("Erro ao verificar banco de dados:", error);
+      setCheckError(error.message || "Erro desconhecido");
       toast({
         variant: "destructive",
         title: "Erro",
