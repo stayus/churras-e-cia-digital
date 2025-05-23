@@ -1,3 +1,4 @@
-import { useProductOperations } from './products';
 
-export const useProductOperations = useProductOperations;
+import { useProductOperations as useProductOps } from './products';
+
+export const useProductOperations = useProductOps;
