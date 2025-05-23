@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Product } from '@/hooks/useProducts';
 import { ShoppingCart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product;
@@ -32,6 +34,8 @@ const getCategoryColor = (category: string): string => {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { name, description, price, image_url, promotion_price, is_out_of_stock, category } = product;
+  const { addItem } = useCart();
+  const { toast } = useToast();
   
   console.log("Renderizando ProductCard:", product);
   
@@ -49,6 +53,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     if (!text) return '';
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
+  };
+  
+  const handleAddToCart = () => {
+    addItem(product, []);
+    toast({
+      title: "Produto adicionado",
+      description: `${name} foi adicionado ao carrinho.`
+    });
   };
   
   return (
@@ -94,6 +106,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           size="sm" 
           disabled={is_out_of_stock}
           className="flex items-center gap-2"
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="h-4 w-4" />
           Adicionar

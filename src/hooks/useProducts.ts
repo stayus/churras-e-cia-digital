@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -105,7 +106,7 @@ export const useProducts = () => {
   const { setupRealtime } = useProductsRealtime(fetchProducts);
   
   // Set up product operations using our new modular hooks
-  const { checkProducts, addProduct, updateProduct } = useProductOperations();
+  const { checkProducts, addProduct, updateProduct, deleteProduct } = useProductOperations();
   
   // Fetch products on mount
   useEffect(() => {
@@ -131,6 +132,7 @@ export const useProducts = () => {
     fetchProducts,
     addProduct,
     updateProduct,
+    deleteProduct,
     setupRealtime,
     checkProducts
   };
