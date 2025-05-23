@@ -1,11 +1,10 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Product, AddProductData } from '@/types/product';
 import { formatDbProducts } from '@/utils/productUtils';
 import { useProductsRealtime } from './useProductsRealtime';
-import { useProductOperations } from './products';
+import { useProductOperations } from './useProductsOperations';
 
 export type { Product, ProductExtra, AddProductData } from '@/types/product';
 
