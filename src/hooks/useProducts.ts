@@ -22,56 +22,53 @@ export const useProducts = () => {
       setError(null);
       
       console.log("useProducts: Buscando produtos do Supabase...");
+
+      // Try using the edge function first
+      const { data: edgeResponse, error: edgeError } = await supabase.functions.invoke('get-products');
+
+      if (!edgeError && edgeResponse?.success) {
+        console.log("useProducts: Produtos recebidos pelo get-products:", edgeResponse);
+        
+        if (edgeResponse.data && Array.isArray(edgeResponse.data) && edgeResponse.data.length > 0) {
+          const formattedProducts = formatDbProducts(edgeResponse.data);
+          console.log("useProducts: Produtos formatados:", formattedProducts);
+          setProducts(formattedProducts);
+          setLoading(false);
+          return;
+        }
+      }
       
-      // Try the standard approach first - direct database query
+      // If edge function fails, try direct query
+      console.log("Edge function falhou ou não retornou dados, tentando consulta direta...");
+      
       const { data, error } = await supabase
         .from('products')
         .select('*');
         
       if (error) {
-        console.error('Error fetching products with standard approach:', error);
+        console.error('Erro na consulta direta:', error);
         
-        // If standard approach fails, try the get-products edge function
-        console.log("Tentando alternativa com edge function get-products...");
-        const { data: edgeResponse, error: edgeError } = await supabase.functions.invoke('get-products');
+        // Try the check-products function as last resort
+        console.log("Consulta direta falhou, tentando com check-products...");
+        const { data: checkResponse, error: checkError } = await supabase.functions.invoke('check-products');
         
-        if (edgeError) {
-          console.error('Error with get-products edge function:', edgeError);
-          
-          // Try with check-products function as last resort
-          console.log("Tentando com check-products como último recurso...");
-          const { data: checkResponse, error: checkError } = await supabase.functions.invoke('check-products');
-          
-          if (checkError) {
-            console.error('Error with check-products edge function too:', checkError);
-            throw new Error('Não foi possível obter produtos através de nenhum método disponível');
-          }
-          
-          if (!checkResponse || !checkResponse.data) {
-            console.log("check-products não retornou dados:", checkResponse);
-            throw new Error('Dados não retornados pela função check-products');
-          }
-          
-          console.log("Products received from check-products function:", checkResponse.data);
-          
-          // Transform the data to match our Product type
-          const formattedProducts = formatDbProducts(checkResponse.data);
-          console.log("Produtos formatados (de check-products function):", formattedProducts);
-          setProducts(formattedProducts);
+        if (checkError) {
+          console.error('Erro com check-products:', checkError);
+          throw new Error('Não foi possível obter produtos através de nenhum método disponível');
+        }
+        
+        if (!checkResponse || !checkResponse.data) {
+          console.log("check-products não retornou dados:", checkResponse);
+          setProducts([]);
           setLoading(false);
           return;
         }
         
-        if (!edgeResponse || !edgeResponse.data) {
-          console.log("get-products não retornou dados:", edgeResponse);
-          throw new Error('Dados não retornados pela função get-products');
-        }
-        
-        console.log("Products received from edge function:", edgeResponse.data);
+        console.log("Produtos recebidos da função check-products:", checkResponse.data);
         
         // Transform the data to match our Product type
-        const formattedProducts = formatDbProducts(edgeResponse.data);
-        console.log("Produtos formatados (de edge function):", formattedProducts);
+        const formattedProducts = formatDbProducts(checkResponse.data);
+        console.log("Produtos formatados (de check-products):", formattedProducts);
         setProducts(formattedProducts);
         setLoading(false);
         return;
@@ -79,14 +76,7 @@ export const useProducts = () => {
       
       console.log("useProducts: Produtos recebidos através de consulta direta:", data);
       
-      if (!data) {
-        console.warn("useProducts: data is null or undefined");
-        setProducts([]);
-        setLoading(false);
-        return;
-      }
-
-      if (data.length === 0) {
+      if (!data || data.length === 0) {
         console.log("useProducts: Nenhum produto encontrado no banco de dados");
         setProducts([]);
         setLoading(false);
@@ -106,6 +96,7 @@ export const useProducts = () => {
         title: "Erro",
         description: "Não foi possível carregar os produtos. Tente novamente mais tarde."
       });
+      setProducts([]);
     } finally {
       setLoading(false);
     }

@@ -28,7 +28,7 @@ serve(async (req) => {
       supabaseServiceKey
     );
 
-    console.log('Fetching products from database');
+    console.log('Buscando produtos do banco de dados com papel de serviço');
     const { data, error } = await supabaseAdmin
       .from('products')
       .select('*');
@@ -36,13 +36,17 @@ serve(async (req) => {
     if (error) {
       console.error('Error fetching products from database:', error);
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ 
+          success: false,
+          error: error.message 
+        }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     console.log(`Successfully fetched ${data?.length || 0} products`);
     if (data && data.length > 0) {
+      console.log('Sample product:', data[0]);
       data.forEach((product, index) => {
         console.log(`${index + 1}. ${product.name} (${product.id}) - ${product.price} - ${product.category || 'sem categoria'}`);
       });
@@ -51,14 +55,21 @@ serve(async (req) => {
     }
     
     return new Response(
-      JSON.stringify({ data }),
+      JSON.stringify({ 
+        success: true,
+        data: data || [],
+        count: data?.length || 0
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
     
   } catch (error) {
     console.error('Unexpected error in get-products function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        success: false,
+        error: error.message || 'Unknown error'
+      }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

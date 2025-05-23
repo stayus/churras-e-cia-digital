@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { Product, useProducts } from '@/hooks/useProducts';
-import { Loader2, RefreshCw, Database, Zap, Eye } from 'lucide-react';
+import { Loader2, RefreshCw, Database, Zap, Eye, Bug } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const ProductDebugger: React.FC = () => {
@@ -15,6 +15,7 @@ const ProductDebugger: React.FC = () => {
   const [isEnablingRealtime, setIsEnablingRealtime] = useState(false);
   const [checkError, setCheckError] = useState<string | null>(null);
   const [directQueryResult, setDirectQueryResult] = useState<any>(null);
+  const [edgeFunctionResult, setEdgeFunctionResult] = useState<any>(null);
 
   const handleCheckDatabase = async () => {
     try {
@@ -74,6 +75,37 @@ const ProductDebugger: React.FC = () => {
         variant: "destructive",
         title: "Erro",
         description: error.message || "Não foi possível realizar a consulta direta."
+      });
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  const handleTestEdgeFunction = async () => {
+    try {
+      setIsChecking(true);
+      setCheckError(null);
+      
+      console.log("Testando função edge get-products...");
+      const { data, error } = await supabase.functions.invoke('get-products');
+      
+      if (error) {
+        setCheckError(error.message);
+        throw error;
+      }
+      
+      setEdgeFunctionResult(data);
+      toast({
+        title: "Teste da função edge concluído",
+        description: `Resposta recebida da função get-products.`
+      });
+    } catch (error: any) {
+      console.error("Erro ao testar função edge:", error);
+      setCheckError(error.message || "Erro desconhecido");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Não foi possível testar a função edge get-products."
       });
     } finally {
       setIsChecking(false);
@@ -147,6 +179,20 @@ const ProductDebugger: React.FC = () => {
           
           <Button 
             variant="outline" 
+            onClick={handleTestEdgeFunction}
+            disabled={isChecking}
+            className="flex items-center gap-2"
+          >
+            {isChecking ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Bug className="h-4 w-4" />
+            )}
+            Testar Função Edge
+          </Button>
+          
+          <Button 
+            variant="outline" 
             onClick={handleRefreshProducts}
             className="flex items-center gap-2"
           >
@@ -214,6 +260,15 @@ const ProductDebugger: React.FC = () => {
                 </li>
               ))}
             </ul>
+          </div>
+        )}
+        
+        {edgeFunctionResult && (
+          <div className="mt-4">
+            <h3 className="text-sm font-medium mb-2">Resposta da função Edge:</h3>
+            <pre className="text-xs border rounded-md p-2 max-h-40 overflow-auto bg-gray-50">
+              {JSON.stringify(edgeFunctionResult, null, 2)}
+            </pre>
           </div>
         )}
       </CardContent>
