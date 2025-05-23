@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Product, AddProductData } from '@/types/product';
 import { formatDbProducts } from '@/utils/productUtils';
 import { useProductsRealtime } from './useProductsRealtime';
-import { useProductOperations } from './useProductsOperations';
+import { useProductOperations } from './products';
 
 export type { Product, ProductExtra, AddProductData } from '@/types/product';
 
@@ -105,7 +105,7 @@ export const useProducts = () => {
   // Set up realtime updates
   const { setupRealtime } = useProductsRealtime(fetchProducts);
   
-  // Set up product operations
+  // Set up product operations using our new modular hooks
   const { checkProducts, addProduct, updateProduct } = useProductOperations();
   
   // Fetch products on mount
