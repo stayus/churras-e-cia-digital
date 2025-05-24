@@ -71,10 +71,10 @@ const CustomerLoginForm = () => {
       // Email is confirmed, proceed with login
       toast({
         title: "Login bem-sucedido",
-        description: "Você será redirecionado para sua conta",
+        description: "Bem-vindo ao Churrasquinho & Cia!",
       });
       
-      navigate("/cliente");
+      navigate("/");
     } catch (error: any) {
       console.error("Error during login:", error);
       setError("Email ou senha incorretos");

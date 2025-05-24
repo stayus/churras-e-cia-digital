@@ -15,18 +15,18 @@ const CustomerDashboard = () => {
   const { products, loading, error, fetchProducts } = useProducts();
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
     fetchProducts();
   }, []);
 
   const handleRefreshProducts = () => {
     fetchProducts();
   };
+
+  // Se não estiver autenticado, redirecionar para login apenas se estiver tentando acessar área protegida
+  if (!isAuthenticated && window.location.pathname !== '/') {
+    navigate('/login');
+    return null;
+  }
 
   if (loading) {
     return (
@@ -58,7 +58,9 @@ const CustomerDashboard = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Bem-vindo(a), {user?.name?.split(' ')[0] || 'Cliente'}!</h1>
+            <h1 className="text-3xl font-bold mb-2">
+              {isAuthenticated ? `Bem-vindo(a), ${user?.name?.split(' ')[0] || 'Cliente'}!` : 'Bem-vindo ao Churrasquinho & Cia!'}
+            </h1>
             <p className="text-gray-600">Confira nossos produtos e faça seu pedido</p>
           </div>
           <Button 

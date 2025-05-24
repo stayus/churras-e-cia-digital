@@ -19,6 +19,10 @@ const CustomerRoutes = (
       element={<CustomerDashboard />} 
     />
     <Route 
+      path="/cliente" 
+      element={<ProtectedRoute element={<CustomerDashboard />} allowedRoles={['customer']} />} 
+    />
+    <Route 
       path="/minha-conta" 
       element={<ProtectedRoute element={<AccountPage />} allowedRoles={['customer']} />} 
     />
