@@ -16,10 +16,12 @@ import NewAddressSelector from '@/components/customer/NewAddressSelector';
 import { useCheckout } from '@/components/cart/useCheckout';
 import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/format';
+import type { PaymentMethod } from '@/contexts/cart';
+import type { CheckedState } from '@radix-ui/react-checkbox';
 
 const CartPage = () => {
   const { user } = useAuth();
-  const { cart } = useCart();
+  const { cart, updateQuantity, removeItem, clearCart } = useCart();
   const [storeSettings, setStoreSettings] = useState<any>(null);
   
   const {
@@ -50,6 +52,14 @@ const CartPage = () => {
     
     fetchStoreSettings();
   }, []);
+
+  const handlePickupChange = (checked: CheckedState) => {
+    setIsPickup(checked === true);
+  };
+
+  const handlePaymentMethodChange = (value: string) => {
+    setPaymentMethod(value as PaymentMethod);
+  };
 
   if (cart.items.length === 0) {
     return (
@@ -87,7 +97,12 @@ const CartPage = () => {
                 <CardTitle>Seus Itens</CardTitle>
               </CardHeader>
               <CardContent>
-                <CartItems />
+                <CartItems 
+                  items={cart.items}
+                  updateQuantity={updateQuantity}
+                  removeItem={removeItem}
+                  clearCart={clearCart}
+                />
               </CardContent>
             </Card>
 
@@ -101,7 +116,7 @@ const CartPage = () => {
                   <Checkbox
                     id="pickup"
                     checked={isPickup}
-                    onCheckedChange={setIsPickup}
+                    onCheckedChange={handlePickupChange}
                   />
                   <Label htmlFor="pickup">Retirar no local (Grátis)</Label>
                 </div>
@@ -127,7 +142,7 @@ const CartPage = () => {
                 <CardTitle>Forma de Pagamento</CardTitle>
               </CardHeader>
               <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
+                <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange}>
                   <div className="space-y-4">
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="pix" id="pix" />
