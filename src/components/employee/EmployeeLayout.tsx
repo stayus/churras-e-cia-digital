@@ -46,11 +46,20 @@ const EmployeeLayout: React.FC<EmployeeLayoutProps> = ({ children }) => {
 
   // Se ainda estamos verificando autenticação ou o usuário é um cliente, mostrar carregando
   if (isLoading || !isAuthenticated || !user || user.role === 'customer') {
-    return <div className="flex h-screen items-center justify-center">Carregando...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-black via-gray-900 to-red-900">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
+            <span className="text-white font-bold text-xl">C</span>
+          </div>
+          <p className="text-white text-lg">Carregando...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
       {children}
     </div>
   );

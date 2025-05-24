@@ -8,15 +8,25 @@ const OrdersPage = () => {
   const { pageTitle } = useOrdersPage();
   
   return (
-    <CustomerLayout>
-      <Helmet>
-        <title>Meus Pedidos - Churrasquinho & Cia</title>
-      </Helmet>
-      <div className="container mx-auto px-4 py-6 md:py-8">
-        <h1 className="text-3xl font-bold mb-6">{pageTitle}</h1>
-        <CustomerOrdersList />
-      </div>
-    </CustomerLayout>
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
+      <CustomerLayout>
+        <Helmet>
+          <title>Meus Pedidos - Churrasquinho & Cia</title>
+        </Helmet>
+        <div className="container mx-auto px-4 py-6 md:py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-white mb-4">
+              Meus{' '}
+              <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+                Pedidos
+              </span>
+            </h1>
+            <p className="text-gray-300 text-lg">Acompanhe o status dos seus pedidos</p>
+          </div>
+          <CustomerOrdersList />
+        </div>
+      </CustomerLayout>
+    </div>
   );
 };
 

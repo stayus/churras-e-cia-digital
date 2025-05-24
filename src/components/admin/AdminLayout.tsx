@@ -45,28 +45,43 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   // If we're still checking authentication or user doesn't have admin role, show loading
   if (isLoading || !isAuthenticated || !user || user.role !== 'admin') {
-    return <div className="flex h-screen items-center justify-center">Carregando...</div>;
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-black via-gray-900 to-red-900">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
+            <span className="text-white font-bold text-xl">C</span>
+          </div>
+          <p className="text-white text-lg">Carregando...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen w-full bg-gray-100">
-        <Sidebar variant="inset" side="left">
-          <SidebarContent>
-            <AdminSidebar />
-          </SidebarContent>
-        </Sidebar>
-        <SidebarInset className="overflow-y-auto">
-          <div className="flex justify-between items-center p-4 bg-white border-b">
-            <div className="flex items-center">
-              <SidebarTrigger />
-              <h2 className="text-xl font-semibold ml-2 text-brand-red">Painel de Administração</h2>
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
+      <SidebarProvider>
+        <div className="flex h-screen w-full">
+          <Sidebar variant="inset" side="left" className="bg-gray-900/90 border-r border-gray-700">
+            <SidebarContent>
+              <AdminSidebar />
+            </SidebarContent>
+          </Sidebar>
+          <SidebarInset className="overflow-y-auto bg-gradient-to-b from-gray-900 to-black">
+            <div className="flex justify-between items-center p-4 bg-gray-900/90 border-b border-gray-700 backdrop-blur-sm">
+              <div className="flex items-center">
+                <SidebarTrigger className="text-white hover:text-yellow-400" />
+                <h2 className="text-xl font-semibold ml-2 bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">
+                  Painel de Administração
+                </h2>
+              </div>
             </div>
-          </div>
-          {children}
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+            <div className="p-6">
+              {children}
+            </div>
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </div>
   );
 };
 
