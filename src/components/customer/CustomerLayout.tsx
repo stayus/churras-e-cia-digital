@@ -1,183 +1,104 @@
 
-import React, { ReactNode, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ShoppingCart, User, Home, BookOpen, Package } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
-import { Button } from '@/components/ui/button';
-import { ShoppingBag, User, LogOut, Menu, X, Home, ClipboardList } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import CartSidebar from './CartSidebar';
 
 interface CustomerLayoutProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
-  const { logout, user } = useAuth();
+  const { user, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
-  const totalItems = cart.items.reduce((acc, item) => acc + item.quantity, 0);
-
-  const menuItems = [
-    { label: 'Início', icon: <Home size={20} />, href: '/' },
-    { label: 'Meus Pedidos', icon: <ClipboardList size={20} />, href: '/pedidos' },
-    { label: 'Minha Conta', icon: <User size={20} />, href: '/minha-conta' }
-  ];
-
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <Button variant="ghost" onClick={() => navigate('/')} className="p-0 hover:bg-transparent">
-              <span className="font-bold text-xl">Churrasquinho & Cia</span>
-            </Button>
-          </div>
-          
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-4">
-            {menuItems.map((item, index) => (
-              <Button 
-                key={index} 
-                variant="ghost" 
-                className="flex items-center" 
-                onClick={() => navigate(item.href)}
-              >
-                {item.icon}
-                <span className="ml-2">{item.label}</span>
-              </Button>
-            ))}
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <Link to="/" className="text-xl font-bold text-primary">
+                Churrasquinho & Cia
+              </Link>
+            </div>
 
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/carrinho')}
-              className="relative"
-            >
-              <ShoppingBag size={20} />
-              <span className="ml-2">Carrinho</span>
-              {totalItems > 0 && (
-                <span className="absolute top-0 right-0 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </Button>
-
-            <Button 
-              variant="ghost" 
-              className="flex items-center" 
-              onClick={handleLogout}
-            >
-              <LogOut size={20} />
-              <span className="ml-2">Sair</span>
-            </Button>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="flex items-center space-x-4 md:hidden">
-            <Button 
-              variant="ghost" 
-              onClick={() => navigate('/carrinho')}
-              className="relative p-2"
-            >
-              <ShoppingBag size={20} />
-              {totalItems > 0 && (
-                <span className="absolute top-0 right-0 bg-primary text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </Button>
-            
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <Menu size={24} />
+            <nav className="hidden md:flex items-center space-x-4">
+              <Link to="/">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <Home className="h-4 w-4" />
+                  Início
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="right">
-                <div className="flex flex-col h-full">
-                  <div className="flex justify-between items-center py-4 border-b">
-                    <span className="font-semibold">Menu</span>
-                    <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
-                      <X size={18} />
-                    </Button>
-                  </div>
-                  
-                  <div className="flex flex-col space-y-4 pt-8">
-                    {menuItems.map((item, index) => (
-                      <Button 
-                        key={index} 
-                        variant="ghost" 
-                        className="flex justify-start items-center w-full" 
-                        onClick={() => {
-                          navigate(item.href);
-                          setMobileMenuOpen(false);
-                        }}
-                      >
-                        {item.icon}
-                        <span className="ml-2">{item.label}</span>
-                      </Button>
-                    ))}
+              </Link>
+              <Link to="/catalogo">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4" />
+                  Cardápio
+                </Button>
+              </Link>
+              <Link to="/pedidos">
+                <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                  <Package className="h-4 w-4" />
+                  Pedidos
+                </Button>
+              </Link>
+            </nav>
 
-                    <Button 
-                      variant="ghost" 
-                      className="flex justify-start items-center w-full" 
-                      onClick={() => {
-                        navigate('/carrinho');
-                        setMobileMenuOpen(false);
-                      }}
-                    >
-                      <ShoppingBag size={20} />
-                      <span className="ml-2">Carrinho ({totalItems})</span>
-                    </Button>
+            <div className="flex items-center space-x-4">
+              {/* Cart Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="relative flex items-center gap-2"
+                onClick={() => setIsCartOpen(true)}
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {totalItems > 0 && (
+                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs">
+                    {totalItems}
+                  </Badge>
+                )}
+                <span className="hidden sm:inline">Carrinho</span>
+              </Button>
 
-                    <div className="flex-grow"></div>
-                    
-                    <Button 
-                      variant="ghost" 
-                      className="flex justify-start items-center w-full mt-auto" 
-                      onClick={handleLogout}
-                    >
-                      <LogOut size={20} />
-                      <span className="ml-2">Sair</span>
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+              {/* User Menu */}
+              <div className="flex items-center space-x-2">
+                <Link to="/minha-conta">
+                  <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="hidden sm:inline">{user?.name?.split(' ')[0] || 'Conta'}</span>
+                  </Button>
+                </Link>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  Sair
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-grow">
+      {/* Main Content */}
+      <main className="flex-1">
         {children}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-gray-200 py-6">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between">
-            <div className="mb-4 md:mb-0">
-              <h3 className="font-bold text-lg mb-2">Churrasquinho & Cia</h3>
-              <p className="text-sm text-gray-400">O melhor churrasquinho da região!</p>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">Contato</h4>
-              <p className="text-sm text-gray-400">WhatsApp: (00) 00000-0000</p>
-            </div>
-          </div>
-          <div className="border-t border-gray-700 mt-6 pt-6 text-center text-sm text-gray-400">
-            &copy; 2025 Churrasquinho & Cia. Todos os direitos reservados.
-          </div>
-        </div>
-      </footer>
+      {/* Cart Sidebar */}
+      <CartSidebar isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
     </div>
   );
 };

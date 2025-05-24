@@ -20,14 +20,11 @@ const CustomerDashboard = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Efetuar refresh dos produtos quando a página carrega
   useEffect(() => {
-    console.log("CustomerDashboard montado - buscando produtos");
     fetchProducts();
   }, []);
 
   const handleRefreshProducts = () => {
-    console.log("Atualizando manualmente a lista de produtos");
     fetchProducts();
   };
 

@@ -16,12 +16,7 @@ const CustomerRoutes = (
   <>
     <Route 
       path="/" 
-      element={<ProtectedRoute element={<CustomerDashboard />} allowedRoles={['customer']} />} 
-    />
-    {/* Add cliente route as an alias to the home route for backward compatibility */}
-    <Route 
-      path="/cliente" 
-      element={<Navigate to="/" replace />} 
+      element={<CustomerDashboard />} 
     />
     <Route 
       path="/minha-conta" 

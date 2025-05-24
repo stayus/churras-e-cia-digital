@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product;
+  onCartOpen?: () => void;
 }
 
 const getCategoryLabel = (category: string): string => {
@@ -32,12 +33,10 @@ const getCategoryColor = (category: string): string => {
   }
 };
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onCartOpen }) => {
   const { name, description, price, image_url, promotion_price, is_out_of_stock, category } = product;
   const { addItem } = useCart();
   const { toast } = useToast();
-  
-  console.log("Renderizando ProductCard:", product);
   
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -61,6 +60,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       title: "Produto adicionado",
       description: `${name} foi adicionado ao carrinho.`
     });
+    
+    // Auto-open cart sidebar after adding item
+    if (onCartOpen) {
+      setTimeout(() => {
+        onCartOpen();
+      }, 500);
+    }
   };
   
   return (

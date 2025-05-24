@@ -2,10 +2,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
-import { useCart, Address, PaymentMethod } from '@/contexts/cart';
+import { useCart, PaymentMethod } from '@/contexts/cart';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Json } from '@/integrations/supabase/types';
+import { CustomerAddress } from '@/hooks/useAddressManager';
 
 export const useCheckout = () => {
   const { cart, clearCart } = useCart();
@@ -13,7 +14,7 @@ export const useCheckout = () => {
   const navigate = useNavigate();
   
   const [observations, setObservations] = useState('');
-  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [selectedAddress, setSelectedAddress] = useState<CustomerAddress | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   const [isPickup, setIsPickup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +42,7 @@ export const useCheckout = () => {
       return;
     }
     
-    if (!isPickup && !selectedAddressId) {
+    if (!isPickup && !selectedAddress) {
       toast({
         title: "Endereço não selecionado",
         description: "Selecione um endereço de entrega ou escolha retirar no local.",
@@ -53,35 +54,26 @@ export const useCheckout = () => {
     try {
       setIsSubmitting(true);
       
-      // Get selected address if not pickup
+      // Prepare order address
       let orderAddress: any = { pickup: true };
       
-      if (!isPickup) {
-        // Fetch customer address from Supabase
-        const { data: customerData } = await supabase
-          .from('customers')
-          .select('addresses')
-          .eq('id', user!.id)
-          .single();
-          
-        if (!customerData?.addresses) {
-          throw new Error('Não foi possível encontrar os endereços do usuário');
-        }
-        
-        const addresses = customerData.addresses as any[];
-        const selectedAddress = addresses.find((addr) => addr.id === selectedAddressId);
-        
-        if (!selectedAddress) {
-          throw new Error('Endereço selecionado não encontrado');
-        }
-        
-        orderAddress = selectedAddress;
+      if (!isPickup && selectedAddress) {
+        orderAddress = {
+          street: selectedAddress.street,
+          number: selectedAddress.number,
+          complement: selectedAddress.complement,
+          neighborhood: selectedAddress.neighborhood,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+          zip_code: selectedAddress.zip_code
+        };
       }
       
       // Transform cart items for backend
       const orderItems = cart.items.map(item => ({
         id: item.id,
-        name: item.name,
+        productId: item.id,
+        productName: item.name,
         price: item.price,
         quantity: item.quantity,
         extras: item.extras || []
@@ -94,7 +86,7 @@ export const useCheckout = () => {
           customer_id: user!.id,
           items: orderItems as unknown as Json,
           total: total,
-          status: isPickup ? 'awaiting_pickup' : 'received',
+          status: 'received',
           payment_method: paymentMethod,
           address: orderAddress as Json,
           observations: observations || null
@@ -103,15 +95,25 @@ export const useCheckout = () => {
         .single();
         
       if (error) {
+        console.error('Error creating order:', error);
         throw error;
       }
       
       // Clear cart after order is created
       clearCart();
       
+      // Show payment-specific success message
+      let successMessage = `Seu pedido #${order.id.substring(0, 8)} foi recebido!`;
+      
+      if (paymentMethod === 'pix') {
+        successMessage += ' Você receberá as informações do PIX em breve.';
+      } else if (paymentMethod === 'dinheiro') {
+        successMessage += ' O pagamento será feito na entrega.';
+      }
+      
       toast({
         title: "Pedido realizado com sucesso!",
-        description: `Seu pedido #${order.id.substring(0, 8)} foi recebido e está sendo processado.`,
+        description: successMessage,
         variant: "default"
       });
       
@@ -133,8 +135,8 @@ export const useCheckout = () => {
   return {
     observations,
     setObservations,
-    selectedAddressId,
-    setSelectedAddressId,
+    selectedAddress,
+    setSelectedAddress,
     paymentMethod,
     setPaymentMethod,
     isPickup,
