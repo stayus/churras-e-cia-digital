@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { ShoppingBag, User, LogIn, Menu } from 'lucide-react';
+import { User, LogIn, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const HomeHeader = () => {
@@ -30,25 +30,16 @@ const HomeHeader = () => {
             <Link to="/catalogo" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Cardápio
             </Link>
-            <Link to="#sobre" className="text-white hover:text-yellow-400 transition-colors font-medium">
+            <a href="#sobre" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Sobre
-            </Link>
-            <Link to="#contato" className="text-white hover:text-yellow-400 transition-colors font-medium">
+            </a>
+            <a href="#contato" className="text-white hover:text-yellow-400 transition-colors font-medium">
               Contato
-            </Link>
+            </a>
           </nav>
 
-          {/* Ações */}
+          {/* Ações de Login */}
           <div className="flex items-center space-x-4">
-            {/* Carrinho */}
-            <Link to="/carrinho" className="relative text-white hover:text-yellow-400 transition-colors">
-              <ShoppingBag className="h-6 w-6" />
-              <span className="absolute -top-2 -right-2 h-5 w-5 text-xs flex items-center justify-center bg-red-500 text-white rounded-full font-bold">
-                0
-              </span>
-            </Link>
-            
-            {/* Login/User */}
             {isAuthenticated ? (
               <Link 
                 to={

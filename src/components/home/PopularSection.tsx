@@ -1,7 +1,9 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
 
 const PopularSection = () => {
@@ -9,8 +11,8 @@ const PopularSection = () => {
     {
       id: 1,
       name: "Churrasquinho Tradicional",
-      description: "Carne bovina selecionada na chapa",
-      image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=300&h=200&fit=crop",
+      description: "Carne bovina selecionada grelhada na perfeição",
+      image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&h=300&fit=crop",
       price: "R$ 12,90",
       rating: 4.8,
       isOutOfStock: false
@@ -18,8 +20,8 @@ const PopularSection = () => {
     {
       id: 2,
       name: "X-Bacon Supreme",
-      description: "Hambúrguer duplo com bacon crocante",
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=200&fit=crop",
+      description: "Hambúrguer duplo com bacon crocante e queijo",
+      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop",
       price: "R$ 22,90",
       rating: 4.9,
       isOutOfStock: false
@@ -27,8 +29,8 @@ const PopularSection = () => {
     {
       id: 3,
       name: "Espetinho de Frango",
-      description: "Frango temperado com ervas especiais",
-      image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=300&h=200&fit=crop",
+      description: "Frango temperado com ervas especiais da casa",
+      image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop",
       price: "R$ 8,50",
       rating: 4.7,
       isOutOfStock: true
@@ -36,15 +38,23 @@ const PopularSection = () => {
   ];
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-4xl font-bold text-center mb-12 text-black">
-          ⭐ Mais Pedidos
-        </h2>
+        <div className="text-center mb-12">
+          <Badge className="mb-4 bg-yellow-500 text-black text-lg px-4 py-2">
+            ⭐ MAIS PEDIDOS
+          </Badge>
+          <h2 className="text-4xl font-bold text-black mb-4">
+            Favoritos dos Clientes
+          </h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Os pratos mais amados e pedidos pelos nossos clientes
+          </p>
+        </div>
         
-        <div className="space-y-6">
+        <div className="grid md:grid-cols-1 gap-8 max-w-4xl mx-auto">
           {popularItems.map((item) => (
-            <Card key={item.id} className="flex flex-col md:flex-row overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+            <Card key={item.id} className="flex flex-col md:flex-row overflow-hidden shadow-lg hover:shadow-xl transition-shadow bg-white">
               <div className="relative md:w-80">
                 <img 
                   src={item.image} 
@@ -55,26 +65,35 @@ const PopularSection = () => {
                   <Star className="h-4 w-4 text-yellow-400 fill-current" />
                   <span className="text-white text-sm font-bold">{item.rating}</span>
                 </div>
+                {item.isOutOfStock && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Badge className="bg-gray-600 text-white font-bold text-lg px-4 py-2">
+                      ESGOTADO
+                    </Badge>
+                  </div>
+                )}
               </div>
               
               <div className="flex-1 p-6 flex flex-col justify-between">
                 <div>
-                  <h3 className="text-2xl font-bold mb-2 text-black">{item.name}</h3>
-                  <p className="text-gray-600 mb-4">{item.description}</p>
+                  <h3 className="text-2xl font-bold mb-3 text-black">{item.name}</h3>
+                  <p className="text-gray-600 mb-4 text-lg">{item.description}</p>
                   
-                  <div className="mb-4">
+                  <div className="mb-6">
                     <span className="text-3xl font-bold text-green-600">{item.price}</span>
                   </div>
                 </div>
                 
                 {item.isOutOfStock ? (
-                  <Button disabled className="bg-gray-400 text-white font-semibold w-full md:w-auto cursor-not-allowed">
+                  <Button disabled className="bg-gray-400 text-white font-semibold w-full md:w-auto px-8 py-3 text-lg cursor-not-allowed">
                     Esgotado
                   </Button>
                 ) : (
-                  <Button className="bg-red-500 hover:bg-red-600 text-white font-semibold w-full md:w-auto">
-                    Adicionar ao Carrinho
-                  </Button>
+                  <Link to="/catalogo">
+                    <Button className="bg-red-500 hover:bg-red-600 text-white font-semibold w-full md:w-auto px-8 py-3 text-lg">
+                      Ver no Cardápio
+                    </Button>
+                  </Link>
                 )}
               </div>
             </Card>
