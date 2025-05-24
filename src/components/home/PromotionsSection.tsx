@@ -1,0 +1,79 @@
+
+import React from 'react';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+
+const PromotionsSection = () => {
+  const promotions = [
+    {
+      id: 1,
+      name: "Combo Especial",
+      description: "2 Churrasquinhos + Refrigerante + Batata",
+      image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=300&h=200&fit=crop",
+      price: "R$ 24,90",
+      originalPrice: "R$ 32,90"
+    },
+    {
+      id: 2,
+      name: "Hambúrguer Artesanal",
+      description: "Hambúrguer 200g + Batata + Bebida",
+      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300&h=200&fit=crop",
+      price: "R$ 19,90",
+      originalPrice: "R$ 26,90"
+    },
+    {
+      id: 3,
+      name: "Espetinho Duplo",
+      description: "2 Espetinhos de carne + Farofa",
+      image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=300&h=200&fit=crop",
+      price: "R$ 16,50",
+      originalPrice: "R$ 21,00"
+    }
+  ];
+
+  return (
+    <section className="py-16 bg-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-4xl font-bold text-center mb-12 text-black">
+          🔥 Promoções Imperdíveis
+        </h2>
+        
+        <div className="space-y-6">
+          {promotions.map((promo) => (
+            <Card key={promo.id} className="flex flex-col md:flex-row overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              <div className="relative md:w-80">
+                <img 
+                  src={promo.image} 
+                  alt={promo.name}
+                  className="w-full h-48 md:h-full object-cover"
+                />
+                <Badge className="absolute top-4 left-4 bg-red-500 text-white font-bold">
+                  PROMOÇÃO
+                </Badge>
+              </div>
+              
+              <div className="flex-1 p-6 flex flex-col justify-between">
+                <div>
+                  <h3 className="text-2xl font-bold mb-2 text-black">{promo.name}</h3>
+                  <p className="text-gray-600 mb-4">{promo.description}</p>
+                  
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl font-bold text-green-600">{promo.price}</span>
+                    <span className="text-lg text-gray-400 line-through">{promo.originalPrice}</span>
+                  </div>
+                </div>
+                
+                <Button className="bg-red-500 hover:bg-red-600 text-white font-semibold w-full md:w-auto">
+                  Adicionar ao Carrinho
+                </Button>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default PromotionsSection;

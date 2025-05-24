@@ -2,9 +2,9 @@
 import React from 'react';
 import HomeHeader from '@/components/home/HomeHeader';
 import HeroSection from '@/components/home/HeroSection';
-import FeaturedProducts from '@/components/home/FeaturedProducts';
-import WhyChooseUs from '@/components/home/WhyChooseUs';
-import ContactCTA from '@/components/home/ContactCTA';
+import PromotionsSection from '@/components/home/PromotionsSection';
+import PopularSection from '@/components/home/PopularSection';
+import CTASection from '@/components/home/CTASection';
 import HomeFooter from '@/components/home/HomeFooter';
 
 const HomePage = () => {
@@ -12,9 +12,9 @@ const HomePage = () => {
     <div className="min-h-screen">
       <HomeHeader />
       <HeroSection />
-      <FeaturedProducts />
-      <WhyChooseUs />
-      <ContactCTA />
+      <PromotionsSection />
+      <PopularSection />
+      <CTASection />
       <HomeFooter />
     </div>
   );
