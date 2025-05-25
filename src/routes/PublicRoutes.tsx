@@ -1,45 +1,28 @@
 
 import React from 'react';
 import { Route } from 'react-router-dom';
+import Index from '@/pages/Index';
+import Home from '@/pages/Home';
+import Login from '@/pages/Login';
+import EmployeeLogin from '@/pages/EmployeeLogin';
+import Register from '@/pages/Register';
+import RegisterSuccess from '@/pages/RegisterSuccess';
+import EmailConfirmed from '@/pages/EmailConfirmed';
+import PasswordChange from '@/pages/PasswordChange';
+import Catalog from '@/pages/Catalog';
+import NotFound from '@/pages/NotFound';
 
-// Pages
-import LoginPage from "@/pages/Login";
-import RegisterPage from "@/pages/Register";
-import RegisterSuccessPage from "@/pages/RegisterSuccess";
-import EmailConfirmedPage from "@/pages/EmailConfirmed";
-import EmployeeLoginPage from "@/pages/EmployeeLogin";
-import NotFound from "@/pages/NotFound";
-import PasswordChangePage from "@/pages/PasswordChange";
-
-import { ProtectedRoute } from './ProtectedRoute';
-
-// Export a fragment containing all public routes
-const PublicRoutes = (
-  <>
-    {/* Public routes */}
-    <Route path="/login" element={<LoginPage />} />
-    <Route path="/registro" element={<RegisterPage />} />
-    <Route path="/registro-concluido" element={<RegisterSuccessPage />} />
-    <Route path="/email-confirmado" element={<EmailConfirmedPage />} />
-    {/* Keep email-confirmation as a duplicate route to handle both URL formats */}
-    <Route path="/email-confirmation" element={<EmailConfirmedPage />} />
-    <Route path="/employee-login" element={<EmployeeLoginPage />} />
-    
-    {/* Protected routes with role-based access */}
-    <Route 
-      path="/change-password" 
-      element={
-        <ProtectedRoute 
-          element={<PasswordChangePage />} 
-          // Permitir qualquer funcionário, não apenas aqueles com role específico
-          allowedRoles={['admin', 'employee', 'motoboy', 'tesoureiro', 'analista', 'cozinheira']} 
-        />
-      } 
-    />
-    
-    {/* Catch all route */}
-    <Route path="*" element={<NotFound />} />
-  </>
-);
+const PublicRoutes = [
+  <Route key="index" path="/" element={<Index />} />,
+  <Route key="home" path="/home" element={<Home />} />,
+  <Route key="login" path="/login" element={<Login />} />,
+  <Route key="employee-login" path="/employee-login" element={<EmployeeLogin />} />,
+  <Route key="register" path="/register" element={<Register />} />,
+  <Route key="register-success" path="/register-success" element={<RegisterSuccess />} />,
+  <Route key="email-confirmed" path="/email-confirmed" element={<EmailConfirmed />} />,
+  <Route key="password-change" path="/password-change" element={<PasswordChange />} />,
+  <Route key="catalogo" path="/catalogo" element={<Catalog />} />,
+  <Route key="not-found" path="*" element={<NotFound />} />
+];
 
 export default PublicRoutes;

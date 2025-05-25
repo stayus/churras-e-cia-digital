@@ -24,7 +24,7 @@ const NewHomeHeader = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/home" className="flex items-center space-x-2">
             <div className="text-2xl font-bold">
               <span className="text-red-600">Churrasquinho</span>
               <span className="text-yellow-500">&Cia</span>
@@ -33,7 +33,7 @@ const NewHomeHeader = () => {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-700 hover:text-red-600 transition-colors font-medium">
+            <Link to="/home" className="text-gray-700 hover:text-red-600 transition-colors font-medium">
               Início
             </Link>
             <Link to="/catalogo" className="text-gray-700 hover:text-red-600 transition-colors font-medium">
@@ -100,7 +100,7 @@ const NewHomeHeader = () => {
           <div className="md:hidden border-t border-gray-100 py-4 bg-white/95 backdrop-blur-md">
             <div className="flex flex-col space-y-4">
               <Link 
-                to="/" 
+                to="/home" 
                 className="text-gray-700 hover:text-red-600 transition-colors font-medium"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

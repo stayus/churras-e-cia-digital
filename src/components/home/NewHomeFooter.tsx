@@ -39,7 +39,7 @@ const NewHomeFooter = () => {
             <h4 className="text-xl font-semibold mb-6 text-yellow-400">Links</h4>
             <div className="space-y-3">
               <Link 
-                to="/" 
+                to="/home" 
                 className="block text-gray-300 hover:text-white transition-colors duration-300 text-base hover:translate-x-2 transform"
               >
                 Início

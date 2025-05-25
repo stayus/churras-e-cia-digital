@@ -1,25 +1,23 @@
 
-import React from 'react';
-import NewHomeHeader from '@/components/home/NewHomeHeader';
-import NewHeroSection from '@/components/home/NewHeroSection';
-import NewPromotionsSection from '@/components/home/NewPromotionsSection';
-import NewPopularSection from '@/components/home/NewPopularSection';
-import NewCTASection from '@/components/home/NewCTASection';
-import NewHomeFooter from '@/components/home/NewHomeFooter';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const HomePage = () => {
+const Index = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redireciona imediatamente para /home
+    navigate('/home', { replace: true });
+  }, [navigate]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <NewHomeHeader />
-      <main>
-        <NewHeroSection />
-        <NewPromotionsSection />
-        <NewPopularSection />
-        <NewCTASection />
-      </main>
-      <NewHomeFooter />
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
+        <p className="text-gray-600">Carregando...</p>
+      </div>
     </div>
   );
 };
 
-export default HomePage;
+export default Index;
