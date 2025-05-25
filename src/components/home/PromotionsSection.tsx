@@ -52,12 +52,8 @@ const PromotionsSection = () => {
 
   const handleAddToCart = (product: any) => {
     if (!isAuthenticated) {
-      toast({
-        title: "Login necessário",
-        description: "Faça login para adicionar produtos ao carrinho.",
-        variant: "destructive"
-      });
-      // Redirecionar para login será feito pelo Link
+      // Redirecionar para login se não estiver logado
+      window.location.href = '/login';
       return;
     }
 
@@ -87,9 +83,6 @@ const PromotionsSection = () => {
           <h2 className="text-4xl font-bold text-black mb-4">
             🔥 Promoções
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Aproveite nossas ofertas especiais e economize nos seus pratos favoritos
-          </p>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8 mb-12">
@@ -119,20 +112,12 @@ const PromotionsSection = () => {
                   <span className="text-lg text-gray-400 line-through">{formatCurrency(promo.originalPrice)}</span>
                 </div>
                 
-                {isAuthenticated ? (
-                  <Button 
-                    onClick={() => handleAddToCart(promo)}
-                    className="bg-red-500 hover:bg-red-600 text-white font-semibold w-full transition-all duration-300 hover:scale-105"
-                  >
-                    Adicionar
-                  </Button>
-                ) : (
-                  <Link to="/login" className="w-full">
-                    <Button className="bg-red-500 hover:bg-red-600 text-white font-semibold w-full transition-all duration-300 hover:scale-105">
-                      Adicionar
-                    </Button>
-                  </Link>
-                )}
+                <Button 
+                  onClick={() => handleAddToCart(promo)}
+                  className="bg-red-500 hover:bg-red-600 text-white font-semibold w-full transition-all duration-300 hover:scale-105"
+                >
+                  Adicionar
+                </Button>
               </div>
             </Card>
           ))}
@@ -141,7 +126,7 @@ const PromotionsSection = () => {
         <div className="text-center animate-fade-in">
           <Link to="/catalogo">
             <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-3 transition-all duration-300 hover:scale-105">
-              Ver Todas as Promoções
+              Ver Todos
             </Button>
           </Link>
         </div>

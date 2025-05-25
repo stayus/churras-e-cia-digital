@@ -17,24 +17,15 @@ const HeroSection = () => {
               <span className="text-red-500">& Cia</span>
             </h1>
             
-            {/* Slogan secundário */}
-            <h2 className="text-3xl md:text-4xl text-white font-bold mb-6">
-              O sabor que você ama!
-            </h2>
-            
             {/* Subtítulo */}
-            <p className="text-xl text-gray-300 mb-10 max-w-2xl leading-relaxed">
-              Hambúrgueres artesanais e lanches deliciosos feitos com ingredientes frescos e muito carinho. 
-              Entrega rápida e atendimento de qualidade que conquistam você.
+            <p className="text-xl text-white mb-10 max-w-2xl leading-relaxed">
+              O sabor que você ama! Hambúrgueres artesanais e lanches deliciosos feitos com ingredientes frescos e muito carinho.
             </p>
             
             {/* Botões de ação */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button asChild size="lg" className="bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-4 text-lg transition-all duration-300 hover:scale-105">
                 <Link to="/catalogo">Ver Cardápio</Link>
-              </Button>
-              <Button asChild size="lg" className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-4 text-lg transition-all duration-300 hover:scale-105">
-                <Link to="/catalogo">Promoções</Link>
               </Button>
             </div>
           </div>

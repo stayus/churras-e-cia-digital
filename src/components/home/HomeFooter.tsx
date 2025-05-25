@@ -61,7 +61,7 @@ const HomeFooter = () => {
               
               <div className="flex items-center">
                 <Mail className="h-5 w-5 text-red-500 mr-3" />
-                <span className="text-gray-300">email@churrasquinho.com</span>
+                <span className="text-gray-300">Email: email@churrasquinho.com</span>
               </div>
             </div>
           </div>
