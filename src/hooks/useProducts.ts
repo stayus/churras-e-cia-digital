@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { formatDbProducts } from '@/utils/productUtils';
 
 export interface Product {
   id: string;
@@ -19,6 +20,14 @@ export interface Product {
   }>;
 }
 
+export interface AddProductData {
+  name: string;
+  description: string;
+  price: number;
+  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
+  image_url?: string;
+}
+
 export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +43,8 @@ export const useProducts = () => {
 
       if (error) throw error;
 
-      setProducts(data || []);
+      const formattedProducts = formatDbProducts(data || []);
+      setProducts(formattedProducts);
     } catch (error: any) {
       console.error('Error fetching products:', error);
       toast({
@@ -47,10 +57,86 @@ export const useProducts = () => {
     }
   };
 
-  useEffect(() => {
-    fetchProducts();
+  const addProduct = async (productData: AddProductData) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('add-product', {
+        body: productData
+      });
 
-    // Set up realtime subscription without showing toast
+      if (error) throw error;
+
+      toast({
+        title: "Produto adicionado",
+        description: "Produto adicionado com sucesso!"
+      });
+
+      await fetchProducts();
+      return true;
+    } catch (error: any) {
+      console.error('Error adding product:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao adicionar produto",
+        description: error.message || "Não foi possível adicionar o produto"
+      });
+      return false;
+    }
+  };
+
+  const updateProduct = async (id: string, productData: Partial<Product>) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('update-product', {
+        body: { id, ...productData }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Produto atualizado",
+        description: "Produto atualizado com sucesso!"
+      });
+
+      await fetchProducts();
+      return true;
+    } catch (error: any) {
+      console.error('Error updating product:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar produto",
+        description: error.message || "Não foi possível atualizar o produto"
+      });
+      return false;
+    }
+  };
+
+  const deleteProduct = async (id: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-product', {
+        body: { id }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Produto excluído",
+        description: "Produto excluído com sucesso!"
+      });
+
+      await fetchProducts();
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting product:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao excluir produto",
+        description: error.message || "Não foi possível excluir o produto"
+      });
+      return false;
+    }
+  };
+
+  const setupRealtime = () => {
+    // Setup realtime subscription
     const subscription = supabase
       .channel('products-channel')
       .on(
@@ -65,11 +151,37 @@ export const useProducts = () => {
     return () => {
       subscription.unsubscribe();
     };
+  };
+
+  const checkProducts = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-products');
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error('Error checking products:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+
+    // Set up realtime subscription
+    const cleanup = setupRealtime();
+
+    return cleanup;
   }, []);
 
   return {
     products,
     loading,
-    refetch: fetchProducts
+    refetch: fetchProducts,
+    fetchProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    setupRealtime,
+    checkProducts
   };
 };

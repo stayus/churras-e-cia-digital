@@ -5,7 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useProducts, Product } from "@/hooks/useProducts";
 
 export const useProductsManagement = () => {
-  const { products: allProducts, loading: productsLoading, fetchProducts } = useProducts();
+  const { products: allProducts, loading: productsLoading, refetch } = useProducts();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -133,7 +133,7 @@ export const useProductsManagement = () => {
     setSearchTerm,
     selectedProducts,
     filteredProducts,
-    fetchProducts,
+    fetchProducts: refetch,
     toggleProductStock,
     updateSelectedProductsStock,
     handleProductSelection,
