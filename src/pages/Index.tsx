@@ -1,21 +1,23 @@
 
 import React from 'react';
-import HomeHeader from '@/components/home/HomeHeader';
-import HeroSection from '@/components/home/HeroSection';
-import PromotionsSection from '@/components/home/PromotionsSection';
-import PopularSection from '@/components/home/PopularSection';
-import CTASection from '@/components/home/CTASection';
-import HomeFooter from '@/components/home/HomeFooter';
+import NewHomeHeader from '@/components/home/NewHomeHeader';
+import NewHeroSection from '@/components/home/NewHeroSection';
+import NewPromotionsSection from '@/components/home/NewPromotionsSection';
+import NewPopularSection from '@/components/home/NewPopularSection';
+import NewCTASection from '@/components/home/NewCTASection';
+import NewHomeFooter from '@/components/home/NewHomeFooter';
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen bg-white">
-      <HomeHeader />
-      <HeroSection />
-      <PromotionsSection />
-      <PopularSection />
-      <CTASection />
-      <HomeFooter />
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      <NewHomeHeader />
+      <main>
+        <NewHeroSection />
+        <NewPromotionsSection />
+        <NewPopularSection />
+        <NewCTASection />
+      </main>
+      <NewHomeFooter />
     </div>
   );
 };
