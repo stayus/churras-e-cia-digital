@@ -22,31 +22,31 @@ const NewHomeHeader = () => {
   return (
     <header className="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-lg z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
           <Link to="/home" className="flex items-center space-x-2">
-            <div className="text-2xl font-bold">
+            <div className="text-xl sm:text-2xl font-bold">
               <span className="text-red-600">Churrasquinho</span>
               <span className="text-yellow-500">&Cia</span>
             </div>
           </Link>
           
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/home" className="text-gray-700 hover:text-red-600 transition-colors font-medium">
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <Link to="/home" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Início
             </Link>
-            <Link to="/catalogo" className="text-gray-700 hover:text-red-600 transition-colors font-medium">
+            <Link to="/catalogo" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Cardápio
             </Link>
             
             {isAuthenticated ? (
               <>
-                <Link to="/pedidos" className="text-gray-700 hover:text-red-600 transition-colors font-medium">
+                <Link to="/pedidos" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Pedidos
                 </Link>
                 <div className="relative">
-                  <Link to="/carrinho" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2">
+                  <Link to="/carrinho" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
                     {totalItems > 0 && (
@@ -56,7 +56,7 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                 </div>
-                <Link to="/minha-conta" className="text-gray-700 hover:text-red-600 transition-colors font-medium">
+                <Link to="/minha-conta" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Conta
                 </Link>
               </>
@@ -69,14 +69,15 @@ const NewHomeHeader = () => {
               <Button 
                 onClick={handleLogout}
                 variant="outline"
-                className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all"
+                size="sm"
+                className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all text-sm"
               >
                 <LogOut className="h-4 w-4 mr-2" />
                 Sair
               </Button>
             ) : (
               <Link to="/login">
-                <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg">
+                <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg text-sm">
                   <LogIn className="h-4 w-4 mr-2" />
                   Entrar
                 </Button>

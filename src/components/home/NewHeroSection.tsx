@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Star, Clock, Truck } from 'lucide-react';
+import { Clock, Truck } from 'lucide-react';
 
 const NewHeroSection = () => {
   return (
@@ -19,29 +19,25 @@ const NewHeroSection = () => {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Conteúdo de texto */}
           <div className="text-center lg:text-left animate-fade-in-up">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-6 leading-tight text-white">
               <span className="text-yellow-400 block">Sabor que</span>
               <span className="text-red-500 block">Conquistou</span>
               <span className="text-white block">a Cidade!</span>
             </h1>
             
-            <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-8 max-w-2xl leading-relaxed">
               Experimente nossos <span className="text-yellow-400 font-semibold">churrasquinhos artesanais</span> e 
               <span className="text-red-400 font-semibold"> hambúrgueres gourmet</span>. 
               Feitos com ingredientes premium e entregues quentinhos na sua porta!
             </p>
             
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-8 text-sm md:text-base">
-              <div className="bg-red-600/20 text-red-300 px-4 py-2 rounded-full border border-red-500/30 flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Qualidade Premium
-              </div>
-              <div className="bg-yellow-600/20 text-yellow-300 px-4 py-2 rounded-full border border-yellow-500/30 flex items-center gap-2">
-                <Truck className="h-4 w-4" />
+            <div className="flex flex-wrap gap-3 sm:gap-4 justify-center lg:justify-start mb-8 text-xs sm:text-sm md:text-base">
+              <div className="bg-red-600/20 text-red-300 px-3 sm:px-4 py-2 rounded-full border border-red-500/30 flex items-center gap-2">
+                <Truck className="h-3 w-3 sm:h-4 sm:w-4" />
                 Entrega Rápida
               </div>
-              <div className="bg-green-600/20 text-green-300 px-4 py-2 rounded-full border border-green-500/30 flex items-center gap-2">
-                <Clock className="h-4 w-4" />
+              <div className="bg-green-600/20 text-green-300 px-3 sm:px-4 py-2 rounded-full border border-green-500/30 flex items-center gap-2">
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
                 Sempre Fresquinho
               </div>
             </div>
@@ -50,21 +46,10 @@ const NewHeroSection = () => {
               <Button 
                 asChild 
                 size="lg" 
-                className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-full"
+                className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-full"
               >
                 <Link to="/catalogo">
                   Ver Cardápio
-                </Link>
-              </Button>
-              
-              <Button 
-                asChild 
-                variant="outline"
-                size="lg" 
-                className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 rounded-full"
-              >
-                <Link to="/catalogo?categoria=promocoes">
-                  Promoções
                 </Link>
               </Button>
             </div>
@@ -81,19 +66,11 @@ const NewHeroSection = () => {
               
               <div className="absolute inset-0 bg-gradient-to-tr from-red-600/30 to-yellow-400/20 rounded-3xl"></div>
               
-              <div className="absolute bottom-6 left-6 right-6 bg-black/80 backdrop-blur-sm rounded-2xl p-6 border border-white/10">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="h-4 w-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="text-white font-semibold">4.9/5</span>
-                </div>
-                <p className="text-white font-semibold text-lg">
+              <div className="absolute bottom-6 left-6 right-6 bg-black/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10">
+                <p className="text-white font-semibold text-base sm:text-lg">
                   🔥 Mais de 10.000 clientes satisfeitos!
                 </p>
-                <p className="text-gray-300 text-sm">
+                <p className="text-gray-300 text-xs sm:text-sm">
                   Grelhado no ponto certo, temperado com amor
                 </p>
               </div>
