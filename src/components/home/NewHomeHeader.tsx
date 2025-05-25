@@ -1,129 +1,175 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
+import { useAuth } from '@/contexts/AuthContext';
+import { Menu, X, ShoppingCart, Package, LogOut, LogIn, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, User, LogOut, Menu } from 'lucide-react';
-import { useCart } from '@/contexts/cart';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { useCart } from '@/contexts/CartContext';
+import { Badge } from '@/components/ui/badge';
 
 const NewHomeHeader = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const { cart } = useCart();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const itemCount = cart.items.reduce((total, item) => total + item.quantity, 0);
+  const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const handleLogout = async () => {
+    await logout();
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-sm border-b border-red-600">
+    <header className="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-lg z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-3 sm:py-4">
+        <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
           <Link to="/home" className="flex items-center space-x-2">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm sm:text-lg">C</span>
+            <div className="text-xl sm:text-2xl font-bold">
+              <span className="text-red-600">Churrasquinho</span>
+              <span className="text-yellow-500">&Cia</span>
             </div>
-            <span className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">
-              Churrasquinho & Cia
-            </span>
           </Link>
-
+          
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link 
-              to="/home" 
-              className="text-white hover:text-yellow-400 transition-colors font-medium"
-            >
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <Link to="/home" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Início
             </Link>
-            <Link 
-              to="/cardapio" 
-              className="text-white hover:text-yellow-400 transition-colors font-medium"
-            >
+            <Link to="/catalogo" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Cardápio
             </Link>
-          </nav>
-
-          {/* Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+            
             {isAuthenticated ? (
               <>
-                {/* Cart */}
-                <Link to="/carrinho">
-                  <Button variant="outline" size="sm" className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black relative">
+                <Link to="/pedidos" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                  Pedidos
+                </Link>
+                <div className="relative">
+                  <Link to="/carrinho" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
                     <ShoppingCart className="h-4 w-4" />
-                    {itemCount > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        {itemCount}
-                      </span>
+                    Carrinho
+                    {totalItems > 0 && (
+                      <Badge variant="destructive" className="h-5 w-5 flex items-center justify-center p-0 text-xs">
+                        {totalItems}
+                      </Badge>
                     )}
-                  </Button>
+                  </Link>
+                </div>
+                <Link to="/minha-conta" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                  Conta
                 </Link>
-
-                {/* User Menu */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black">
-                      <User className="h-4 w-4 mr-1" />
-                      <span className="hidden sm:inline">{user?.name}</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
-                    <DropdownMenuItem asChild>
-                      <Link to="/pedidos" className="text-white hover:text-yellow-400">
-                        Meus Pedidos
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={logout} className="text-white hover:text-yellow-400">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sair
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </>
-            ) : (
-              <div className="flex space-x-2">
-                <Link to="/login">
-                  <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-bold">
-                    Entrar
-                  </Button>
-                </Link>
-                <Link to="/registro">
-                  <Button variant="outline" size="sm" className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black">
-                    Cadastrar
-                  </Button>
-                </Link>
-              </div>
-            )}
+            ) : null}
+          </nav>
 
-            {/* Mobile Menu */}
-            <div className="md:hidden">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black">
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-gray-900 border-gray-700">
-                  <DropdownMenuItem asChild>
-                    <Link to="/home" className="text-white hover:text-yellow-400">
-                      Início
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/cardapio" className="text-white hover:text-yellow-400">
-                      Cardápio
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+          {/* Auth Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            {isAuthenticated ? (
+              <Button 
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all text-sm"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+            ) : (
+              <Link to="/login">
+                <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg text-sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Entrar
+                </Button>
+              </Link>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-700 hover:text-red-600"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 py-4 bg-white/95 backdrop-blur-md">
+            <div className="flex flex-col space-y-4">
+              <Link 
+                to="/home" 
+                className="text-gray-700 hover:text-red-600 transition-colors font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Início
+              </Link>
+              <Link 
+                to="/catalogo" 
+                className="text-gray-700 hover:text-red-600 transition-colors font-medium"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Cardápio
+              </Link>
+              
+              {isAuthenticated && (
+                <>
+                  <Link 
+                    to="/pedidos" 
+                    className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Package className="h-4 w-4" />
+                    Pedidos
+                  </Link>
+                  <Link 
+                    to="/carrinho" 
+                    className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Carrinho
+                    {totalItems > 0 && (
+                      <Badge variant="destructive" className="h-5 w-5 flex items-center justify-center p-0 text-xs">
+                        {totalItems}
+                      </Badge>
+                    )}
+                  </Link>
+                  <Link 
+                    to="/minha-conta" 
+                    className="text-gray-700 hover:text-red-600 transition-colors font-medium"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Conta
+                  </Link>
+                </>
+              )}
+              
+              <div className="border-t border-gray-100 pt-4">
+                {isAuthenticated ? (
+                  <Button 
+                    onClick={handleLogout}
+                    variant="outline"
+                    className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
+                  </Button>
+                ) : (
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold w-full">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Entrar
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </header>
   );

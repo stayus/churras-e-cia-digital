@@ -11,6 +11,10 @@ interface ProductGridProps {
 const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
+  const handleCartOpen = () => {
+    setIsCartOpen(true);
+  };
+
   if (products.length === 0) {
     return (
       <div className="text-center py-12">
@@ -25,7 +29,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products }) => {
         {products.map((product) => (
           <ProductCard 
             key={product.id} 
-            product={product}
+            product={product} 
+            onCartOpen={handleCartOpen}
           />
         ))}
       </div>

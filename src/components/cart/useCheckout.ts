@@ -19,14 +19,17 @@ export const useCheckout = () => {
   const [isPickup, setIsPickup] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Fixed shipping fee amount
   const shippingFee = isPickup ? 0 : 5.00;
   
+  // Calculate subtotal of items
   const subtotal = cart.items.reduce((acc, item) => {
     const itemTotal = item.price * item.quantity;
     const extraTotal = item.extras?.reduce((sum, extra) => sum + extra.price * item.quantity, 0) || 0;
     return acc + itemTotal + extraTotal;
   }, 0);
   
+  // Total order amount
   const total = subtotal + shippingFee;
   
   const handleCheckout = async () => {
@@ -51,6 +54,7 @@ export const useCheckout = () => {
     try {
       setIsSubmitting(true);
       
+      // Prepare order address
       let orderAddress: any = { pickup: true };
       
       if (!isPickup && selectedAddress) {
@@ -65,6 +69,7 @@ export const useCheckout = () => {
         };
       }
       
+      // Transform cart items for backend
       const orderItems = cart.items.map(item => ({
         id: item.id,
         productId: item.id,
@@ -74,6 +79,7 @@ export const useCheckout = () => {
         extras: item.extras || []
       }));
       
+      // Create order in database
       const { data: order, error } = await supabase
         .from('orders')
         .insert({
@@ -93,22 +99,15 @@ export const useCheckout = () => {
         throw error;
       }
       
+      // Clear cart after order is created
       clearCart();
       
+      // Show payment-specific success message
       let successMessage = `Seu pedido #${order.id.substring(0, 8)} foi recebido!`;
       
       if (paymentMethod === 'pix') {
-        // Buscar configurações da loja para pegar WhatsApp
-        const { data: settings } = await supabase
-          .from('settings')
-          .select('whatsapp_link, store_phone')
-          .single();
-        
-        const whatsappLink = settings?.whatsapp_link || '#';
-        successMessage += ` Por favor, envie o comprovante do PIX pelo WhatsApp: ${whatsappLink}`;
+        successMessage += ' Você receberá as informações do PIX em breve.';
       } else if (paymentMethod === 'dinheiro') {
-        successMessage += ' O pagamento será feito na entrega.';
-      } else if (paymentMethod === 'cartao') {
         successMessage += ' O pagamento será feito na entrega.';
       }
       
@@ -118,6 +117,7 @@ export const useCheckout = () => {
         variant: "default"
       });
       
+      // Redirect to orders page
       navigate('/pedidos');
       
     } catch (error: any) {

@@ -17,7 +17,7 @@ const AdminProducts = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const { products, loading, refetch, deleteProduct } = useProducts();
+  const { products, loading, fetchProducts, deleteProduct } = useProducts();
 
   // Função para formatar preço como currency
   const formatCurrency = (value: number) => {
@@ -31,7 +31,7 @@ const AdminProducts = () => {
   const handleProductSubmit = (data: any) => {
     console.log("Product data:", data);
     setIsProductDialogOpen(false);
-    refetch(); // Atualizar lista de produtos
+    fetchProducts(); // Atualizar lista de produtos
   };
 
   // Função para editar produto
@@ -44,7 +44,7 @@ const AdminProducts = () => {
   const handleProductUpdate = (data: Product) => {
     console.log("Product updated:", data);
     setIsEditDialogOpen(false);
-    refetch(); // Atualizar lista de produtos
+    fetchProducts(); // Atualizar lista de produtos
   };
 
   // Função para confirmar exclusão
@@ -58,7 +58,7 @@ const AdminProducts = () => {
     if (selectedProduct) {
       const success = await deleteProduct(selectedProduct.id);
       if (success) {
-        refetch();
+        fetchProducts();
       }
     }
     setIsDeleteDialogOpen(false);
@@ -67,7 +67,7 @@ const AdminProducts = () => {
   // Efetuar refresh dos produtos quando a página carrega
   useEffect(() => {
     console.log("AdminProducts montado - buscando produtos");
-    refetch();
+    fetchProducts();
   }, []);
 
   return (

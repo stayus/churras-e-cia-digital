@@ -1,130 +1,123 @@
 
 import React from 'react';
-import { useAuth } from '@/contexts/auth';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useCart } from '@/contexts/cart';
-import { useToast } from '@/hooks/use-toast';
 import { Product } from '@/hooks/useProducts';
-import { ShoppingCart, Star } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface ProductCardProps {
   product: Product;
+  onCartOpen?: () => void;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { isAuthenticated } = useAuth();
+const getCategoryLabel = (category: string): string => {
+  switch (category) {
+    case 'lanche': return 'Lanche';
+    case 'bebida': return 'Bebida';
+    case 'refeicao': return 'Refeição';
+    case 'sobremesa': return 'Sobremesa';
+    default: return 'Outro';
+  }
+};
+
+const getCategoryColor = (category: string): string => {
+  switch (category) {
+    case 'lanche': return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
+    case 'bebida': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+    case 'refeicao': return 'bg-green-100 text-green-800 hover:bg-green-200';
+    case 'sobremesa': return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
+    default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+  }
+};
+
+const ProductCard: React.FC<ProductCardProps> = ({ product, onCartOpen }) => {
+  const { name, description, price, image_url, promotion_price, is_out_of_stock, category } = product;
   const { addItem } = useCart();
   const { toast } = useToast();
-
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
   };
-
+  
+  const categoryClass = getCategoryColor(category);
+  const categoryLabel = getCategoryLabel(category);
+  
+  const truncateDescription = (text: string, maxLength: number = 80) => {
+    if (!text) return '';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+  
   const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      window.location.href = '/login';
-      return;
-    }
-
-    if (product.is_out_of_stock) {
-      toast({
-        title: "Produto esgotado",
-        description: "Este produto está temporariamente esgotado.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Convert Product to match cart's expected format
-    const cartProduct = {
-      id: product.id,
-      name: product.name,
-      description: product.description,
-      price: product.promotion_price || product.price,
-      image_url: product.image_url,
-      category: product.category,
-      is_out_of_stock: product.is_out_of_stock,
-      promotion_price: product.promotion_price,
-      extras: product.extras || []
-    };
-
-    addItem(cartProduct, []);
+    addItem(product, []);
     toast({
       title: "Produto adicionado",
-      description: `${product.name} foi adicionado ao carrinho.`,
+      description: `${name} foi adicionado ao carrinho.`
     });
+    
+    // Auto-open cart sidebar after adding item
+    if (onCartOpen) {
+      setTimeout(() => {
+        onCartOpen();
+      }, 500);
+    }
   };
-
-  const currentPrice = product.promotion_price || product.price;
-  const hasPromotion = product.promotion_price && product.promotion_price < product.price;
-
+  
   return (
-    <Card className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 bg-white border-0 rounded-2xl">
-      <div className="relative overflow-hidden">
+    <Card className="overflow-hidden h-full flex flex-col">
+      <div className="relative">
         <img 
-          src={product.image_url || "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&h=300&fit=crop"} 
-          alt={product.name}
-          className="w-full h-40 sm:h-48 object-cover group-hover:scale-110 transition-transform duration-700"
+          src={image_url || 'https://placehold.co/300x200?text=Produto'} 
+          alt={name}
+          className="w-full h-48 object-cover"
         />
-        
-        {hasPromotion && (
-          <Badge className="absolute top-4 right-4 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold px-2 sm:px-3 py-1 text-xs sm:text-sm shadow-lg animate-pulse">
-            PROMOÇÃO
-          </Badge>
-        )}
-        
-        {product.is_out_of_stock && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-            <span className="text-white font-bold text-lg">ESGOTADO</span>
+        <Badge className={`absolute top-2 right-2 ${categoryClass}`}>
+          {categoryLabel}
+        </Badge>
+        {promotion_price && (
+          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm font-bold">
+            Promoção
           </div>
         )}
-        
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        {is_out_of_stock && (
+          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
+            <p className="text-white text-xl font-bold">Esgotado</p>
+          </div>
+        )}
       </div>
       
-      <div className="p-4 sm:p-6">
-        <h3 className="text-lg sm:text-xl font-bold mb-2 sm:mb-3 text-gray-900 group-hover:text-red-600 transition-colors duration-300">
-          {product.name}
-        </h3>
-        <p className="text-gray-600 mb-3 sm:mb-4 text-sm leading-relaxed line-clamp-2">
-          {product.description}
-        </p>
-        
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <div className="flex flex-col">
-            <span className="text-xl sm:text-2xl font-bold text-green-600">
-              {formatCurrency(currentPrice)}
-            </span>
-            {hasPromotion && (
-              <span className="text-xs sm:text-sm text-gray-400 line-through">
-                De {formatCurrency(product.price)}
-              </span>
-            )}
-          </div>
-          
-          <div className="flex items-center gap-1 text-yellow-500">
-            <Star className="h-4 w-4 fill-current" />
-            <Star className="h-4 w-4 fill-current" />
-            <Star className="h-4 w-4 fill-current" />
-            <Star className="h-4 w-4 fill-current" />
-            <Star className="h-4 w-4 fill-current" />
-          </div>
+      <CardContent className="pt-4 flex-grow">
+        <h3 className="font-bold text-lg mb-2">{name}</h3>
+        <p className="text-gray-600 text-sm mb-3">{truncateDescription(description)}</p>
+      </CardContent>
+      
+      <CardFooter className="flex justify-between items-center border-t p-4">
+        <div>
+          {promotion_price ? (
+            <div className="flex flex-col">
+              <span className="text-red-600 font-bold">{formatCurrency(promotion_price)}</span>
+              <span className="text-gray-500 text-sm line-through">{formatCurrency(price)}</span>
+            </div>
+          ) : (
+            <span className="font-bold">{formatCurrency(price)}</span>
+          )}
         </div>
-        
         <Button 
+          size="sm" 
+          disabled={is_out_of_stock}
+          className="flex items-center gap-2"
           onClick={handleAddToCart}
-          disabled={product.is_out_of_stock}
-          className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-2 sm:py-3 text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-lg rounded-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
           <ShoppingCart className="h-4 w-4" />
-          {product.is_out_of_stock ? 'Esgotado' : 'Adicionar ao Carrinho'}
+          Adicionar
         </Button>
-      </div>
+      </CardFooter>
     </Card>
   );
 };

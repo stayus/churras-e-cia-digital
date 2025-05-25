@@ -30,7 +30,7 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
     name: product.name,
     description: product.description,
     price: product.price,
-    category: product.category as 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro',
+    category: product.category,
     image_url: product.image_url || '',
   };
   
@@ -47,26 +47,17 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
         image_url: data.image_url || ''
       });
       
-      if (result) {
-        const updatedProduct: Product = {
-          ...product,
-          name: data.name,
-          description: data.description,
-          price: data.price,
-          category: data.category,
-          image_url: data.image_url || ''
-        };
-        
-        onSubmit(updatedProduct);
-        onOpenChange(false);
-        
-        toast({
-          title: "Produto atualizado",
-          description: "O produto foi atualizado com sucesso."
-        });
-      } else {
+      if (!result) {
         throw new Error("Não foi possível atualizar o produto");
       }
+      
+      onSubmit(result);
+      onOpenChange(false);
+      
+      toast({
+        title: "Produto atualizado",
+        description: "O produto foi atualizado com sucesso."
+      });
     } catch (error: any) {
       console.error('Erro ao atualizar produto:', error);
       toast({

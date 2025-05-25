@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { useAuth } from '@/contexts/auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -12,14 +12,14 @@ import { RefreshCw } from 'lucide-react';
 const CustomerDashboard = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const { products, loading, refetch } = useProducts();
+  const { products, loading, error, fetchProducts } = useProducts();
 
   useEffect(() => {
-    refetch();
+    fetchProducts();
   }, []);
 
   const handleRefreshProducts = () => {
-    refetch();
+    fetchProducts();
   };
 
   // Se não estiver autenticado, redirecionar para login apenas se estiver tentando acessar área protegida
@@ -34,6 +34,21 @@ const CustomerDashboard = () => {
         <div className="flex justify-center items-center h-64">
           <p>Carregando produtos...</p>
         </div>
+      </CustomerLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <CustomerLayout>
+        <Card className="mb-6">
+          <div className="pt-6 px-6 pb-6">
+            <p className="text-red-500">Erro ao carregar produtos: {error}</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">
+              Tentar novamente
+            </Button>
+          </div>
+        </Card>
       </CustomerLayout>
     );
   }
