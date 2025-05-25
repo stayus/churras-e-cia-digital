@@ -9,7 +9,7 @@ import Register from '@/pages/Register';
 import RegisterSuccess from '@/pages/RegisterSuccess';
 import EmailConfirmed from '@/pages/EmailConfirmed';
 import PasswordChange from '@/pages/PasswordChange';
-import Catalog from '@/pages/Catalog';
+import Cardapio from '@/pages/Cardapio';
 import NotFound from '@/pages/NotFound';
 
 const PublicRoutes = [
@@ -21,7 +21,8 @@ const PublicRoutes = [
   <Route key="register-success" path="/register-success" element={<RegisterSuccess />} />,
   <Route key="email-confirmed" path="/email-confirmed" element={<EmailConfirmed />} />,
   <Route key="password-change" path="/password-change" element={<PasswordChange />} />,
-  <Route key="catalogo" path="/catalogo" element={<Catalog />} />,
+  <Route key="cardapio" path="/cardapio" element={<Cardapio />} />,
+  <Route key="catalogo" path="/catalogo" element={<Cardapio />} />, // Redirect antigo
   <Route key="not-found" path="*" element={<NotFound />} />
 ];
 
