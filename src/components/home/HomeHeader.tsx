@@ -72,7 +72,7 @@ const HomeHeader = () => {
                   className="flex items-center text-white hover:text-yellow-400 transition-colors"
                 >
                   <User className="h-5 w-5 mr-2" />
-                  <span className="font-medium">{user?.name?.split(' ')[0]}</span>
+                  <span className="font-medium">Conta</span>
                 </Link>
                 <button 
                   onClick={handleLogout}
@@ -156,7 +156,7 @@ const HomeHeader = () => {
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       <User className="h-5 w-5 mr-2" />
-                      <span className="font-medium">{user?.name?.split(' ')[0]}</span>
+                      <span className="font-medium">Conta</span>
                     </Link>
                     <button 
                       onClick={handleLogout}

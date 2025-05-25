@@ -9,7 +9,7 @@ const HeroSection = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Conteúdo de texto */}
-          <div className="text-center lg:text-left animate-fade-in">
+          <div className="text-center lg:text-left animate-scroll-reveal">
             {/* Slogan principal */}
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
               <span className="text-yellow-400">O Sabor que</span>
@@ -50,7 +50,7 @@ const HeroSection = () => {
           </div>
           
           {/* Imagem chamativa */}
-          <div className="hidden lg:block animate-scale-in">
+          <div className="hidden lg:block animate-scroll-reveal" style={{ animationDelay: '300ms' }}>
             <div className="relative">
               <img 
                 src="https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=600&h=500&fit=crop&crop=center" 

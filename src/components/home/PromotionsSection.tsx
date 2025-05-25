@@ -82,7 +82,7 @@ const PromotionsSection = () => {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12 animate-fade-in">
+        <div className="text-center mb-12 animate-scroll-reveal">
           <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
             🔥 Promoções
           </h2>
@@ -95,7 +95,7 @@ const PromotionsSection = () => {
           {promotions.map((promo, index) => (
             <Card 
               key={promo.id} 
-              className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105 animate-slide-in-left group bg-white border border-gray-200"
+              className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105 animate-scroll-reveal group bg-white border border-gray-200"
               style={{ animationDelay: `${index * 200}ms` }}
             >
               <div className="relative overflow-hidden">
@@ -144,10 +144,10 @@ const PromotionsSection = () => {
           ))}
         </div>
 
-        <div className="text-center animate-fade-in">
+        <div className="text-center animate-scroll-reveal">
           <Link to="/catalogo?categoria=promocoes">
             <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-              Ver Todas as Promoções
+              Ver Todos
             </Button>
           </Link>
         </div>

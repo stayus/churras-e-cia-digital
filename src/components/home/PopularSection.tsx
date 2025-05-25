@@ -82,7 +82,7 @@ const PopularSection = () => {
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row justify-between items-center mb-12 animate-fade-in">
+        <div className="flex flex-col lg:flex-row justify-between items-center mb-12 animate-scroll-reveal">
           <div className="text-center lg:text-left mb-6 lg:mb-0">
             <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
               ⭐ Mais Pedidos
@@ -103,7 +103,7 @@ const PopularSection = () => {
           {popularItems.map((item, index) => (
             <Card 
               key={item.id} 
-              className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105 animate-slide-in-right group bg-white border border-gray-200"
+              className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105 animate-scroll-reveal group bg-white border border-gray-200"
               style={{ animationDelay: `${index * 200}ms` }}
             >
               <div className="relative overflow-hidden">
