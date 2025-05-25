@@ -201,6 +201,41 @@
     }
   }
 
+  @keyframes scroll-reveal {
+    0% {
+      opacity: 0;
+      transform: translateY(50px) rotateX(15deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg);
+    }
+  }
+
+  @keyframes bounce-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.3) translateY(50px);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.1) translateY(-10px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 30px rgba(234, 179, 8, 0.8), 0 0 40px rgba(234, 179, 8, 0.6);
+    }
+  }
+
   /* Animation Classes */
   .animate-fade-in {
     animation: fade-in 0.8s ease-out forwards;
@@ -228,6 +263,18 @@
 
   .animate-glow {
     animation: glow 2s ease-in-out infinite;
+  }
+
+  .animate-scroll-reveal {
+    animation: scroll-reveal 0.8s ease-out forwards;
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.8s ease-out forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
   }
 
   /* Responsive utilities */
