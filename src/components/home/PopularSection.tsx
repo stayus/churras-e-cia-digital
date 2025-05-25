@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/hooks/use-toast';
+import { TrendingUp, ArrowRight, Users } from 'lucide-react';
 
 const PopularSection = () => {
   const { isAuthenticated } = useAuth();
@@ -17,30 +18,30 @@ const PopularSection = () => {
     {
       id: 1,
       name: "Churrasquinho Tradicional",
-      description: "Carne bovina selecionada grelhada na perfeição com temperos especiais",
+      description: "Carne bovina premium grelhada na perfeição com temperos especiais da casa",
       image: "https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=400&h=300&fit=crop",
-      price: 12.90,
-      orders_count: 847,
+      price: 14.90,
+      orders_count: 2847,
       is_out_of_stock: false,
       category: 'lanche'
     },
     {
       id: 2,
-      name: "X-Bacon Supreme",
-      description: "Hambúrguer duplo artesanal com bacon crocante, queijo derretido e molho especial",
+      name: "X-Bacon Gourmet",
+      description: "Hambúrguer artesanal 180g + bacon crocante + queijo derretido + molho especial",
       image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop",
-      price: 22.90,
-      orders_count: 623,
+      price: 26.90,
+      orders_count: 1923,
       is_out_of_stock: false,
       category: 'lanche'
     },
     {
       id: 3,
       name: "Espetinho de Frango",
-      description: "Frango temperado com ervas especiais da casa, grelhado no ponto certo",
+      description: "Frango temperado com ervas finas, grelhado no ponto ideal e suculento",
       image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&h=300&fit=crop",
-      price: 8.50,
-      orders_count: 592,
+      price: 9.90,
+      orders_count: 1592,
       is_out_of_stock: false,
       category: 'lanche'
     }
@@ -55,7 +56,6 @@ const PopularSection = () => {
 
   const handleAddToCart = (product: any) => {
     if (!isAuthenticated) {
-      // Redirecionar para login se não estiver logado
       window.location.href = '/login';
       return;
     }
@@ -75,35 +75,44 @@ const PopularSection = () => {
     addItem(productForCart, []);
     toast({
       title: "Produto adicionado",
-      description: `${product.name} foi adicionado ao carrinho.`
+      description: `${product.name} foi adicionado ao carrinho.`,
     });
   };
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row justify-between items-center mb-12 animate-scroll-reveal">
+        {/* Header with Ver Cardápio button */}
+        <div className="flex flex-col lg:flex-row justify-between items-center mb-16 animate-fade-in-up">
           <div className="text-center lg:text-left mb-6 lg:mb-0">
-            <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">
-              ⭐ Mais Pedidos
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Os favoritos dos nossos clientes
+            <div className="flex items-center justify-center lg:justify-start gap-3 mb-4">
+              <TrendingUp className="h-8 w-8 text-red-600" />
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
+                Mais Pedidos
+              </h2>
+            </div>
+            <p className="text-xl text-gray-600">
+              Os favoritos absolutos dos nossos clientes
             </p>
           </div>
           
           <Link to="/catalogo">
-            <Button className="bg-red-500 hover:bg-red-600 text-white font-bold px-8 py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-              Ver o Cardápio Completo
+            <Button 
+              size="lg"
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-8 py-4 transition-all duration-300 hover:scale-105 hover:shadow-lg rounded-full"
+            >
+              Ver Cardápio Completo
+              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
           </Link>
         </div>
         
+        {/* Cards Grid */}
         <div className="grid md:grid-cols-3 gap-8">
           {popularItems.map((item, index) => (
             <Card 
               key={item.id} 
-              className="overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:scale-105 animate-scroll-reveal group bg-white border border-gray-200"
+              className="group overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 animate-fade-in-up bg-white border-0 rounded-2xl"
               style={{ animationDelay: `${index * 200}ms` }}
             >
               <div className="relative overflow-hidden">
@@ -112,32 +121,39 @@ const PopularSection = () => {
                   alt={item.name}
                   className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-700"
                 />
-                {/* Badge com contador de pedidos */}
-                <Badge className="absolute top-3 right-3 bg-green-600 text-white font-bold px-3 py-1 text-sm shadow-lg">
-                  {item.orders_count} pedidos
+                
+                {/* Orders Badge */}
+                <Badge className="absolute top-4 right-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold px-3 py-1 text-sm shadow-lg flex items-center gap-1">
+                  <Users className="h-3 w-3" />
+                  {item.orders_count.toLocaleString()} pedidos
                 </Badge>
+                
+                {/* Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
               
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-2 text-black group-hover:text-red-600 transition-colors duration-300">
+                <h3 className="text-xl font-bold mb-3 text-gray-900 group-hover:text-red-600 transition-colors duration-300">
                   {item.name}
                 </h3>
                 <p className="text-gray-600 mb-4 text-sm leading-relaxed">
                   {item.description}
                 </p>
                 
-                <div className="mb-6">
+                <div className="flex items-center justify-between mb-6">
                   <span className="text-2xl font-bold text-green-600">
                     {formatCurrency(item.price)}
                   </span>
+                  <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+                    Top #{popularItems.indexOf(item) + 1}
+                  </div>
                 </div>
                 
                 <Button 
                   onClick={() => handleAddToCart(item)}
-                  className="bg-red-500 hover:bg-red-600 text-white font-semibold w-full transition-all duration-300 hover:scale-105 hover:shadow-lg"
+                  className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-semibold py-3 transition-all duration-300 hover:scale-105 hover:shadow-lg rounded-full"
                 >
-                  Adicionar
+                  Adicionar ao Carrinho
                 </Button>
               </div>
             </Card>

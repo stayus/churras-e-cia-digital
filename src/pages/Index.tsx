@@ -9,7 +9,7 @@ import HomeFooter from '@/components/home/HomeFooter';
 
 const HomePage = () => {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <HomeHeader />
       <HeroSection />
       <PromotionsSection />
