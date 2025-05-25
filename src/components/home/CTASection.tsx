@@ -7,7 +7,7 @@ import { Clock, Truck } from 'lucide-react';
 const CTASection = () => {
   return (
     <section className="py-24 bg-red-500">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center animate-fade-in">
         <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
           Tá com fome? 
         </h2>
@@ -16,9 +16,13 @@ const CTASection = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
-          <Button asChild size="lg" className="bg-white hover:bg-gray-100 text-red-500 font-bold px-12 py-6 text-xl rounded-full">
+          <Button 
+            asChild 
+            size="lg" 
+            className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-12 py-6 text-xl rounded-full transition-all duration-300 hover:scale-110 hover:rotate-1"
+          >
             <Link to="/catalogo">
-              Ver Cardápio Completo
+              Pedir Agora
             </Link>
           </Button>
         </div>
