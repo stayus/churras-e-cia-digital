@@ -11,7 +11,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
 import CustomerLayout from '@/components/customer/CustomerLayout';
 import CartItems from '@/components/cart/CartItems';
-import OrderSummary from '@/components/cart/OrderSummary';
 import NewAddressSelector from '@/components/customer/NewAddressSelector';
 import { useCheckout } from '@/components/cart/useCheckout';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,185 +62,206 @@ const CartPage = () => {
 
   if (cart.items.length === 0) {
     return (
-      <CustomerLayout>
-        <Helmet>
-          <title>Carrinho - Churrasquinho & Cia</title>
-        </Helmet>
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold mb-4">Seu carrinho está vazio</h2>
-            <p className="text-gray-600 mb-8">Adicione alguns produtos deliciosos ao seu carrinho</p>
-            <Button onClick={() => window.location.href = '/catalogo'}>
-              Ver Cardápio
-            </Button>
+      <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
+        <CustomerLayout>
+          <Helmet>
+            <title>Carrinho - Churrasquinho & Cia</title>
+          </Helmet>
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center py-12">
+              <h2 className="text-3xl font-bold mb-4 text-white">Seu carrinho está vazio</h2>
+              <p className="text-gray-300 mb-8 text-lg">Adicione alguns produtos deliciosos ao seu carrinho</p>
+              <Button 
+                onClick={() => window.location.href = '/cardapio'}
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-8 py-3"
+              >
+                Ver Cardápio
+              </Button>
+            </div>
           </div>
-        </div>
-      </CustomerLayout>
+        </CustomerLayout>
+      </div>
     );
   }
 
   return (
-    <CustomerLayout>
-      <Helmet>
-        <title>Carrinho - Churrasquinho & Cia</title>
-      </Helmet>
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
+      <CustomerLayout>
+        <Helmet>
+          <title>Carrinho - Churrasquinho & Cia</title>
+        </Helmet>
 
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Finalizar Pedido</h1>
+        <div className="container mx-auto px-4 py-8">
+          <h1 className="text-4xl font-bold mb-8 text-white text-center animate-fade-in">
+            Finalizar{' '}
+            <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+              Pedido
+            </span>
+          </h1>
 
-        <div className="grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Cart Items */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Seus Itens</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CartItems 
-                  items={cart.items}
-                  updateQuantity={updateQuantity}
-                  removeItem={removeItem}
-                  clearCart={clearCart}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Delivery Options */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Opções de Entrega</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="pickup"
-                    checked={isPickup}
-                    onCheckedChange={handlePickupChange}
+          <div className="grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2 space-y-6">
+              {/* Cart Items */}
+              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '200ms' }}>
+                <CardHeader>
+                  <CardTitle className="text-yellow-400">Seus Itens</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CartItems 
+                    items={cart.items}
+                    updateQuantity={updateQuantity}
+                    removeItem={removeItem}
+                    clearCart={clearCart}
                   />
-                  <Label htmlFor="pickup">Retirar no local (Grátis)</Label>
-                </div>
+                </CardContent>
+              </Card>
 
-                {!isPickup && (
-                  <div>
-                    <Label className="text-base font-medium">Endereço de Entrega</Label>
-                    <div className="mt-2">
-                      <NewAddressSelector
-                        userId={user!.id}
-                        onAddressSelected={setSelectedAddress}
-                        selectedAddress={selectedAddress}
-                      />
-                    </div>
+              {/* Delivery Options */}
+              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '400ms' }}>
+                <CardHeader>
+                  <CardTitle className="text-yellow-400">Opções de Entrega</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="pickup"
+                      checked={isPickup}
+                      onCheckedChange={handlePickupChange}
+                      className="border-yellow-400 data-[state=checked]:bg-yellow-400 data-[state=checked]:text-black"
+                    />
+                    <Label htmlFor="pickup" className="text-white font-medium">Retirar no local (Grátis)</Label>
                   </div>
-                )}
-              </CardContent>
-            </Card>
 
-            {/* Payment Method */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Forma de Pagamento</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange}>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="pix" id="pix" />
-                      <Label htmlFor="pix" className="font-medium">PIX</Label>
-                    </div>
-                    {paymentMethod === 'pix' && storeSettings?.pix_key && (
-                      <div className="ml-6 p-4 bg-blue-50 rounded-lg">
-                        <p className="text-sm text-blue-800 mb-2">
-                          <strong>PIX:</strong> {storeSettings.pix_key}
-                        </p>
-                        <p className="text-sm text-blue-600">
-                          Por favor, envie o comprovante para nossa equipe no WhatsApp: {' '}
-                          <a 
-                            href={storeSettings.whatsapp_link} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="font-medium underline"
-                          >
-                            {storeSettings.store_phone}
-                          </a>
-                        </p>
+                  {!isPickup && (
+                    <div>
+                      <Label className="text-base font-medium text-yellow-400">Endereço de Entrega</Label>
+                      <div className="mt-2">
+                        <NewAddressSelector
+                          userId={user!.id}
+                          onAddressSelected={setSelectedAddress}
+                          selectedAddress={selectedAddress}
+                        />
                       </div>
-                    )}
-
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="dinheiro" id="dinheiro" />
-                      <Label htmlFor="dinheiro" className="font-medium">Dinheiro</Label>
                     </div>
-                    {paymentMethod === 'dinheiro' && (
-                      <div className="ml-6 p-4 bg-green-50 rounded-lg">
-                        <p className="text-sm text-green-800">
-                          O pagamento será feito na entrega.
-                        </p>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Payment Method */}
+              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '600ms' }}>
+                <CardHeader>
+                  <CardTitle className="text-yellow-400">Forma de Pagamento</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange}>
+                    <div className="space-y-4">
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="pix" id="pix" className="border-yellow-400 text-yellow-400" />
+                        <Label htmlFor="pix" className="font-medium text-white">PIX</Label>
                       </div>
-                    )}
+                      {paymentMethod === 'pix' && storeSettings?.pix_key && (
+                        <div className="ml-6 p-4 bg-blue-900/50 rounded-lg border border-blue-600">
+                          <p className="text-sm text-blue-300 mb-2">
+                            <strong>PIX:</strong> {storeSettings.pix_key}
+                          </p>
+                          <p className="text-sm text-blue-200">
+                            Por favor, envie o comprovante para nossa equipe no WhatsApp: {' '}
+                            <a 
+                              href={storeSettings.whatsapp_link} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="font-medium underline text-yellow-400 hover:text-yellow-300"
+                            >
+                              {storeSettings.store_phone}
+                            </a>
+                          </p>
+                        </div>
+                      )}
 
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="cartao" id="cartao" />
-                      <Label htmlFor="cartao" className="font-medium">Cartão</Label>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="dinheiro" id="dinheiro" className="border-yellow-400 text-yellow-400" />
+                        <Label htmlFor="dinheiro" className="font-medium text-white">Dinheiro</Label>
+                      </div>
+                      {paymentMethod === 'dinheiro' && (
+                        <div className="ml-6 p-4 bg-green-900/50 rounded-lg border border-green-600">
+                          <p className="text-sm text-green-300">
+                            O pagamento será feito na entrega.
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="cartao" id="cartao" className="border-yellow-400 text-yellow-400" />
+                        <Label htmlFor="cartao" className="font-medium text-white">Cartão</Label>
+                      </div>
+                      {paymentMethod === 'cartao' && (
+                        <div className="ml-6 p-4 bg-purple-900/50 rounded-lg border border-purple-600">
+                          <p className="text-sm text-purple-300">
+                            O pagamento será feito na entrega.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </RadioGroup>
+                </CardContent>
+              </Card>
+
+              {/* Observations */}
+              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '800ms' }}>
+                <CardHeader>
+                  <CardTitle className="text-yellow-400">Observações</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Textarea
+                    placeholder="Alguma observação especial para seu pedido?"
+                    value={observations}
+                    onChange={(e) => setObservations(e.target.value)}
+                    rows={3}
+                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-400"
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Order Summary */}
+            <div>
+              <Card className="sticky top-4 bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '1000ms' }}>
+                <CardHeader>
+                  <CardTitle className="text-yellow-400">Resumo do Pedido</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-white">
+                      <span>Subtotal:</span>
+                      <span>{formatCurrency(subtotal)}</span>
+                    </div>
+                    <div className="flex justify-between text-white">
+                      <span>Taxa de entrega:</span>
+                      <span>{formatCurrency(shippingFee)}</span>
+                    </div>
+                    <div className="border-t border-gray-600 pt-2">
+                      <div className="flex justify-between font-bold text-lg text-yellow-400">
+                        <span>Total:</span>
+                        <span>{formatCurrency(total)}</span>
+                      </div>
                     </div>
                   </div>
-                </RadioGroup>
-              </CardContent>
-            </Card>
 
-            {/* Observations */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Observações</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Textarea
-                  placeholder="Alguma observação especial para seu pedido?"
-                  value={observations}
-                  onChange={(e) => setObservations(e.target.value)}
-                  rows={3}
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Order Summary */}
-          <div>
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle>Resumo do Pedido</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>{formatCurrency(subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Taxa de entrega:</span>
-                    <span>{formatCurrency(shippingFee)}</span>
-                  </div>
-                  <div className="border-t pt-2">
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>Total:</span>
-                      <span>{formatCurrency(total)}</span>
-                    </div>
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={handleCheckout} 
-                  className="w-full" 
-                  size="lg"
-                  disabled={isSubmitting || (!isPickup && !selectedAddress)}
-                >
-                  {isSubmitting ? 'Processando...' : 'Finalizar Pedido'}
-                </Button>
-              </CardContent>
-            </Card>
+                  <Button 
+                    onClick={handleCheckout} 
+                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold" 
+                    size="lg"
+                    disabled={isSubmitting || (!isPickup && !selectedAddress)}
+                  >
+                    {isSubmitting ? 'Processando...' : 'Finalizar Pedido'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-      </div>
-    </CustomerLayout>
+      </CustomerLayout>
+    </div>
   );
 };
 

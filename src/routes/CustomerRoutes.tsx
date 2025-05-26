@@ -5,7 +5,7 @@ import { Route, Navigate } from 'react-router-dom';
 // Customer pages
 import CustomerDashboard from "@/pages/customer/Dashboard";
 import AccountPage from "@/pages/customer/Account";
-import CatalogPage from "@/pages/Catalog";
+import CardapioPage from "@/pages/Cardapio";
 import CartPage from "@/pages/Cart";
 import OrdersPage from "@/pages/Orders";
 
@@ -27,8 +27,8 @@ const CustomerRoutes = (
       element={<ProtectedRoute element={<AccountPage />} allowedRoles={['customer']} />} 
     />
     <Route 
-      path="/catalogo" 
-      element={<CatalogPage />} 
+      path="/cardapio" 
+      element={<CardapioPage />} 
     />
     <Route 
       path="/carrinho" 

@@ -102,9 +102,13 @@ const CustomerLoginForm = () => {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-white">Email</FormLabel>
               <FormControl>
-                <Input placeholder="email@exemplo.com" {...field} />
+                <Input 
+                  placeholder="email@exemplo.com" 
+                  {...field} 
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-400"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -115,25 +119,34 @@ const CustomerLoginForm = () => {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Senha</FormLabel>
+              <FormLabel className="text-white">Senha</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="********" {...field} />
+                <Input 
+                  type="password" 
+                  placeholder="********" 
+                  {...field} 
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-yellow-400"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div className="flex justify-between items-center mt-2">
-          <Link to="/esqueci-senha" className="text-sm text-primary hover:underline">
+          <Link to="/esqueci-senha" className="text-sm text-yellow-400 hover:text-yellow-300 transition-colors">
             Esqueci minha senha
           </Link>
         </div>
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold" 
+          disabled={isLoading}
+        >
           {isLoading ? "Entrando..." : "Entrar"}
         </Button>
         <div className="text-center mt-4">
-          <span className="text-sm text-gray-500">Não tem uma conta? </span>
-          <Link to="/registro" className="text-sm text-primary hover:underline">
+          <span className="text-sm text-gray-400">Não tem uma conta? </span>
+          <Link to="/register" className="text-sm text-yellow-400 hover:text-yellow-300 font-semibold transition-colors">
             Criar conta
           </Link>
         </div>
