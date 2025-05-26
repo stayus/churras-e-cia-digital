@@ -80,8 +80,8 @@ const NewHomeFooter = () => {
               
               <div className="flex items-center group">
                 <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mr-3 sm:mr-4 group-hover:scale-110 transition-transform duration-300" />
-                <a href="tel:(11)99999-9999" className="text-gray-300 hover:text-white text-sm sm:text-base transition-colors">
-                  (11) 99999-9999
+                <a href="tel:(98)98853-0154" className="text-gray-300 hover:text-white text-sm sm:text-base transition-colors">
+                  (98) 98853-0154
                 </a>
               </div>
               
@@ -101,11 +101,19 @@ const NewHomeFooter = () => {
               <div className="flex items-center">
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-2 sm:mr-3" />
                 <div className="text-gray-300 text-sm sm:text-base">
-                  <div className="font-medium">Segunda a Sexta</div>
-                  <div className="text-xs sm:text-sm">18:00 - 23:00</div>
+                  <div className="font-medium">Segunda e Sexta</div>
+                  <div className="text-xs sm:text-sm">Fechado</div>
                 </div>
               </div>
               
+              <div className="flex items-center">
+                <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-2 sm:mr-3" />
+                <div className="text-gray-300 text-sm sm:text-base">
+                  <div className="font-medium">Terça a Quinta</div>
+                  <div className="text-xs sm:text-sm">18:30 - 22:00</div>
+                </div>
+              </div>
+
               <div className="flex items-center">
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-2 sm:mr-3" />
                 <div className="text-gray-300 text-sm sm:text-base">
