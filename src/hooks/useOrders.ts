@@ -67,23 +67,6 @@ export const useOrders = () => {
 
   useEffect(() => {
     fetchOrders();
-    
-    // Set up real-time subscription for orders
-    const subscription = supabase
-      .channel('orders-channel')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'orders' },
-        (payload) => {
-          // Refresh orders when there's a change
-          fetchOrders();
-        }
-      )
-      .subscribe();
-    
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   return {
