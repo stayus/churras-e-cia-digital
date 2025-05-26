@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onCartOpen }) => {
 
   const handleAddToCart = async () => {
     setIsAdding(true);
-    await addItem(product);
+    await addItem(product, 1);
     setIsAdding(false);
     onCartOpen();
   };
@@ -32,13 +33,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onCartOpen }) => {
 
   const handleIncreaseQuantity = async () => {
     setIsAdding(true);
-    await addItem(product);
+    await addItem(product, 1);
     setIsAdding(false);
   };
 
   const handleDecreaseQuantity = async () => {
     setIsRemoving(true);
-    await removeItem(product.id, true);
+    await removeItem(product.id);
     setIsRemoving(false);
   };
 

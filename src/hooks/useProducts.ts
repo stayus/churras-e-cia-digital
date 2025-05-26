@@ -1,17 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Product } from '@/types/product';
+import { Product, ProductExtra, AddProductData } from '@/types/product';
+import { formatDbProducts } from '@/utils/productUtils';
 
-export { Product } from '@/types/product';
-
-export interface AddProductData {
-  name: string;
-  description: string;
-  price: number;
-  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
-  image_url?: string;
-}
+export type { Product, AddProductData } from '@/types/product';
 
 export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -34,13 +27,9 @@ export const useProducts = () => {
         return;
       }
 
-      // Cast the category to the correct type
-      const typedProducts = (data || []).map(product => ({
-        ...product,
-        category: product.category as Product['category']
-      }));
-
-      setProducts(typedProducts);
+      // Use the utility function to format products properly
+      const formattedProducts = formatDbProducts(data || []);
+      setProducts(formattedProducts);
     } catch (err) {
       console.error('Error in fetchProducts:', err);
       setError('Erro ao carregar produtos');
