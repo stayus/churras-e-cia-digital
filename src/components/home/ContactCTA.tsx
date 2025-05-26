@@ -53,16 +53,20 @@ const ContactCTA = () => {
               <h3 className="text-3xl font-bold mb-6 text-center text-yellow-400">Horário de Funcionamento</h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-gray-700 pb-3">
-                  <span className="font-semibold text-white">Segunda a Sexta</span>
-                  <span className="text-yellow-400 font-bold">17:00 - 23:00</span>
+                  <span className="font-semibold text-white">Segunda e Sexta</span>
+                  <span className="text-yellow-400 font-bold">Fechado</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-gray-700 pb-3">
+                  <span className="font-semibold text-white">Terça a Quinta</span>
+                  <span className="text-yellow-400 font-bold">18:30 - 22:00</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-gray-700 pb-3">
                   <span className="font-semibold text-white">Sábado</span>
-                  <span className="text-yellow-400 font-bold">17:00 - 00:00</span>
+                  <span className="text-yellow-400 font-bold">18:00 - 22:00</span>
                 </div>
                 <div className="flex justify-between items-center border-b border-gray-700 pb-3">
                   <span className="font-semibold text-white">Domingo</span>
-                  <span className="text-yellow-400 font-bold">17:00 - 22:00</span>
+                  <span className="text-yellow-400 font-bold">18:00 - 22:00</span>
                 </div>
               </div>
               
@@ -73,7 +77,7 @@ const ContactCTA = () => {
                 </div>
                 <div className="flex items-center text-gray-300">
                   <Phone className="h-5 w-5 text-red-500 mr-3" />
-                  <span><strong className="text-white">Tel:</strong> (00) 00000-0000</span>
+                  <span><strong className="text-white">Tel:</strong> (98) 98853-0154</span>
                 </div>
               </div>
             </CardContent>
