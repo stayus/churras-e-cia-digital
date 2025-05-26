@@ -12,15 +12,15 @@ export const cartReducer = (state: CartState, action: CartAction): CartState => 
       if (existingItemIndex !== -1) {
         // Update existing item quantity
         const updatedItems = [...state.items];
+        const newQuantity = updatedItems[existingItemIndex].quantity + quantity;
+        const itemPrice = product.promotion_price || product.price;
         updatedItems[existingItemIndex] = {
           ...updatedItems[existingItemIndex],
-          quantity: updatedItems[existingItemIndex].quantity + quantity
+          quantity: newQuantity,
+          totalPrice: itemPrice * newQuantity
         };
         
-        const total = updatedItems.reduce((sum, item) => {
-          const price = item.product.promotion_price || item.product.price;
-          return sum + (price * item.quantity);
-        }, 0);
+        const total = updatedItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
         return {
           items: updatedItems,
@@ -28,21 +28,20 @@ export const cartReducer = (state: CartState, action: CartAction): CartState => 
         };
       } else {
         // Add new item
+        const itemPrice = product.promotion_price || product.price;
         const newItem = {
           id: product.id,
           product,
           quantity,
           extras: [],
-          price: product.promotion_price || product.price,
+          price: itemPrice,
           name: product.name,
-          imageUrl: product.image_url
+          imageUrl: product.image_url,
+          totalPrice: itemPrice * quantity
         };
         
         const newItems = [...state.items, newItem];
-        const total = newItems.reduce((sum, item) => {
-          const price = item.product.promotion_price || item.product.price;
-          return sum + (price * item.quantity);
-        }, 0);
+        const total = newItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
         return {
           items: newItems,
@@ -61,19 +60,19 @@ export const cartReducer = (state: CartState, action: CartAction): CartState => 
         const updatedItems = [...state.items];
         if (updatedItems[existingItemIndex].quantity > 1) {
           // Decrease quantity
+          const newQuantity = updatedItems[existingItemIndex].quantity - 1;
+          const itemPrice = updatedItems[existingItemIndex].product.promotion_price || updatedItems[existingItemIndex].product.price;
           updatedItems[existingItemIndex] = {
             ...updatedItems[existingItemIndex],
-            quantity: updatedItems[existingItemIndex].quantity - 1
+            quantity: newQuantity,
+            totalPrice: itemPrice * newQuantity
           };
         } else {
           // Remove item completely
           updatedItems.splice(existingItemIndex, 1);
         }
 
-        const total = updatedItems.reduce((sum, item) => {
-          const price = item.product.promotion_price || item.product.price;
-          return sum + (price * item.quantity);
-        }, 0);
+        const total = updatedItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
         return {
           items: updatedItems,
@@ -90,14 +89,19 @@ export const cartReducer = (state: CartState, action: CartAction): CartState => 
         return cartReducer(state, { type: 'REMOVE_ITEM', payload: id });
       }
 
-      const updatedItems = state.items.map(item =>
-        item.product.id === id ? { ...item, quantity } : item
-      );
+      const updatedItems = state.items.map(item => {
+        if (item.product.id === id) {
+          const itemPrice = item.product.promotion_price || item.product.price;
+          return { 
+            ...item, 
+            quantity,
+            totalPrice: itemPrice * quantity
+          };
+        }
+        return item;
+      });
 
-      const total = updatedItems.reduce((sum, item) => {
-        const price = item.product.promotion_price || item.product.price;
-        return sum + (price * item.quantity);
-      }, 0);
+      const total = updatedItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
       return {
         items: updatedItems,

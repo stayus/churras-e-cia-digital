@@ -25,6 +25,7 @@ export interface CartItem {
   price: number;
   name: string;
   imageUrl: string;
+  totalPrice: number;
 }
 
 export interface CartState {
@@ -42,9 +43,13 @@ export type CartAction =
 export interface Address {
   id: string;
   street: string;
+  number: string;
   city: string;
   state: string;
   zipCode: string;
+  zip: string;
+  complement?: string;
+  label?: string;
 }
 
 export type PaymentMethod = 'pix' | 'dinheiro' | 'cartao';
