@@ -1,80 +1,58 @@
 
 import React, { createContext, useReducer, ReactNode } from 'react';
-import { cartReducer, initialState } from './cartReducer';
-import { 
-  CartContextType, 
-  Product, 
-  CartExtra, 
-  Address, 
-  PaymentMethod
-} from './types';
+import { CartContextType, CartState, CartProduct } from './types';
+import { cartReducer } from './cartReducer';
 
-export const CartContext = createContext<CartContextType | undefined>(undefined);
+const CartContext = createContext<CartContextType | undefined>(undefined);
+
+const initialState: CartState = {
+  items: [],
+  total: 0
+};
 
 interface CartProviderProps {
   children: ReactNode;
 }
 
-export function CartProvider({ children }: CartProviderProps) {
-  const [cart, dispatch] = useReducer(cartReducer, initialState);
+export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
-  const addItem = (product: Product, quantity: number) => {
+  const addItem = (product: CartProduct, quantity: number) => {
     dispatch({ type: 'ADD_ITEM', payload: { product, quantity } });
   };
 
   const removeItem = (productId: string) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: { productId } });
+    dispatch({ type: 'REMOVE_ITEM', payload: productId });
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, quantity } });
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { id: productId, quantity } });
   };
 
   const getItemQuantity = (productId: string): number => {
-    const item = cart.items.find(item => item.id === productId);
+    const item = state.items.find(item => item.product.id === productId);
     return item ? item.quantity : 0;
-  };
-
-  const setAddress = (address: Address) => {
-    dispatch({ type: 'SET_ADDRESS', payload: address });
-    // After setting address, we would ideally recalculate shipping
-    calculateShipping(address);
-  };
-
-  const setPaymentMethod = (method: PaymentMethod) => {
-    dispatch({ type: 'SET_PAYMENT_METHOD', payload: method });
-  };
-
-  const setObservations = (observations: string) => {
-    dispatch({ type: 'SET_OBSERVATIONS', payload: observations });
-  };
-
-  // This function would use the Google Maps API to calculate shipping based on distance
-  const calculateShipping = (address: Address) => {
-    // This would be replaced with actual distance calculation logic
-    // For now we'll use a fixed fee of 5
-    const mockShippingFee = 5;
-    dispatch({ type: 'CALCULATE_SHIPPING', payload: mockShippingFee });
   };
 
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
   };
 
+  const value: CartContextType = {
+    items: state.items,
+    total: state.total,
+    addItem,
+    removeItem,
+    updateQuantity,
+    getItemQuantity,
+    clearCart
+  };
+
   return (
-    <CartContext.Provider value={{
-      cart,
-      addItem,
-      removeItem,
-      updateQuantity,
-      getItemQuantity,
-      setAddress,
-      setPaymentMethod,
-      setObservations,
-      calculateShipping,
-      clearCart
-    }}>
+    <CartContext.Provider value={value}>
       {children}
     </CartContext.Provider>
   );
-}
+};
+
+export { CartContext };

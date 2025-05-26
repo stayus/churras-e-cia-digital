@@ -16,23 +16,34 @@ export const useProducts = () => {
       setLoading(true);
       setError(null);
       
+      console.log("useProducts: Iniciando busca de produtos...");
+      
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching products:', error);
-        setError('Erro ao carregar produtos');
+        console.error('useProducts: Erro ao buscar produtos:', error);
+        setError('Erro ao carregar produtos: ' + error.message);
+        return;
+      }
+
+      console.log("useProducts: Dados recebidos do banco:", data);
+      
+      if (!data || data.length === 0) {
+        console.log("useProducts: Nenhum produto encontrado no banco de dados");
+        setProducts([]);
         return;
       }
 
       // Use the utility function to format products properly
-      const formattedProducts = formatDbProducts(data || []);
+      const formattedProducts = formatDbProducts(data);
+      console.log("useProducts: Produtos formatados:", formattedProducts);
       setProducts(formattedProducts);
     } catch (err) {
-      console.error('Error in fetchProducts:', err);
-      setError('Erro ao carregar produtos');
+      console.error('useProducts: Erro inesperado:', err);
+      setError('Erro inesperado ao carregar produtos');
     } finally {
       setLoading(false);
     }
@@ -131,6 +142,7 @@ export const useProducts = () => {
   };
 
   useEffect(() => {
+    console.log("useProducts: Hook inicializado, iniciando fetchProducts...");
     fetchProducts();
   }, []);
 
