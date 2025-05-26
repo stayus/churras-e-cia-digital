@@ -13,7 +13,7 @@ interface CustomerLayoutProps {
 }
 
 const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -22,12 +22,12 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
-      {/* Fixed Header */}
+      {/* Fixed Header - Always Visible */}
       <header className="fixed top-0 w-full bg-black/95 backdrop-blur-md shadow-2xl border-b border-red-600 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -55,49 +55,75 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
                   Cardápio
                 </Button>
               </Link>
-              <Link to="/pedidos">
-                <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
-                  <Package className="h-4 w-4" />
-                  Pedidos
-                </Button>
-              </Link>
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              {/* Cart Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="relative flex items-center gap-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300"
-                onClick={() => setIsCartOpen(true)}
-              >
-                <ShoppingCart className="h-4 w-4" />
-                {totalItems > 0 && (
-                  <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-600">
-                    {totalItems}
-                  </Badge>
-                )}
-                <span className="hidden sm:inline">Carrinho</span>
-              </Button>
-
-              {/* User Menu */}
-              <div className="flex items-center space-x-2">
-                <Link to="/minha-conta">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">{user?.name?.split(' ')[0] || 'Conta'}</span>
+              {isAuthenticated && (
+                <>
+                  <Link to="/pedidos">
+                    <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
+                      <Package className="h-4 w-4" />
+                      Pedidos
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="relative flex items-center gap-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300"
+                    onClick={() => setIsCartOpen(true)}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    {totalItems > 0 && (
+                      <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-600">
+                        {totalItems}
+                      </Badge>
+                    )}
+                    <span className="hidden sm:inline">Carrinho</span>
+                  </Button>
+                  <Link to="/minha-conta">
+                    <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="hidden sm:inline">Conta</span>
+                    </Button>
+                  </Link>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={handleLogout}
+                    className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 flex items-center gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span className="hidden sm:inline">Sair</span>
+                  </Button>
+                </>
+              )}
+              {!isAuthenticated && (
+                <Link to="/login">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300"
+                  >
+                    Entrar
                   </Button>
                 </Link>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={handleLogout}
-                  className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 flex items-center gap-2"
+              )}
+            </nav>
+
+            {/* Mobile menu button and cart */}
+            <div className="flex items-center space-x-2 md:hidden">
+              {isAuthenticated && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="relative flex items-center gap-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300"
+                  onClick={() => setIsCartOpen(true)}
                 >
-                  <LogOut className="h-4 w-4" />
-                  <span className="hidden sm:inline">Sair</span>
+                  <ShoppingCart className="h-4 w-4" />
+                  {totalItems > 0 && (
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-600">
+                      {totalItems}
+                    </Badge>
+                  )}
                 </Button>
-              </div>
+              )}
             </div>
           </div>
         </div>
@@ -109,7 +135,9 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
       </main>
 
       {/* Cart Sidebar */}
-      <CartSidebar isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
+      {isAuthenticated && (
+        <CartSidebar isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
+      )}
     </div>
   );
 };

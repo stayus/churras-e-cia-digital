@@ -1,444 +1,401 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Check, Plus, Pencil, Trash, Loader2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CustomerAddress, useAddressManager } from '@/hooks/useAddressManager';
+import { Badge } from '@/components/ui/badge';
+import { MapPin, Plus, Edit, Trash2 } from 'lucide-react';
+import { useAddressManager, CustomerAddress } from '@/hooks/useAddressManager';
+import { useToast } from '@/hooks/use-toast';
 
 interface NewAddressSelectorProps {
-  userId: string;
-  onAddressSelected: (address: CustomerAddress | null) => void;
   selectedAddress: CustomerAddress | null;
+  onAddressSelect: (address: CustomerAddress) => void;
 }
 
-const NewAddressSelector: React.FC<NewAddressSelectorProps> = ({ 
-  userId, 
-  onAddressSelected,
-  selectedAddress 
+const NewAddressSelector: React.FC<NewAddressSelectorProps> = ({
+  selectedAddress,
+  onAddressSelect
 }) => {
   const { addresses, loading, addAddress, updateAddress, deleteAddress } = useAddressManager();
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [currentAddress, setCurrentAddress] = useState<CustomerAddress | null>(null);
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
   const [formData, setFormData] = useState({
     street: '',
     number: '',
+    complement: '',
+    neighborhood: '',
     city: '',
     state: 'CE',
-    zip_code: '',
-    complement: '',
-    neighborhood: ''
+    zip_code: ''
   });
-  const [submitting, setSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    // Aplicar máscara para o CEP
-    if (name === 'zip_code') {
-      let formattedZip = value.replace(/\D/g, '');
-      if (formattedZip.length > 5) {
-        formattedZip = `${formattedZip.substring(0, 5)}-${formattedZip.substring(5, 8)}`;
-      }
-      setFormData({ ...formData, [name]: formattedZip });
-      return;
-    }
-    
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleAddAddress = () => {
+  const resetForm = () => {
     setFormData({
       street: '',
       number: '',
+      complement: '',
+      neighborhood: '',
       city: '',
       state: 'CE',
-      zip_code: '',
-      complement: '',
-      neighborhood: ''
+      zip_code: ''
     });
-    setIsAddDialogOpen(true);
+    setEditingAddress(null);
   };
 
-  const handleEditAddress = (address: CustomerAddress) => {
-    setCurrentAddress(address);
-    setFormData({
-      street: address.street,
-      number: address.number,
-      city: address.city,
-      state: address.state,
-      zip_code: address.zip_code,
-      complement: address.complement || '',
-      neighborhood: address.neighborhood
-    });
-    setIsEditDialogOpen(true);
+  const handleOpenDialog = (address?: CustomerAddress) => {
+    if (address) {
+      setEditingAddress(address);
+      setFormData({
+        street: address.street,
+        number: address.number,
+        complement: address.complement || '',
+        neighborhood: address.neighborhood,
+        city: address.city,
+        state: address.state,
+        zip_code: address.zip_code
+      });
+    } else {
+      resetForm();
+    }
+    setIsDialogOpen(true);
   };
 
-  const saveAddress = async () => {
-    if (!formData.street || !formData.number || !formData.city || !formData.zip_code || !formData.neighborhood) {
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      
-      const addressData = {
-        street: formData.street,
-        number: formData.number,
-        city: formData.city,
-        state: formData.state,
-        zip_code: formData.zip_code,
-        complement: formData.complement || undefined,
-        neighborhood: formData.neighborhood
-      };
-      
-      let savedAddress;
-      
-      if (isEditDialogOpen && currentAddress) {
-        savedAddress = await updateAddress(currentAddress.id, addressData);
-      } else {
-        savedAddress = await addAddress(addressData);
-      }
-      
-      // Select the new/updated address
-      if (savedAddress) {
-        onAddressSelected(savedAddress);
-      }
-      
-      // Close dialogs
-      setIsAddDialogOpen(false);
-      setIsEditDialogOpen(false);
-      
-    } catch (error) {
-      // Error is handled in the hook
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDeleteAddress = async (addressId: string) => {
-    if (!confirm('Tem certeza que deseja excluir este endereço?')) {
-      return;
-    }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
     try {
-      await deleteAddress(addressId);
-      
-      // If the deleted address was selected, clear selection
-      if (selectedAddress?.id === addressId) {
-        onAddressSelected(null);
+      if (editingAddress) {
+        await updateAddress(editingAddress.id, formData);
+        toast({
+          title: "Endereço atualizado",
+          description: "Seu endereço foi atualizado com sucesso"
+        });
+      } else {
+        const newAddress = await addAddress(formData);
+        if (newAddress && !selectedAddress) {
+          onAddressSelect(newAddress);
+        }
+        toast({
+          title: "Endereço adicionado",
+          description: "Seu endereço foi salvo com sucesso"
+        });
       }
-    } catch (error) {
-      // Error is handled in the hook
+      setIsDialogOpen(false);
+      resetForm();
+    } catch (error: any) {
+      console.error('Error saving address:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Não foi possível salvar o endereço"
+      });
     }
+  };
+
+  const handleDelete = async (addressId: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este endereço?')) {
+      try {
+        await deleteAddress(addressId);
+        if (selectedAddress?.id === addressId) {
+          onAddressSelect(addresses.find(addr => addr.id !== addressId) || null);
+        }
+      } catch (error) {
+        console.error('Error deleting address:', error);
+      }
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center p-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <Card className="bg-gray-900/90 border-gray-700">
+        <CardContent className="p-6">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {addresses.length === 0 ? (
-        <div className="text-center p-6">
-          <p className="text-muted-foreground mb-4">
-            Você ainda não tem endereços cadastrados
-          </p>
-          <Button onClick={handleAddAddress}>
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar endereço
-          </Button>
-        </div>
-      ) : (
-        <>
-          <div className="space-y-3">
-            {addresses.map((address) => (
-              <Card 
-                key={address.id}
-                className={`cursor-pointer transition-colors ${selectedAddress?.id === address.id ? 'border-primary' : 'hover:border-gray-300'}`}
-                onClick={() => onAddressSelected(address)}
-              >
-                <CardContent className="p-4 flex justify-between items-center">
-                  <div className="flex-1">
-                    <p>{address.street}, {address.number}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {address.neighborhood}, {address.city} - {address.state}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      CEP {address.zip_code}
-                    </p>
-                    {address.complement && (
-                      <p className="text-sm text-muted-foreground">
-                        {address.complement}
-                      </p>
-                    )}
+    <Card className="bg-gray-900/90 border-gray-700 shadow-xl">
+      <CardHeader>
+        <CardTitle className="text-yellow-400 flex items-center gap-2">
+          <MapPin className="h-5 w-5" />
+          Endereço de Entrega
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {addresses.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-400 mb-4">Nenhum endereço cadastrado</p>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => handleOpenDialog()}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Endereço
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-yellow-400">
+                    {editingAddress ? 'Editar Endereço' : 'Novo Endereço'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <Label htmlFor="street" className="text-gray-300">Rua</Label>
+                      <Input
+                        id="street"
+                        value={formData.street}
+                        onChange={(e) => handleInputChange('street', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="number" className="text-gray-300">Número</Label>
+                      <Input
+                        id="number"
+                        value={formData.number}
+                        onChange={(e) => handleInputChange('number', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="complement" className="text-gray-300">Complemento</Label>
+                      <Input
+                        id="complement"
+                        value={formData.complement}
+                        onChange={(e) => handleInputChange('complement', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="neighborhood" className="text-gray-300">Bairro</Label>
+                      <Input
+                        id="neighborhood"
+                        value={formData.neighborhood}
+                        onChange={(e) => handleInputChange('neighborhood', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="city" className="text-gray-300">Cidade</Label>
+                      <Input
+                        id="city"
+                        value={formData.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="zip_code" className="text-gray-300">CEP</Label>
+                      <Input
+                        id="zip_code"
+                        value={formData.zip_code}
+                        onChange={(e) => handleInputChange('zip_code', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
                   </div>
-                  
-                  <div className="ml-4 flex items-center space-x-2">
-                    {selectedAddress?.id === address.id && (
-                      <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="h-4 w-4 text-primary-foreground" />
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
+                    >
+                      {editingAddress ? 'Atualizar' : 'Salvar'}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                      className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-3">
+              {addresses.map((address) => (
+                <div
+                  key={address.id}
+                  className={`p-4 rounded-lg border cursor-pointer transition-all duration-300 ${
+                    selectedAddress?.id === address.id
+                      ? 'border-yellow-400 bg-yellow-400/10'
+                      : 'border-gray-600 hover:border-gray-500 bg-gray-800/50'
+                  }`}
+                  onClick={() => onAddressSelect(address)}
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <p className="text-white font-medium">
+                          {address.street}, {address.number}
+                        </p>
+                        {address.is_default && (
+                          <Badge variant="secondary" className="text-xs">
+                            Principal
+                          </Badge>
+                        )}
                       </div>
-                    )}
-                    
-                    <div className="flex space-x-1" onClick={(e) => e.stopPropagation()}>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleEditAddress(address)}
+                      <p className="text-gray-400 text-sm">
+                        {address.neighborhood}, {address.city} - {address.state}
+                      </p>
+                      <p className="text-gray-400 text-sm">CEP: {address.zip_code}</p>
+                    </div>
+                    <div className="flex gap-1 ml-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenDialog(address);
+                        }}
+                        className="text-gray-400 hover:text-white h-8 w-8 p-0"
                       >
-                        <Pencil className="h-4 w-4" />
+                        <Edit className="h-3 w-3" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-8 w-8 text-destructive"
-                        onClick={() => handleDeleteAddress(address.id)}
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(address.id);
+                        }}
+                        className="text-red-400 hover:text-red-300 h-8 w-8 p-0"
                       >
-                        <Trash className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          <Button variant="outline" onClick={handleAddAddress} className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar novo endereço
-          </Button>
-        </>
-      )}
-      
-      {/* Add Address Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Adicionar endereço</DialogTitle>
-            <DialogDescription>
-              Preencha os dados do seu novo endereço
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="sm:col-span-2">
-                <Label htmlFor="street">Rua / Avenida *</Label>
-                <Input
-                  id="street"
-                  name="street"
-                  required
-                  placeholder="Nome da rua"
-                  value={formData.street}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="number">Número *</Label>
-                <Input
-                  id="number"
-                  name="number"
-                  required
-                  placeholder="123"
-                  value={formData.number}
-                  onChange={handleInputChange}
-                />
-              </div>
+                </div>
+              ))}
             </div>
             
-            <div>
-              <Label htmlFor="neighborhood">Bairro *</Label>
-              <Input
-                id="neighborhood"
-                name="neighborhood"
-                required
-                placeholder="Nome do bairro"
-                value={formData.neighborhood}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="complement">Complemento</Label>
-              <Input
-                id="complement"
-                name="complement"
-                placeholder="Apto, bloco, referência"
-                value={formData.complement}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="city">Cidade *</Label>
-                <Input
-                  id="city"
-                  name="city"
-                  required
-                  placeholder="Nome da cidade"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="state">Estado</Label>
-                <Input
-                  id="state"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleInputChange}
-                  maxLength={2}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="zip_code">CEP *</Label>
-                <Input
-                  id="zip_code"
-                  name="zip_code"
-                  required
-                  placeholder="00000-000"
-                  value={formData.zip_code}
-                  onChange={handleInputChange}
-                  maxLength={9}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={saveAddress} disabled={submitting}>
-              {submitting ? "Salvando..." : "Salvar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Edit Address Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Editar endereço</DialogTitle>
-            <DialogDescription>
-              Atualize os dados do seu endereço
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-4 py-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="sm:col-span-2">
-                <Label htmlFor="edit-street">Rua / Avenida *</Label>
-                <Input
-                  id="edit-street"
-                  name="street"
-                  required
-                  placeholder="Nome da rua"
-                  value={formData.street}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="edit-number">Número *</Label>
-                <Input
-                  id="edit-number"
-                  name="number"
-                  required
-                  placeholder="123"
-                  value={formData.number}
-                  onChange={handleInputChange}
-                />
-              </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="edit-neighborhood">Bairro *</Label>
-              <Input
-                id="edit-neighborhood"
-                name="neighborhood"
-                required
-                placeholder="Nome do bairro"
-                value={formData.neighborhood}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div>
-              <Label htmlFor="edit-complement">Complemento</Label>
-              <Input
-                id="edit-complement"
-                name="complement"
-                placeholder="Apto, bloco, referência"
-                value={formData.complement}
-                onChange={handleInputChange}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="edit-city">Cidade *</Label>
-                <Input
-                  id="edit-city"
-                  name="city"
-                  required
-                  placeholder="Nome da cidade"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="edit-state">Estado</Label>
-                <Input
-                  id="edit-state"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleInputChange}
-                  maxLength={2}
-                />
-              </div>
-              
-              <div>
-                <Label htmlFor="edit-zip_code">CEP *</Label>
-                <Input
-                  id="edit-zip_code"
-                  name="zip_code"
-                  required
-                  placeholder="00000-000"
-                  value={formData.zip_code}
-                  onChange={handleInputChange}
-                  maxLength={9}
-                />
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={saveAddress} disabled={submitting}>
-              {submitting ? "Salvando..." : "Atualizar"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => handleOpenDialog()}
+                  variant="outline" 
+                  className="w-full border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Novo Endereço
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-md">
+                <DialogHeader>
+                  <DialogTitle className="text-yellow-400">
+                    {editingAddress ? 'Editar Endereço' : 'Novo Endereço'}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-2">
+                      <Label htmlFor="street" className="text-gray-300">Rua</Label>
+                      <Input
+                        id="street"
+                        value={formData.street}
+                        onChange={(e) => handleInputChange('street', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="number" className="text-gray-300">Número</Label>
+                      <Input
+                        id="number"
+                        value={formData.number}
+                        onChange={(e) => handleInputChange('number', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="complement" className="text-gray-300">Complemento</Label>
+                      <Input
+                        id="complement"
+                        value={formData.complement}
+                        onChange={(e) => handleInputChange('complement', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <Label htmlFor="neighborhood" className="text-gray-300">Bairro</Label>
+                      <Input
+                        id="neighborhood"
+                        value={formData.neighborhood}
+                        onChange={(e) => handleInputChange('neighborhood', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="city" className="text-gray-300">Cidade</Label>
+                      <Input
+                        id="city"
+                        value={formData.city}
+                        onChange={(e) => handleInputChange('city', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="zip_code" className="text-gray-300">CEP</Label>
+                      <Input
+                        id="zip_code"
+                        value={formData.zip_code}
+                        onChange={(e) => handleInputChange('zip_code', e.target.value)}
+                        className="bg-gray-800 border-gray-600 text-white"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-4">
+                    <Button 
+                      type="submit" 
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
+                    >
+                      {editingAddress ? 'Atualizar' : 'Salvar'}
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setIsDialogOpen(false)}
+                      className="border-gray-600 text-gray-300 hover:bg-gray-800"
+                    >
+                      Cancelar
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

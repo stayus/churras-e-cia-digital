@@ -1,169 +1,110 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '@/contexts/cart';
 import { useAuth } from '@/contexts/auth';
-import { useCart, PaymentMethod } from '@/contexts/cart';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { Json } from '@/integrations/supabase/types';
+import { useToast } from '@/hooks/use-toast';
 import { CustomerAddress } from '@/hooks/useAddressManager';
 
+export interface CheckoutData {
+  address: CustomerAddress;
+  paymentMethod: string;
+  observations?: string;
+}
+
 export const useCheckout = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
   const { cart, clearCart } = useCart();
   const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  
-  const [observations, setObservations] = useState('');
-  const [selectedAddress, setSelectedAddress] = useState<CustomerAddress | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
-  const [isPickup, setIsPickup] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Fixed shipping fee amount
-  const shippingFee = isPickup ? 0 : 5.00;
-  
-  // Calculate subtotal of items
-  const subtotal = cart.items.reduce((acc, item) => {
-    const itemTotal = item.price * item.quantity;
-    const extraTotal = item.extras?.reduce((sum, extra) => sum + extra.price * item.quantity, 0) || 0;
-    return acc + itemTotal + extraTotal;
-  }, 0);
-  
-  // Total order amount
-  const total = subtotal + shippingFee;
-  
-  const handleCheckout = async () => {
+
+  const processCheckout = async (checkoutData: CheckoutData) => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Você precisa estar logado para fazer um pedido"
+      });
+      navigate('/login');
+      return false;
+    }
+
     if (cart.items.length === 0) {
       toast({
-        title: "Carrinho vazio",
-        description: "Adicione produtos ao carrinho antes de finalizar o pedido.",
-        variant: "destructive"
+        variant: "destructive",
+        title: "Erro",
+        description: "Seu carrinho está vazio"
       });
-      return;
+      return false;
     }
-    
-    if (!isPickup && !selectedAddress) {
-      toast({
-        title: "Endereço não selecionado",
-        description: "Selecione um endereço de entrega ou escolha retirar no local.",
-        variant: "destructive"
-      });
-      return;
-    }
+
+    setIsProcessing(true);
     
     try {
-      setIsSubmitting(true);
-      
-      // Get current user from Supabase Auth
-      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !authUser) {
-        toast({
-          title: "Erro de autenticação",
-          description: "Você precisa estar logado para finalizar o pedido.",
-          variant: "destructive"
-        });
-        navigate('/login');
-        return;
-      }
-      
-      // Prepare order address
-      let orderAddress: any = { pickup: true };
-      
-      if (!isPickup && selectedAddress) {
-        orderAddress = {
-          street: selectedAddress.street,
-          number: selectedAddress.number,
-          complement: selectedAddress.complement,
-          neighborhood: selectedAddress.neighborhood,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-          zip_code: selectedAddress.zip_code
-        };
-      }
-      
-      // Transform cart items for backend
-      const orderItems = cart.items.map(item => ({
-        id: item.id,
-        productId: item.id,
-        productName: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        extras: item.extras || []
-      }));
-      
-      // Create order in database
+      // Calculate total
+      const total = cart.items.reduce((sum, item) => {
+        const price = item.promotion_price || item.price;
+        return sum + (price * item.quantity);
+      }, 0);
+
+      // Create order object
+      const orderData = {
+        customer_id: user.id,
+        items: cart.items,
+        total: total,
+        address: checkoutData.address,
+        payment_method: checkoutData.paymentMethod,
+        observations: checkoutData.observations || null,
+        status: 'received'
+      };
+
+      console.log('Creating order with data:', orderData);
+
+      // Insert order into database
       const { data: order, error } = await supabase
         .from('orders')
-        .insert({
-          customer_id: authUser.id, // Use auth user ID
-          items: orderItems as unknown as Json,
-          total: total,
-          status: 'received',
-          payment_method: paymentMethod,
-          address: orderAddress as Json,
-          observations: observations || null
-        })
-        .select('id')
+        .insert([orderData])
+        .select()
         .single();
-        
+
       if (error) {
         console.error('Error creating order:', error);
-        throw error;
+        throw new Error(error.message || 'Erro ao criar pedido');
       }
-      
-      // Clear cart after order is created
+
+      if (!order) {
+        throw new Error('Pedido não foi criado corretamente');
+      }
+
+      // Clear cart after successful order
       clearCart();
-      
-      // Show payment-specific success message
-      let successMessage = `Seu pedido #${order.id.substring(0, 8)} foi recebido!`;
-      
-      if (paymentMethod === 'pix') {
-        successMessage += ' Por favor enviar o comprovante através do WhatsApp.';
-        // You can add WhatsApp link here
-        setTimeout(() => {
-          window.open('https://wa.me/5511999999999', '_blank');
-        }, 2000);
-      } else if (paymentMethod === 'dinheiro') {
-        successMessage += ' O pagamento será feito na entrega.';
-      } else if (paymentMethod === 'cartao') {
-        successMessage += ' O pagamento será feito na entrega.';
-      }
-      
+
       toast({
         title: "Pedido realizado com sucesso!",
-        description: successMessage,
-        variant: "default"
+        description: `Seu pedido #${order.id.slice(0, 8)} foi criado e está sendo processado.`
       });
-      
-      // Redirect to orders page
+
+      // Navigate to orders page
       navigate('/pedidos');
       
+      return true;
     } catch (error: any) {
-      console.error('Erro ao finalizar pedido:', error);
+      console.error('Checkout error:', error);
       toast({
-        title: "Erro ao finalizar pedido",
-        description: error.message || 'Ocorreu um erro ao processar o pedido. Tente novamente.',
-        variant: "destructive"
+        variant: "destructive",
+        title: "Erro ao processar pedido",
+        description: error.message || "Tente novamente em alguns minutos"
       });
+      return false;
     } finally {
-      setIsSubmitting(false);
+      setIsProcessing(false);
     }
   };
 
   return {
-    observations,
-    setObservations,
-    selectedAddress,
-    setSelectedAddress,
-    paymentMethod,
-    setPaymentMethod,
-    isPickup,
-    setIsPickup,
-    isSubmitting,
-    shippingFee,
-    subtotal,
-    total,
-    handleCheckout
+    processCheckout,
+    isProcessing
   };
 };
