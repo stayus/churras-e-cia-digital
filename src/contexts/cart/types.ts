@@ -18,9 +18,13 @@ export interface CartProduct {
 }
 
 export interface CartItem {
+  id: string;
   product: CartProduct;
   quantity: number;
   extras: CartExtra[];
+  price: number;
+  name: string;
+  imageUrl: string;
 }
 
 export interface CartState {
@@ -34,6 +38,30 @@ export type CartAction =
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR_CART' };
 
+// Additional types for compatibility
+export interface Address {
+  id: string;
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+}
+
+export type PaymentMethod = 'pix' | 'dinheiro' | 'cartao';
+
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string;
+  is_out_of_stock: boolean;
+  promotion_price: number | null;
+  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
+  extras: CartExtra[];
+  created_at?: string;
+}
+
 export interface CartContextType {
   items: CartItem[];
   total: number;
@@ -42,4 +70,5 @@ export interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   getItemQuantity: (productId: string) => number;
   clearCart: () => void;
+  cart: CartState;
 }

@@ -45,7 +45,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     removeItem,
     updateQuantity,
     getItemQuantity,
-    clearCart
+    clearCart,
+    cart: state
   };
 
   return (

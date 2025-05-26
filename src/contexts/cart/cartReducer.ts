@@ -29,9 +29,13 @@ export const cartReducer = (state: CartState, action: CartAction): CartState => 
       } else {
         // Add new item
         const newItem = {
+          id: product.id,
           product,
           quantity,
-          extras: []
+          extras: [],
+          price: product.promotion_price || product.price,
+          name: product.name,
+          imageUrl: product.image_url
         };
         
         const newItems = [...state.items, newItem];
