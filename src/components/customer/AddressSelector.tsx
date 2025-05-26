@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check, Plus, Pencil, Trash, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Address } from '@/contexts/CartContext';
+import { Address } from '@/contexts/cart/types';
 import { Json } from '@/integrations/supabase/types';
 
 interface AddressSelectorProps {
