@@ -18,8 +18,8 @@ interface CartProviderProps {
 export function CartProvider({ children }: CartProviderProps) {
   const [cart, dispatch] = useReducer(cartReducer, initialState);
 
-  const addItem = (product: Product, extras: CartExtra[]) => {
-    dispatch({ type: 'ADD_ITEM', payload: { product, extras } });
+  const addItem = (product: Product, quantity: number) => {
+    dispatch({ type: 'ADD_ITEM', payload: { product, quantity } });
   };
 
   const removeItem = (productId: string) => {
@@ -28,6 +28,11 @@ export function CartProvider({ children }: CartProviderProps) {
 
   const updateQuantity = (productId: string, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { productId, quantity } });
+  };
+
+  const getItemQuantity = (productId: string): number => {
+    const item = cart.items.find(item => item.id === productId);
+    return item ? item.quantity : 0;
   };
 
   const setAddress = (address: Address) => {
@@ -62,6 +67,7 @@ export function CartProvider({ children }: CartProviderProps) {
       addItem,
       removeItem,
       updateQuantity,
+      getItemQuantity,
       setAddress,
       setPaymentMethod,
       setObservations,

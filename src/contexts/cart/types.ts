@@ -55,7 +55,7 @@ export interface CartState {
 }
 
 export type CartAction = 
-  | { type: 'ADD_ITEM'; payload: { product: Product; extras: CartExtra[] } }
+  | { type: 'ADD_ITEM'; payload: { product: Product; quantity: number } }
   | { type: 'REMOVE_ITEM'; payload: { productId: string } }
   | { type: 'UPDATE_QUANTITY'; payload: { productId: string; quantity: number } }
   | { type: 'SET_ADDRESS'; payload: Address }
@@ -66,9 +66,10 @@ export type CartAction =
 
 export interface CartContextType {
   cart: CartState;
-  addItem: (product: Product, extras: CartExtra[]) => void;
+  addItem: (product: Product, quantity: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  getItemQuantity: (productId: string) => number;
   setAddress: (address: Address) => void;
   setPaymentMethod: (method: PaymentMethod) => void;
   setObservations: (observations: string) => void;
