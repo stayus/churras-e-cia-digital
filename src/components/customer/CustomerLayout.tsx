@@ -4,8 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ShoppingCart, User, Home, BookOpen, Package, LogOut } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/auth';
+import { useCart } from '@/contexts/cart';
 import CartSidebar from './CartSidebar';
 
 interface CustomerLayoutProps {
@@ -27,8 +27,8 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
-      {/* Header */}
-      <header className="bg-black/90 backdrop-blur-sm shadow-lg border-b border-red-600 sticky top-0 z-50">
+      {/* Fixed Header */}
+      <header className="fixed top-0 w-full bg-black/95 backdrop-blur-md shadow-2xl border-b border-red-600 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -42,21 +42,21 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
               </Link>
             </div>
 
-            <nav className="hidden md:flex items-center space-x-4">
+            <nav className="hidden md:flex items-center space-x-6">
               <Link to="/">
-                <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
                   <Home className="h-4 w-4" />
                   Início
                 </Button>
               </Link>
-              <Link to="/catalogo">
-                <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 flex items-center gap-2">
+              <Link to="/cardapio">
+                <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
                   <BookOpen className="h-4 w-4" />
                   Cardápio
                 </Button>
               </Link>
               <Link to="/pedidos">
-                <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 flex items-center gap-2">
+                <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
                   <Package className="h-4 w-4" />
                   Pedidos
                 </Button>
@@ -68,7 +68,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="relative flex items-center gap-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
+                className="relative flex items-center gap-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black transition-all duration-300"
                 onClick={() => setIsCartOpen(true)}
               >
                 <ShoppingCart className="h-4 w-4" />
@@ -83,7 +83,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
               {/* User Menu */}
               <div className="flex items-center space-x-2">
                 <Link to="/minha-conta">
-                  <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 flex items-center gap-2">
+                  <Button variant="ghost" size="sm" className="text-white hover:text-yellow-400 hover:bg-gray-800 transition-all duration-300 flex items-center gap-2">
                     <User className="h-4 w-4" />
                     <span className="hidden sm:inline">{user?.name?.split(' ')[0] || 'Conta'}</span>
                   </Button>
@@ -92,7 +92,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
                   variant="outline" 
                   size="sm" 
                   onClick={handleLogout}
-                  className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white flex items-center gap-2"
+                  className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 flex items-center gap-2"
                 >
                   <LogOut className="h-4 w-4" />
                   <span className="hidden sm:inline">Sair</span>
@@ -103,8 +103,8 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="flex-1">
+      {/* Main Content with padding for fixed header */}
+      <main className="pt-16 flex-1">
         {children}
       </main>
 

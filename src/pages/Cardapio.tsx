@@ -24,9 +24,9 @@ const CardapioPage = () => {
         <CustomerLayout>
           <div className="container mx-auto px-4 py-8">
             <div className="flex justify-center items-center h-64">
-              <div className="text-center">
+              <div className="text-center animate-fade-in">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
-                <p className="text-white text-lg">Carregando cardápio...</p>
+                <p className="text-white text-lg">Carregando cardápio delicioso...</p>
               </div>
             </div>
           </div>
@@ -40,11 +40,11 @@ const CardapioPage = () => {
       <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
         <CustomerLayout>
           <div className="container mx-auto px-4 py-8">
-            <div className="text-center py-12">
-              <p className="text-red-400 mb-4">Erro ao carregar produtos: {error}</p>
+            <div className="text-center py-12 animate-fade-in">
+              <p className="text-red-400 mb-4 text-lg">Erro ao carregar produtos: {error}</p>
               <Button 
                 onClick={handleRefreshProducts}
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-8 py-3 transition-all duration-300 hover:scale-105"
               >
                 Tentar novamente
               </Button>
@@ -62,24 +62,25 @@ const CardapioPage = () => {
           <title>Cardápio - Churrasquinho & Cia</title>
         </Helmet>
         
-        <div className="container mx-auto px-4 py-6 md:py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 animate-fade-in">
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
               Nosso{' '}
               <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
                 Cardápio
               </span>
             </h1>
-            <p className="text-gray-300 text-lg md:text-xl animate-fade-in" style={{ animationDelay: '200ms' }}>
-              Sabores autênticos que conquistam seu paladar
+            <p className="text-gray-300 text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '200ms' }}>
+              Sabores autênticos que conquistam seu paladar. Feitos com ingredientes premium 
+              e <span className="text-yellow-400 font-semibold">muito amor</span>!
             </p>
             
             <div className="flex justify-center mt-6">
               <Button 
                 variant="outline" 
-                size="sm" 
+                size="lg" 
                 onClick={handleRefreshProducts} 
-                className="border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold animate-fade-in"
+                className="border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold px-8 py-3 transition-all duration-300 hover:scale-105 animate-fade-in"
                 style={{ animationDelay: '400ms' }}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />

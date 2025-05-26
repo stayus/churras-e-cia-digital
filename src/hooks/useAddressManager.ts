@@ -39,7 +39,10 @@ export const useAddressManager = () => {
         .eq('customer_id', user.id)
         .order('created_at', { ascending: false });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching addresses:', error);
+        throw error;
+      }
       
       setAddresses(data || []);
     } catch (error: any) {
@@ -73,7 +76,10 @@ export const useAddressManager = () => {
         .select()
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding address:', error);
+        throw error;
+      }
       
       setAddresses(prev => [data, ...prev]);
       
@@ -111,7 +117,10 @@ export const useAddressManager = () => {
         .select()
         .single();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating address:', error);
+        throw error;
+      }
       
       setAddresses(prev => prev.map(addr => 
         addr.id === addressId ? { ...addr, ...data } : addr
@@ -149,7 +158,10 @@ export const useAddressManager = () => {
         .eq('id', addressId)
         .eq('customer_id', user.id);
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting address:', error);
+        throw error;
+      }
       
       setAddresses(prev => prev.filter(addr => addr.id !== addressId));
       

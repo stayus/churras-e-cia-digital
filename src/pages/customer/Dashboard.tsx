@@ -1,9 +1,8 @@
 
 import React, { useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
 import CustomerLayout from '@/components/customer/CustomerLayout';
 import ProductGrid from '@/components/customer/ProductGrid';
 import { useProducts } from '@/hooks/useProducts';
@@ -33,9 +32,9 @@ const CustomerDashboard = () => {
       <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
         <CustomerLayout>
           <div className="flex justify-center items-center h-64">
-            <div className="text-center">
+            <div className="text-center animate-fade-in">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
-              <p className="text-white text-lg">Carregando produtos...</p>
+              <p className="text-white text-lg">Carregando produtos deliciosos...</p>
             </div>
           </div>
         </CustomerLayout>
@@ -47,17 +46,17 @@ const CustomerDashboard = () => {
     return (
       <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
         <CustomerLayout>
-          <Card className="mb-6 bg-gray-900/90 border-gray-700">
-            <div className="pt-6 px-6 pb-6">
-              <p className="text-red-400">Erro ao carregar produtos: {error}</p>
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center py-12 animate-fade-in">
+              <p className="text-red-400 mb-4 text-lg">Erro ao carregar produtos: {error}</p>
               <Button 
                 onClick={() => window.location.reload()} 
-                className="mt-4 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white"
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-8 py-3 transition-all duration-300 hover:scale-105"
               >
                 Tentar novamente
               </Button>
             </div>
-          </Card>
+          </div>
         </CustomerLayout>
       </div>
     );
@@ -66,23 +65,38 @@ const CustomerDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
       <CustomerLayout>
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8 flex justify-between items-center">
-            <div className="animate-fade-in">
-              <h1 className="text-4xl font-bold mb-2 text-white">
-                {isAuthenticated ? `Bem-vindo(a), ${user?.name?.split(' ')[0] || 'Cliente'}!` : 'Bem-vindo ao Churrasquinho & Cia!'}
-              </h1>
-              <p className="text-gray-300 text-lg">Confira nossos produtos e faça seu pedido</p>
-            </div>
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
+              {isAuthenticated ? (
+                <>
+                  Bem-vindo(a),{' '}
+                  <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+                    {user?.name?.split(' ')[0] || 'Cliente'}!
+                  </span>
+                </>
+              ) : (
+                <>
+                  Bem-vindo ao{' '}
+                  <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+                    Churrasquinho & Cia!
+                  </span>
+                </>
+              )}
+            </h1>
+            <p className="text-gray-300 text-lg md:text-xl mb-8 leading-relaxed">
+              Confira nossos produtos fresquinhos e faça seu pedido agora mesmo
+            </p>
+            
             <Button 
               variant="outline" 
-              size="sm" 
+              size="lg" 
               onClick={handleRefreshProducts} 
-              className="flex items-center gap-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black animate-fade-in"
+              className="border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold px-8 py-3 transition-all duration-300 hover:scale-105 animate-fade-in"
               style={{ animationDelay: '200ms' }}
             >
-              <RefreshCw className="h-4 w-4" />
-              Atualizar
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Atualizar Produtos
             </Button>
           </div>
 

@@ -67,13 +67,20 @@ const CartPage = () => {
           <Helmet>
             <title>Carrinho - Churrasquinho & Cia</title>
           </Helmet>
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center py-12">
-              <h2 className="text-3xl font-bold mb-4 text-white">Seu carrinho está vazio</h2>
-              <p className="text-gray-300 mb-8 text-lg">Adicione alguns produtos deliciosos ao seu carrinho</p>
+          <div className="container mx-auto px-4 py-8 md:py-12">
+            <div className="text-center py-12 animate-fade-in">
+              <h2 className="text-4xl sm:text-5xl font-bold mb-6 text-white leading-tight">
+                Seu carrinho está{' '}
+                <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+                  vazio
+                </span>
+              </h2>
+              <p className="text-gray-300 mb-8 text-lg md:text-xl leading-relaxed">
+                Adicione alguns produtos deliciosos ao seu carrinho
+              </p>
               <Button 
                 onClick={() => window.location.href = '/cardapio'}
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-8 py-3"
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-full"
               >
                 Ver Cardápio
               </Button>
@@ -91,20 +98,25 @@ const CartPage = () => {
           <title>Carrinho - Churrasquinho & Cia</title>
         </Helmet>
 
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl font-bold mb-8 text-white text-center animate-fade-in">
-            Finalizar{' '}
-            <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
-              Pedido
-            </span>
-          </h1>
+        <div className="container mx-auto px-4 py-8 md:py-12">
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
+              Finalizar{' '}
+              <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
+                Pedido
+              </span>
+            </h1>
+            <p className="text-gray-300 text-lg md:text-xl leading-relaxed">
+              Estamos quase lá! Confirme seus dados e finalize seu pedido
+            </p>
+          </div>
 
           <div className="grid gap-8 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-6">
               {/* Cart Items */}
-              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '200ms' }}>
+              <Card className="bg-gray-900/90 border-gray-700 shadow-2xl animate-fade-in" style={{ animationDelay: '200ms' }}>
                 <CardHeader>
-                  <CardTitle className="text-yellow-400">Seus Itens</CardTitle>
+                  <CardTitle className="text-yellow-400 text-xl">Seus Itens</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <CartItems 
@@ -117,9 +129,9 @@ const CartPage = () => {
               </Card>
 
               {/* Delivery Options */}
-              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '400ms' }}>
+              <Card className="bg-gray-900/90 border-gray-700 shadow-2xl animate-fade-in" style={{ animationDelay: '400ms' }}>
                 <CardHeader>
-                  <CardTitle className="text-yellow-400">Opções de Entrega</CardTitle>
+                  <CardTitle className="text-yellow-400 text-xl">Opções de Entrega</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center space-x-2">
@@ -148,9 +160,9 @@ const CartPage = () => {
               </Card>
 
               {/* Payment Method */}
-              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '600ms' }}>
+              <Card className="bg-gray-900/90 border-gray-700 shadow-2xl animate-fade-in" style={{ animationDelay: '600ms' }}>
                 <CardHeader>
-                  <CardTitle className="text-yellow-400">Forma de Pagamento</CardTitle>
+                  <CardTitle className="text-yellow-400 text-xl">Forma de Pagamento</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <RadioGroup value={paymentMethod} onValueChange={handlePaymentMethodChange}>
@@ -207,9 +219,9 @@ const CartPage = () => {
               </Card>
 
               {/* Observations */}
-              <Card className="bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '800ms' }}>
+              <Card className="bg-gray-900/90 border-gray-700 shadow-2xl animate-fade-in" style={{ animationDelay: '800ms' }}>
                 <CardHeader>
-                  <CardTitle className="text-yellow-400">Observações</CardTitle>
+                  <CardTitle className="text-yellow-400 text-xl">Observações</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Textarea
@@ -225,9 +237,9 @@ const CartPage = () => {
 
             {/* Order Summary */}
             <div>
-              <Card className="sticky top-4 bg-gray-900/90 border-gray-700 animate-fade-in" style={{ animationDelay: '1000ms' }}>
+              <Card className="sticky top-20 bg-gray-900/90 border-gray-700 shadow-2xl animate-fade-in" style={{ animationDelay: '1000ms' }}>
                 <CardHeader>
-                  <CardTitle className="text-yellow-400">Resumo do Pedido</CardTitle>
+                  <CardTitle className="text-yellow-400 text-xl">Resumo do Pedido</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
@@ -249,7 +261,7 @@ const CartPage = () => {
 
                   <Button 
                     onClick={handleCheckout} 
-                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold" 
+                    className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold transition-all duration-300 hover:scale-105" 
                     size="lg"
                     disabled={isSubmitting || (!isPickup && !selectedAddress)}
                   >
