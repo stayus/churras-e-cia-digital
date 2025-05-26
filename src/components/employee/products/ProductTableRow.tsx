@@ -1,8 +1,7 @@
-
 import { Toggle } from "@/components/ui/toggle";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TableRow, TableCell } from "@/components/ui/table";
-import { Product } from "@/hooks/useProducts";
+import { Product } from "@/types/product";
 
 interface ProductTableRowProps {
   product: Product;

@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Product, useProducts } from '@/hooks/useProducts';
+import { useProducts } from '@/hooks/useProducts';
+import { Product } from '@/types/product';
 import { Loader2, RefreshCw, Database, Zap, Eye, Bug } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 

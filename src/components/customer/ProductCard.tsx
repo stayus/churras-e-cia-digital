@@ -1,123 +1,133 @@
-
-import React from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/hooks/useProducts';
-import { ShoppingCart } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { useCart } from '@/contexts/CartContext';
-import { useToast } from '@/hooks/use-toast';
+import { useCart } from '@/contexts/cart';
+import { Product } from '@/types/product';
+import { formatCurrency } from '@/lib/format';
+import { Minus, Plus, ShoppingCart } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
-  onCartOpen?: () => void;
+  onCartOpen: () => void;
 }
 
-const getCategoryLabel = (category: string): string => {
-  switch (category) {
-    case 'lanche': return 'Lanche';
-    case 'bebida': return 'Bebida';
-    case 'refeicao': return 'Refeição';
-    case 'sobremesa': return 'Sobremesa';
-    default: return 'Outro';
-  }
-};
-
-const getCategoryColor = (category: string): string => {
-  switch (category) {
-    case 'lanche': return 'bg-amber-100 text-amber-800 hover:bg-amber-200';
-    case 'bebida': return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
-    case 'refeicao': return 'bg-green-100 text-green-800 hover:bg-green-200';
-    case 'sobremesa': return 'bg-purple-100 text-purple-800 hover:bg-purple-200';
-    default: return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
-  }
-};
-
 const ProductCard: React.FC<ProductCardProps> = ({ product, onCartOpen }) => {
-  const { name, description, price, image_url, promotion_price, is_out_of_stock, category } = product;
-  const { addItem } = useCart();
-  const { toast } = useToast();
-  
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
+  const { addItem, removeItem, getItemQuantity } = useCart();
+  const quantity = getItemQuantity(product.id);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+
+  const handleAddToCart = async () => {
+    setIsAdding(true);
+    await addItem(product);
+    setIsAdding(false);
+    onCartOpen();
   };
-  
-  const categoryClass = getCategoryColor(category);
-  const categoryLabel = getCategoryLabel(category);
-  
-  const truncateDescription = (text: string, maxLength: number = 80) => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+
+  const handleRemoveFromCart = async () => {
+    setIsRemoving(true);
+    await removeItem(product.id);
+    setIsRemoving(false);
   };
-  
-  const handleAddToCart = () => {
-    addItem(product, []);
-    toast({
-      title: "Produto adicionado",
-      description: `${name} foi adicionado ao carrinho.`
-    });
-    
-    // Auto-open cart sidebar after adding item
-    if (onCartOpen) {
-      setTimeout(() => {
-        onCartOpen();
-      }, 500);
-    }
+
+  const handleIncreaseQuantity = async () => {
+    setIsAdding(true);
+    await addItem(product);
+    setIsAdding(false);
   };
-  
+
+  const handleDecreaseQuantity = async () => {
+    setIsRemoving(true);
+    await removeItem(product.id, true);
+    setIsRemoving(false);
+  };
+
   return (
-    <Card className="overflow-hidden h-full flex flex-col">
-      <div className="relative">
-        <img 
-          src={image_url || 'https://placehold.co/300x200?text=Produto'} 
-          alt={name}
-          className="w-full h-48 object-cover"
+    <Card className="bg-gray-900/90 border-gray-700 shadow-2xl transition-all duration-300 hover:scale-105">
+      <div className="aspect-w-4 aspect-h-3 relative">
+        <img
+          src={product.image_url}
+          alt={product.name}
+          className="object-cover rounded-t-md"
         />
-        <Badge className={`absolute top-2 right-2 ${categoryClass}`}>
-          {categoryLabel}
-        </Badge>
-        {promotion_price && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-md text-sm font-bold">
+        {product.is_out_of_stock && (
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-t-md">
+            <span className="text-white text-lg font-bold">Esgotado</span>
+          </div>
+        )}
+        {product.promotion_price !== null && product.promotion_price > 0 && (
+          <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-md text-sm font-bold">
             Promoção
           </div>
         )}
-        {is_out_of_stock && (
-          <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center">
-            <p className="text-white text-xl font-bold">Esgotado</p>
-          </div>
-        )}
       </div>
-      
-      <CardContent className="pt-4 flex-grow">
-        <h3 className="font-bold text-lg mb-2">{name}</h3>
-        <p className="text-gray-600 text-sm mb-3">{truncateDescription(description)}</p>
-      </CardContent>
-      
-      <CardFooter className="flex justify-between items-center border-t p-4">
-        <div>
-          {promotion_price ? (
-            <div className="flex flex-col">
-              <span className="text-red-600 font-bold">{formatCurrency(promotion_price)}</span>
-              <span className="text-gray-500 text-sm line-through">{formatCurrency(price)}</span>
-            </div>
+      <CardContent className="p-4">
+        <h3 className="text-xl font-semibold text-white mb-2 line-clamp-1">
+          {product.name}
+        </h3>
+        <p className="text-gray-400 mb-3 line-clamp-2">
+          {product.description}
+        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            {product.promotion_price !== null && product.promotion_price > 0 ? (
+              <>
+                <span className="text-gray-500 line-through mr-2">
+                  {formatCurrency(product.price)}
+                </span>
+                <span className="text-yellow-400 text-lg font-bold">
+                  {formatCurrency(product.promotion_price)}
+                </span>
+              </>
+            ) : (
+              <span className="text-yellow-400 text-lg font-bold">
+                {formatCurrency(product.price)}
+              </span>
+            )}
+          </div>
+
+          {quantity === 0 ? (
+            <Button
+              onClick={handleAddToCart}
+              disabled={product.is_out_of_stock || isAdding}
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold"
+            >
+              {isAdding ? (
+                <>
+                  Adicionando...
+                </>
+              ) : (
+                <>
+                  Adicionar
+                  <ShoppingCart className="ml-2 h-4 w-4" />
+                </>
+              )}
+            </Button>
           ) : (
-            <span className="font-bold">{formatCurrency(price)}</span>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleDecreaseQuantity}
+                disabled={isRemoving}
+                className="text-red-500 border-red-500 hover:bg-red-500 hover:text-white"
+              >
+                <Minus className="h-4 w-4" />
+              </Button>
+              <span className="text-white font-semibold">{quantity}</span>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleIncreaseQuantity}
+                disabled={isAdding}
+                className="text-green-500 border-green-500 hover:bg-green-500 hover:text-white"
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
           )}
         </div>
-        <Button 
-          size="sm" 
-          disabled={is_out_of_stock}
-          className="flex items-center gap-2"
-          onClick={handleAddToCart}
-        >
-          <ShoppingCart className="h-4 w-4" />
-          Adicionar
-        </Button>
-      </CardFooter>
+      </CardContent>
     </Card>
   );
 };

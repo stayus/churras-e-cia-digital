@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useProducts, Product } from "@/hooks/useProducts";
+import { useProducts } from "@/hooks/useProducts";
+import { Product } from "@/types/product";
 
 export const useProductsPromotions = () => {
   const { products: allProducts, loading: productsLoading } = useProducts();

@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Product } from '@/hooks/useProducts';
+import { Product } from '@/types/product';
 import ProductCard from './ProductCard';
 import CartSidebar from './CartSidebar';
 
