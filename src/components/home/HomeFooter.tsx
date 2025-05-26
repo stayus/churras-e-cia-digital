@@ -103,16 +103,23 @@ const HomeFooter = () => {
               <div className="flex items-center">
                 <Clock className="h-5 w-5 text-red-500 mr-3" />
                 <div className="text-gray-300 text-base">
-                  <div className="font-medium">Segunda a Sexta</div>
-                  <div className="text-sm">18:00 - 23:00</div>
+                  <div className="font-medium">Segunda e Sexta</div>
+                  <div className="text-sm"> Fechado </div>
                 </div>
               </div>
               
               <div className="flex items-center">
                 <Clock className="h-5 w-5 text-red-500 mr-3" />
                 <div className="text-gray-300 text-base">
+                  <div className="font-medium">Terça a Quinta</div>
+                  <div className="text-sm">18:30 - 22:00</div>
+                </div>
+              </div>
+              <div className="flex items-center">
+                <Clock className="h-5 w-5 text-red-500 mr-3" />
+                <div className="text-gray-300 text-base">
                   <div className="font-medium">Sábados e Domingos</div>
-                  <div className="text-sm">17:00 - 00:00</div>
+                  <div className="text-sm">18:00 - 22:00</div>
                 </div>
               </div>
             </div>
