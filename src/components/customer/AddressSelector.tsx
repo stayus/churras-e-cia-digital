@@ -146,7 +146,9 @@ const AddressSelector: React.FC<AddressSelectorProps> = ({
         street: formData.street,
         number: formData.number,
         city: formData.city,
+        state: 'CE', // Default state
         zip: formData.zip,
+        zipCode: formData.zip, // Same as zip for compatibility
         complement: formData.complement || undefined,
         label: formData.label || undefined
       };
