@@ -15,20 +15,28 @@ export interface CustomerAddress {
   is_default: boolean;
 }
 
-export const useAddressManager = (customerId: string) => {
+export const useAddressManager = () => {
   const [addresses, setAddresses] = useState<CustomerAddress[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
   const fetchAddresses = async () => {
-    if (!customerId) return;
-    
     try {
       setLoading(true);
+      
+      // Get current user from Supabase Auth
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        console.log('No authenticated user found');
+        setAddresses([]);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('customer_addresses')
         .select('*')
-        .eq('customer_id', customerId)
+        .eq('customer_id', user.id)
         .order('created_at', { ascending: false });
         
       if (error) throw error;
@@ -48,11 +56,18 @@ export const useAddressManager = (customerId: string) => {
 
   const addAddress = async (addressData: Omit<CustomerAddress, 'id' | 'is_default'>) => {
     try {
+      // Get current user from Supabase Auth
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Usuário não autenticado');
+      }
+      
       const { data, error } = await supabase
         .from('customer_addresses')
         .insert({
           ...addressData,
-          customer_id: customerId,
+          customer_id: user.id,
           is_default: addresses.length === 0 // First address is default
         })
         .select()
@@ -73,7 +88,7 @@ export const useAddressManager = (customerId: string) => {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Não foi possível salvar o endereço"
+        description: error.message || "Não foi possível salvar o endereço"
       });
       throw error;
     }
@@ -81,11 +96,18 @@ export const useAddressManager = (customerId: string) => {
 
   const updateAddress = async (addressId: string, addressData: Partial<CustomerAddress>) => {
     try {
+      // Get current user from Supabase Auth
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Usuário não autenticado');
+      }
+      
       const { data, error } = await supabase
         .from('customer_addresses')
         .update(addressData)
         .eq('id', addressId)
-        .eq('customer_id', customerId)
+        .eq('customer_id', user.id)
         .select()
         .single();
         
@@ -114,11 +136,18 @@ export const useAddressManager = (customerId: string) => {
 
   const deleteAddress = async (addressId: string) => {
     try {
+      // Get current user from Supabase Auth
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error('Usuário não autenticado');
+      }
+      
       const { error } = await supabase
         .from('customer_addresses')
         .delete()
         .eq('id', addressId)
-        .eq('customer_id', customerId);
+        .eq('customer_id', user.id);
         
       if (error) throw error;
       
@@ -141,7 +170,7 @@ export const useAddressManager = (customerId: string) => {
 
   useEffect(() => {
     fetchAddresses();
-  }, [customerId]);
+  }, []);
 
   return {
     addresses,

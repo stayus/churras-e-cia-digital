@@ -54,6 +54,19 @@ export const useCheckout = () => {
     try {
       setIsSubmitting(true);
       
+      // Get current user from Supabase Auth
+      const { data: { user: authUser }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !authUser) {
+        toast({
+          title: "Erro de autenticação",
+          description: "Você precisa estar logado para finalizar o pedido.",
+          variant: "destructive"
+        });
+        navigate('/login');
+        return;
+      }
+      
       // Prepare order address
       let orderAddress: any = { pickup: true };
       
@@ -83,7 +96,7 @@ export const useCheckout = () => {
       const { data: order, error } = await supabase
         .from('orders')
         .insert({
-          customer_id: user!.id,
+          customer_id: authUser.id, // Use auth user ID
           items: orderItems as unknown as Json,
           total: total,
           status: 'received',
@@ -106,8 +119,14 @@ export const useCheckout = () => {
       let successMessage = `Seu pedido #${order.id.substring(0, 8)} foi recebido!`;
       
       if (paymentMethod === 'pix') {
-        successMessage += ' Você receberá as informações do PIX em breve.';
+        successMessage += ' Por favor enviar o comprovante através do WhatsApp.';
+        // You can add WhatsApp link here
+        setTimeout(() => {
+          window.open('https://wa.me/5511999999999', '_blank');
+        }, 2000);
       } else if (paymentMethod === 'dinheiro') {
+        successMessage += ' O pagamento será feito na entrega.';
+      } else if (paymentMethod === 'cartao') {
         successMessage += ' O pagamento será feito na entrega.';
       }
       

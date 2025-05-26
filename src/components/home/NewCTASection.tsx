@@ -28,7 +28,7 @@ const NewCTASection = () => {
             size="lg" 
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-8 sm:px-12 py-4 sm:py-6 text-lg sm:text-xl rounded-full transition-all duration-300 hover:scale-110 hover:rotate-1 hover:shadow-2xl transform shadow-lg"
           >
-            <Link to="/catalogo">
+            <Link to="/cardapio">
               🍔 Pedir Agora
             </Link>
           </Button>
