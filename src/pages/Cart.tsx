@@ -149,9 +149,8 @@ const CartPage = () => {
                       <Label className="text-base font-medium text-yellow-400">Endereço de Entrega</Label>
                       <div className="mt-2">
                         <NewAddressSelector
-                          userId={user!.id}
-                          onAddressSelected={setSelectedAddress}
                           selectedAddress={selectedAddress}
+                          onAddressSelect={setSelectedAddress}
                         />
                       </div>
                     </div>
@@ -263,7 +262,7 @@ const CartPage = () => {
                     onClick={handleCheckout} 
                     className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold transition-all duration-300 hover:scale-105" 
                     size="lg"
-                    disabled={isSubmitting || (!isPickup && !selectedAddress)}
+                    disabled={isSubmitting}
                   >
                     {isSubmitting ? 'Processando...' : 'Finalizar Pedido'}
                   </Button>

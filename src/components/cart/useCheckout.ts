@@ -15,10 +15,26 @@ export interface CheckoutData {
 
 export const useCheckout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [observations, setObservations] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState<CustomerAddress | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<string>('');
+  const [isPickup, setIsPickup] = useState(false);
+  
   const { cart, clearCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Calculate subtotal from cart items
+  const subtotal = cart.items.reduce((sum, item) => {
+    return sum + item.totalPrice;
+  }, 0);
+
+  // Calculate shipping fee (free if pickup, otherwise fixed fee)
+  const shippingFee = isPickup ? 0 : 5;
+
+  // Calculate total
+  const total = subtotal + shippingFee;
 
   const processCheckout = async (checkoutData: CheckoutData) => {
     if (!user) {
@@ -43,18 +59,12 @@ export const useCheckout = () => {
     setIsProcessing(true);
     
     try {
-      // Calculate total
-      const total = cart.items.reduce((sum, item) => {
-        const price = item.promotion_price || item.price;
-        return sum + (price * item.quantity);
-      }, 0);
-
-      // Create order object
+      // Create order object with proper JSON structure for Supabase
       const orderData = {
         customer_id: user.id,
-        items: cart.items,
+        items: cart.items as any, // Cast to any to match Json type
         total: total,
-        address: checkoutData.address,
+        address: checkoutData.address as any, // Cast to any to match Json type
         payment_method: checkoutData.paymentMethod,
         observations: checkoutData.observations || null,
         status: 'received'
@@ -103,8 +113,49 @@ export const useCheckout = () => {
     }
   };
 
+  const handleCheckout = async () => {
+    if (!isPickup && !selectedAddress) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Selecione um endereço de entrega"
+      });
+      return;
+    }
+
+    if (!paymentMethod) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Selecione uma forma de pagamento"
+      });
+      return;
+    }
+
+    const checkoutData: CheckoutData = {
+      address: selectedAddress || {} as CustomerAddress,
+      paymentMethod,
+      observations
+    };
+
+    await processCheckout(checkoutData);
+  };
+
   return {
     processCheckout,
-    isProcessing
+    isProcessing,
+    observations,
+    setObservations,
+    selectedAddress,
+    setSelectedAddress,
+    paymentMethod,
+    setPaymentMethod,
+    isPickup,
+    setIsPickup,
+    isSubmitting: isProcessing,
+    shippingFee,
+    subtotal,
+    total,
+    handleCheckout
   };
 };
