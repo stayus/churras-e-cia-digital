@@ -19,7 +19,7 @@ const NewAddressSelector: React.FC<NewAddressSelectorProps> = ({
   onAddressSelected,
   selectedAddress 
 }) => {
-  const { addresses, loading, addAddress, updateAddress, deleteAddress } = useAddressManager(userId);
+  const { addresses, loading, addAddress, updateAddress, deleteAddress } = useAddressManager();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentAddress, setCurrentAddress] = useState<CustomerAddress | null>(null);
