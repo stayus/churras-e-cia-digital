@@ -110,7 +110,7 @@ const NewHomeFooter = () => {
                 <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-red-500 mr-2 sm:mr-3" />
                 <div className="text-gray-300 text-sm sm:text-base">
                   <div className="font-medium">Sábados e Domingos</div>
-                  <div className="text-xs sm:text-sm">17:00 - 00:00</div>
+                  <div className="text-xs sm:text-sm">18:00 - 22:00</div>
                 </div>
               </div>
             </div>
