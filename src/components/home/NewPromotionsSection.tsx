@@ -34,7 +34,7 @@ const NewPromotionsSection = () => {
       return;
     }
 
-    addItem(product, []);
+    addItem(product, 1);
     toast({
       title: "Produto adicionado",
       description: `${product.name} foi adicionado ao carrinho.`,

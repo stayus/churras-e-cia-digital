@@ -75,7 +75,7 @@ const PromotionsSection = () => {
       extras: []
     };
 
-    addItem(productForCart, []);
+    addItem(productForCart, 1);
     toast({
       title: "Produto adicionado",
       description: `${product.name} foi adicionado ao carrinho.`,
