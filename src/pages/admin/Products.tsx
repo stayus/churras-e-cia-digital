@@ -9,8 +9,7 @@ import ProductEditDialog from "@/components/admin/products/ProductEditDialog";
 import DeleteConfirmationDialog from "@/components/admin/DeleteConfirmationDialog";
 import ProductDebugger from "@/components/admin/products/ProductDebugger";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { useProducts } from "@/hooks/useProducts";
-import { Product } from "@/types/product";
+import { useProducts, Product } from "@/hooks/useProducts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const AdminProducts = () => {

@@ -3,8 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useProducts } from '@/hooks/useProducts';
-import { AddProductData } from '@/types/product';
+import { useProducts, AddProductData } from '@/hooks/useProducts';
 import ProductForm from './ProductForm';
 import { ProductFormValues } from './schema/productSchema';
 

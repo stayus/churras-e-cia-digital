@@ -38,16 +38,11 @@ export const parseProductExtras = (extras: any): ProductExtra[] => {
  * Format database product data to match Product type
  */
 export const formatDbProducts = (data: any[]): Product[] => {
-  console.log("formatDbProducts: Recebendo dados para formatação:", data);
+  console.log("formatDbProducts recebeu dados:", data);
   
-  if (!data || data.length === 0) {
-    console.log("formatDbProducts: Nenhum dado para formatar");
-    return [];
-  }
+  if (!data || data.length === 0) return [];
   
-  const formattedProducts = data.map((item, index) => {
-    console.log(`formatDbProducts: Formatando produto ${index + 1}:`, item);
-    
+  const formattedProducts = data.map(item => {
     // Ensure all required fields exist with default values if missing
     const category = item.category || 'outro';
     const extras = item.extras || [];
@@ -63,14 +58,12 @@ export const formatDbProducts = (data: any[]): Product[] => {
       is_out_of_stock: is_out_of_stock,
       promotion_price: item.promotion_price || null,
       category: category as 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro',
-      extras: parseProductExtras(extras),
-      created_at: item.created_at
+      extras: parseProductExtras(extras)
     };
     
-    console.log(`formatDbProducts: Produto ${index + 1} formatado:`, product);
     return product;
   });
   
-  console.log("formatDbProducts: Produtos finais formatados:", formattedProducts);
+  console.log("formatDbProducts retornou produtos formatados:", formattedProducts);
   return formattedProducts;
 };

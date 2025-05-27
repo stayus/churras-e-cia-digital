@@ -72,7 +72,7 @@ const PopularSection = () => {
       extras: []
     };
 
-    addItem(productForCart, 1);
+    addItem(productForCart, []);
     toast({
       title: "Produto adicionado",
       description: `${product.name} foi adicionado ao carrinho.`,

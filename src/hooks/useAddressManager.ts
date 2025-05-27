@@ -65,11 +65,6 @@ export const useAddressManager = () => {
       if (userError || !user) {
         throw new Error('Usuário não autenticado');
       }
-
-      // Check address limit before adding
-      if (addresses.length >= 3) {
-        throw new Error('Você pode ter no máximo 3 endereços cadastrados. Exclua um endereço antes de adicionar outro.');
-      }
       
       const { data, error } = await supabase
         .from('customer_addresses')
@@ -83,9 +78,6 @@ export const useAddressManager = () => {
         
       if (error) {
         console.error('Error adding address:', error);
-        if (error.message.includes('no máximo 3 endereços')) {
-          throw new Error('Você pode ter no máximo 3 endereços cadastrados. Exclua um endereço antes de adicionar outro.');
-        }
         throw error;
       }
       

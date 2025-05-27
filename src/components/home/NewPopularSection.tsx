@@ -34,7 +34,7 @@ const NewPopularSection = () => {
       return;
     }
 
-    addItem(product, 1);
+    addItem(product, []);
     toast({
       title: "Produto adicionado",
       description: `${product.name} foi adicionado ao carrinho.`,

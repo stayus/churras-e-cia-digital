@@ -1,3 +1,4 @@
+
 import { 
   Table,
   TableBody,
@@ -9,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import ProductTableRow from "./ProductTableRow";
 import ProductsLoading from "./ProductsLoading";
 import ProductsEmpty from "./ProductsEmpty";
-import { Product } from "@/types/product";
+import { Product } from "@/hooks/useProducts";
 
 interface ProductsTableProps {
   products: Product[];

@@ -1,9 +1,10 @@
+
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Percent } from "lucide-react";
-import { Product } from "@/types/product";
+import { Product } from "@/hooks/useProducts";
 
 interface PromotionTableRowProps {
   product: Product;

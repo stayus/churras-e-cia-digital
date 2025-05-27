@@ -15,7 +15,6 @@ export interface Product {
   promotion_price: number | null;
   category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
   extras: ProductExtra[];
-  created_at?: string;
 }
 
 export interface AddProductData {

@@ -1,59 +1,7 @@
 
-export interface CartExtra {
-  id: string;
-  name: string;
-  price: number;
-}
+import { Json } from '@/integrations/supabase/types';
 
-export interface CartProduct {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  image_url: string;
-  is_out_of_stock: boolean;
-  promotion_price: number | null;
-  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
-  extras: CartExtra[];
-}
-
-export interface CartItem {
-  id: string;
-  product: CartProduct;
-  quantity: number;
-  extras: CartExtra[];
-  price: number;
-  name: string;
-  imageUrl: string;
-  totalPrice: number;
-}
-
-export interface CartState {
-  items: CartItem[];
-  total: number;
-}
-
-export type CartAction =
-  | { type: 'ADD_ITEM'; payload: { product: CartProduct; quantity: number } }
-  | { type: 'REMOVE_ITEM'; payload: string }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
-  | { type: 'CLEAR_CART' };
-
-// Additional types for compatibility
-export interface Address {
-  id: string;
-  street: string;
-  number: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  zip: string;
-  complement?: string;
-  label?: string;
-}
-
-export type PaymentMethod = 'pix' | 'dinheiro' | 'cartao';
-
+// Types
 export interface Product {
   id: string;
   name: string;
@@ -61,19 +9,69 @@ export interface Product {
   price: number;
   image_url: string;
   is_out_of_stock: boolean;
-  promotion_price: number | null;
-  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
-  extras: CartExtra[];
-  created_at?: string;
+  promotion_price?: number;
+  extras: Array<{
+    id: string;
+    name: string;
+    price: number;
+  }>;
 }
 
-export interface CartContextType {
+export interface CartExtra {
+  id: string;
+  name: string;
+  price: number;
+}
+
+export interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  extras?: CartExtra[];
+  imageUrl?: string;
+  totalPrice: number;
+}
+
+export interface Address {
+  id: string;
+  street: string;
+  number: string;
+  city: string;
+  zip: string;
+  complement?: string;
+  label?: string;
+}
+
+export type PaymentMethod = 'pix' | 'dinheiro' | 'cartao';
+
+export interface CartState {
   items: CartItem[];
-  total: number;
-  addItem: (product: CartProduct, quantity: number) => void;
+  totalPrice: number;
+  selectedAddress: Address | null;
+  paymentMethod: PaymentMethod | null;
+  observations: string;
+  shippingFee: number;
+}
+
+export type CartAction = 
+  | { type: 'ADD_ITEM'; payload: { product: Product; extras: CartExtra[] } }
+  | { type: 'REMOVE_ITEM'; payload: { productId: string } }
+  | { type: 'UPDATE_QUANTITY'; payload: { productId: string; quantity: number } }
+  | { type: 'SET_ADDRESS'; payload: Address }
+  | { type: 'SET_PAYMENT_METHOD'; payload: PaymentMethod }
+  | { type: 'SET_OBSERVATIONS'; payload: string }
+  | { type: 'CALCULATE_SHIPPING'; payload: number }
+  | { type: 'CLEAR_CART' };
+
+export interface CartContextType {
+  cart: CartState;
+  addItem: (product: Product, extras: CartExtra[]) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
-  getItemQuantity: (productId: string) => number;
+  setAddress: (address: Address) => void;
+  setPaymentMethod: (method: PaymentMethod) => void;
+  setObservations: (observations: string) => void;
+  calculateShipping: (address: Address) => void;
   clearCart: () => void;
-  cart: CartState;
 }
