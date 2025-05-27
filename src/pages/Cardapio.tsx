@@ -20,13 +20,13 @@ const CardapioPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
+      <div className="page-container">
         <CustomerLayout>
-          <div className="container mx-auto px-4 py-8">
+          <div className="content-container">
             <div className="flex justify-center items-center h-64">
               <div className="text-center animate-fade-in">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-400 mx-auto mb-4"></div>
-                <p className="text-white text-lg">Carregando cardápio delicioso...</p>
+                <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-yellow-400 mx-auto mb-6"></div>
+                <p className="text-white text-xl font-medium">Carregando cardápio delicioso...</p>
               </div>
             </div>
           </div>
@@ -37,17 +37,21 @@ const CardapioPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
+      <div className="page-container">
         <CustomerLayout>
-          <div className="container mx-auto px-4 py-8">
-            <div className="text-center py-12 animate-fade-in">
-              <p className="text-red-400 mb-4 text-lg">Erro ao carregar produtos: {error}</p>
-              <Button 
-                onClick={handleRefreshProducts}
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-8 py-3 transition-all duration-300 hover:scale-105"
-              >
-                Tentar novamente
-              </Button>
+          <div className="content-container">
+            <div className="text-center py-16 animate-fade-in">
+              <div className="brand-card max-w-md mx-auto p-8">
+                <p className="text-red-400 mb-6 text-lg">Erro ao carregar produtos:</p>
+                <p className="text-gray-300 mb-6">{error}</p>
+                <Button 
+                  onClick={handleRefreshProducts}
+                  className="brand-button-primary"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Tentar novamente
+                </Button>
+              </div>
             </div>
           </div>
         </CustomerLayout>
@@ -56,31 +60,26 @@ const CardapioPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
+    <div className="page-container">
       <CustomerLayout>
         <Helmet>
           <title>Cardápio - Churrasquinho & Cia</title>
         </Helmet>
         
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
-              Nosso{' '}
-              <span className="bg-gradient-to-r from-yellow-400 to-red-500 bg-clip-text text-transparent">
-                Cardápio
-              </span>
+        <div className="content-container">
+          <div className="page-header">
+            <h1 className="page-title">
+              Nosso <span className="gradient-text">Cardápio</span>
             </h1>
-            <p className="text-gray-300 text-lg md:text-xl mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <p className="page-subtitle mb-8">
               Sabores autênticos que conquistam seu paladar. Feitos com ingredientes premium 
-              e <span className="text-yellow-400 font-semibold">muito amor</span>!
+              e muito amor para você!
             </p>
             
-            <div className="flex justify-center mt-6">
+            <div className="flex justify-center">
               <Button 
-                variant="outline" 
-                size="lg" 
                 onClick={handleRefreshProducts} 
-                className="border-2 border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black font-bold px-8 py-3 transition-all duration-300 hover:scale-105 animate-fade-in"
+                className="brand-button-secondary animate-fade-in"
                 style={{ animationDelay: '400ms' }}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />

@@ -9,7 +9,7 @@ import NewHomeFooter from '@/components/home/NewHomeFooter';
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="page-container">
       <NewHomeHeader />
       <main>
         <NewHeroSection />
