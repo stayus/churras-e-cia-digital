@@ -36,7 +36,7 @@ const NewHomeHeader = () => {
             <Link to="/home" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Início
             </Link>
-            <Link to="/catalogo" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+            <Link to="/cardapio" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Cardápio
             </Link>
             
