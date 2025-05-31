@@ -58,7 +58,7 @@ const HeroSection = () => {
                 size="lg" 
                 className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-4 text-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl rounded-full"
               >
-                <Link to="/catalogo">
+                <Link to="/cardapio">
                   Ver Cardápio
                 </Link>
               </Button>
