@@ -81,7 +81,7 @@ const NewHomeFooter = () => {
               <div className="flex items-center group">
                 <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mr-3 sm:mr-4 group-hover:scale-110 transition-transform duration-300" />
                 <a href="tel:(98)98853-0154" className="text-gray-300 hover:text-white text-sm sm:text-base transition-colors">
-                  (98) 98853-0154
+                  (98) 98853-01548885555
                 </a>
               </div>
               
