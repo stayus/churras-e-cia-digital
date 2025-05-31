@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,7 +16,30 @@ const AdminProducts = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const { products, loading, error, fetchProducts, deleteProduct, toggleProductStock } = useProducts();
+
+  // Force initial load and wait for products
+  useEffect(() => {
+    const loadProducts = async () => {
+      console.log("AdminProducts: Forçando carregamento inicial de produtos");
+      setInitialLoading(true);
+      
+      try {
+        await fetchProducts();
+        console.log("AdminProducts: Produtos carregados com sucesso");
+      } catch (error) {
+        console.error("AdminProducts: Erro ao carregar produtos:", error);
+      } finally {
+        // Wait a bit more to ensure products are loaded
+        setTimeout(() => {
+          setInitialLoading(false);
+        }, 1000);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   // Função para formatar preço como currency
   const formatCurrency = (value: number) => {
@@ -69,19 +91,14 @@ const AdminProducts = () => {
     await toggleProductStock(product.id, !product.is_out_of_stock);
   };
 
-  // Efetuar refresh dos produtos quando a página carrega
-  useEffect(() => {
-    console.log("AdminProducts montado - buscando produtos");
-    fetchProducts();
-  }, []);
-
-  if (loading) {
+  // Show loading until both initial loading and products loading are complete
+  if (initialLoading || loading) {
     return (
       <AdminLayout>
         <div className="p-6">
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin text-red-600 mr-2" />
-            <span className="text-gray-700">Carregando produtos...</span>
+            <span className="text-gray-700">Carregando produtos do banco de dados...</span>
           </div>
         </div>
       </AdminLayout>
@@ -121,7 +138,9 @@ const AdminProducts = () => {
         
         <Card className="mb-6 bg-white">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-gray-900">Produtos</CardTitle>
+            <CardTitle className="text-gray-900">
+              Produtos ({products.length} cadastrado{products.length !== 1 ? 's' : ''})
+            </CardTitle>
             <Button 
               className="bg-red-600 hover:bg-red-700 flex items-center gap-2 text-white"
               onClick={() => setIsProductDialogOpen(true)}
@@ -132,9 +151,24 @@ const AdminProducts = () => {
           </CardHeader>
           <CardContent>
             {products.length === 0 ? (
-              <p className="text-center py-8 text-gray-600">
-                Nenhum produto cadastrado. Adicione seu primeiro produto!
-              </p>
+              <div className="text-center py-8">
+                <div className="text-gray-400 mb-4">
+                  <PlusCircle className="h-16 w-16 mx-auto mb-4" />
+                </div>
+                <p className="text-gray-600 text-lg mb-4">
+                  Nenhum produto cadastrado no banco de dados.
+                </p>
+                <p className="text-gray-500 mb-6">
+                  Adicione seu primeiro produto para começar a vender!
+                </p>
+                <Button 
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => setIsProductDialogOpen(true)}
+                >
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Adicionar Primeiro Produto
+                </Button>
+              </div>
             ) : (
               <div className="rounded-md border">
                 <Table>

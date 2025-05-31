@@ -19,6 +19,17 @@ const NewHomeHeader = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <header className="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-lg z-50 border-b border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -33,20 +44,20 @@ const NewHomeHeader = () => {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-            <Link to="/home" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+            <button onClick={scrollToTop} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Início
-            </Link>
-            <Link to="/home#cardapio" onClick={() => window.location.href = '/home#cardapio'} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+            </button>
+            <button onClick={() => scrollToSection('cardapio')} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Cardápio
-            </Link>
+            </button>
             
             {isAuthenticated ? (
               <>
-                <Link to="/home#pedidos" onClick={() => window.location.href = '/home#pedidos'} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/orders" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Pedidos
                 </Link>
                 <div className="relative">
-                  <Link to="/home#carrinho" onClick={() => window.location.href = '/home#carrinho'} className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
+                  <Link to="/cart" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
                     {totalItems > 0 && (
@@ -56,7 +67,7 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                 </div>
-                <Link to="/home#conta" onClick={() => window.location.href = '/home#conta'} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/customer/account" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Conta
                 </Link>
               </>
@@ -100,44 +111,39 @@ const NewHomeHeader = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100 py-4 bg-white/95 backdrop-blur-md">
             <div className="flex flex-col space-y-4">
-              <Link 
-                to="/home" 
-                className="text-gray-700 hover:text-red-600 transition-colors font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
+              <button 
+                onClick={() => {
+                  scrollToTop();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
               >
                 Início
-              </Link>
-              <Link 
-                to="/home#cardapio" 
-                className="text-gray-700 hover:text-red-600 transition-colors font-medium"
+              </button>
+              <button 
                 onClick={() => {
+                  scrollToSection('cardapio');
                   setIsMobileMenuOpen(false);
-                  window.location.href = '/home#cardapio';
                 }}
+                className="text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
               >
                 Cardápio
-              </Link>
+              </button>
               
               {isAuthenticated && (
                 <>
                   <Link 
-                    to="/home#pedidos" 
+                    to="/orders" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      window.location.href = '/home#pedidos';
-                    }}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Package className="h-4 w-4" />
                     Pedidos
                   </Link>
                   <Link 
-                    to="/home#carrinho" 
+                    to="/cart" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      window.location.href = '/home#carrinho';
-                    }}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
@@ -148,12 +154,9 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                   <Link 
-                    to="/home#conta" 
+                    to="/customer/account" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium"
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      window.location.href = '/home#conta';
-                    }}
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Conta
                   </Link>

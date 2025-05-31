@@ -41,23 +41,9 @@ export const useProducts = () => {
       
       console.log('useProducts: Iniciando busca de produtos...');
       
-      // Try direct database query first
-      const { data: directData, error: directError } = await supabase
-        .from('products')
-        .select('*')
-        .order('name');
-        
-      if (!directError && directData) {
-        console.log('useProducts: Produtos obtidos diretamente do banco:', directData);
-        const formattedProducts = formatDbProducts(directData);
-        setProducts(formattedProducts);
-        console.log('useProducts: Produtos formatados:', formattedProducts);
-        return;
-      }
+      // Always try edge function first for better reliability
+      console.log('useProducts: Usando edge function get-products');
       
-      console.log('useProducts: Consulta direta falhou, tentando edge function get-products');
-      
-      // If direct query fails, try the edge function
       const { data, error } = await supabase.functions.invoke('get-products');
       
       if (error) {
@@ -67,12 +53,28 @@ export const useProducts = () => {
       
       console.log('useProducts: Resposta da função get-products:', data);
       
-      if (data?.success && data?.data) {
+      if (data?.success && data?.data && Array.isArray(data.data)) {
         const formattedProducts = formatDbProducts(data.data);
         setProducts(formattedProducts);
         console.log('useProducts: Produtos formatados da edge function:', formattedProducts);
       } else {
-        throw new Error('Nenhum produto encontrado');
+        // If edge function fails, try direct database query as fallback
+        console.log('useProducts: Edge function falhou, tentando consulta direta');
+        
+        const { data: directData, error: directError } = await supabase
+          .from('products')
+          .select('*')
+          .order('name');
+          
+        if (!directError && directData && Array.isArray(directData)) {
+          console.log('useProducts: Produtos obtidos diretamente do banco:', directData);
+          const formattedProducts = formatDbProducts(directData);
+          setProducts(formattedProducts);
+          console.log('useProducts: Produtos formatados:', formattedProducts);
+        } else {
+          console.error('useProducts: Erro na consulta direta:', directError);
+          throw new Error('Nenhum produto encontrado');
+        }
       }
     } catch (err) {
       console.error('useProducts: Erro ao carregar produtos:', err);
