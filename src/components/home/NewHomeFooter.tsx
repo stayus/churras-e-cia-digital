@@ -1,4 +1,5 @@
 
+/Home Principal parte de baixo rodapé
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter } from 'lucide-react';
@@ -45,7 +46,7 @@ const NewHomeFooter = () => {
                 Início
               </Link>
               <Link 
-                to="/catalogo" 
+                to="/caradapio" 
                 className="block text-gray-300 hover:text-white transition-colors duration-300 text-sm sm:text-base hover:translate-x-2 transform"
               >
                 Cardápio
@@ -81,7 +82,7 @@ const NewHomeFooter = () => {
               <div className="flex items-center group">
                 <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-red-500 mr-3 sm:mr-4 group-hover:scale-110 transition-transform duration-300" />
                 <a href="tel:(98)98853-0154" className="text-gray-300 hover:text-white text-sm sm:text-base transition-colors">
-                  (98) 98853-01548885555
+                  (98) 98853-0154
                 </a>
               </div>
               

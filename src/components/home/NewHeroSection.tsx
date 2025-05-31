@@ -1,4 +1,5 @@
 
+/Usado para parte onde tem a imagem 
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -68,7 +69,7 @@ const NewHeroSection = () => {
               
               <div className="absolute bottom-6 left-6 right-6 bg-black/80 backdrop-blur-sm rounded-2xl p-4 sm:p-6 border border-white/10">
                 <p className="text-white font-semibold text-base sm:text-lg">
-                  🔥 Mais de 10.000 clientes satisfeitos!
+                  🔥 Mais de 10.000asdasdas clientes satisfeitos!
                 </p>
                 <p className="text-gray-300 text-xs sm:text-sm">
                   Grelhado no ponto certo, temperado com amor
