@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDbProducts } from '@/utils/productUtils';
+import { useToast } from '@/hooks/use-toast';
 
 export interface Product {
   id: string;
@@ -31,6 +32,7 @@ export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const fetchProducts = async () => {
     try {
@@ -65,7 +67,7 @@ export const useProducts = () => {
       if (error) throw error;
 
       if (data?.success && data?.product) {
-        await fetchProducts(); // Refresh the list
+        await fetchProducts();
         return data.product;
       }
       
@@ -85,7 +87,7 @@ export const useProducts = () => {
       if (error) throw error;
 
       if (data?.success && data?.product) {
-        await fetchProducts(); // Refresh the list
+        await fetchProducts();
         return data.product;
       }
       
@@ -105,7 +107,7 @@ export const useProducts = () => {
       if (error) throw error;
 
       if (data?.success) {
-        await fetchProducts(); // Refresh the list
+        await fetchProducts();
         return true;
       }
       
@@ -142,8 +144,17 @@ export const useProducts = () => {
       if (error) throw error;
 
       console.log('Realtime setup successful:', data);
+      toast({
+        title: "Realtime ativado",
+        description: "Monitoramento de produtos configurado com sucesso."
+      });
     } catch (error) {
       console.error('Error setting up realtime:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Falha ao configurar realtime para produtos."
+      });
       throw error;
     }
   };
@@ -151,7 +162,7 @@ export const useProducts = () => {
   useEffect(() => {
     fetchProducts();
 
-    // Set up realtime subscription silently (no toast notifications)
+    // Set up realtime subscription
     const channel = supabase
       .channel('products-channel')
       .on(
@@ -162,11 +173,16 @@ export const useProducts = () => {
           table: 'products'
         },
         () => {
-          // Silently refetch products when changes occur
+          console.log('Produto alterado - atualizando lista');
           fetchProducts();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Status da subscrição realtime:', status);
+        if (status === 'SUBSCRIBED') {
+          console.log('Realtime ativo para produtos');
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

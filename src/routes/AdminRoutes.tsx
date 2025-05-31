@@ -3,11 +3,9 @@ import React from 'react';
 import { Route } from 'react-router-dom';
 
 // Admin pages
-import AdminDashboard from "@/pages/admin/Admin";
+import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminProducts from "@/pages/admin/Products";
-import AdminEmployees from "@/pages/admin/Employees";
 import AdminReports from "@/pages/admin/Reports";
-import AdminSettings from "@/pages/admin/Settings";
 import AdminOrders from "@/pages/admin/Orders";
 
 import { ProtectedRoute } from './ProtectedRoute';
@@ -22,10 +20,6 @@ const AdminRoutes = (
     <Route 
       path="/admin/produtos" 
       element={<ProtectedRoute element={<AdminProducts />} allowedRoles={['admin']} />} 
-    />
-    <Route 
-      path="/admin/funcionarios" 
-      element={<ProtectedRoute element={<AdminEmployees />} allowedRoles={['admin']} />} 
     />
     <Route 
       path="/admin/relatorios" 

@@ -1,42 +1,29 @@
 
 import React from 'react';
-import { Route, Navigate } from 'react-router-dom';
-
-// Customer pages
-import CustomerDashboard from "@/pages/customer/Dashboard";
-import AccountPage from "@/pages/customer/Account";
-import CardapioPage from "@/pages/Cardapio";
-import CartPage from "@/pages/Cart";
-import OrdersPage from "@/pages/Orders";
-
+import { Route } from 'react-router-dom';
+import Dashboard from '@/pages/customer/Dashboard';
+import Cart from '@/pages/Cart';
+import Orders from '@/pages/Orders';
+import Account from '@/pages/customer/Account';
 import { ProtectedRoute } from './ProtectedRoute';
 
-// Export a fragment containing all customer routes
 const CustomerRoutes = (
   <>
     <Route 
-      path="/" 
-      element={<CustomerDashboard />} 
+      path="/dashboard" 
+      element={<ProtectedRoute element={<Dashboard />} allowedRoles={['customer']} />} 
     />
     <Route 
-      path="/cliente" 
-      element={<ProtectedRoute element={<CustomerDashboard />} allowedRoles={['customer']} />} 
-    />
-    <Route 
-      path="/minha-conta" 
-      element={<ProtectedRoute element={<AccountPage />} allowedRoles={['customer']} />} 
-    />
-    <Route 
-      path="/cardapio" 
-      element={<CardapioPage />} 
-    />
-    <Route 
-      path="/carrinho" 
-      element={<ProtectedRoute element={<CartPage />} allowedRoles={['customer']} />} 
+      path="/cart" 
+      element={<Cart />} 
     />
     <Route 
       path="/pedidos" 
-      element={<ProtectedRoute element={<OrdersPage />} allowedRoles={['customer']} />} 
+      element={<Orders />} 
+    />
+    <Route 
+      path="/minha-conta" 
+      element={<ProtectedRoute element={<Account />} allowedRoles={['customer']} />} 
     />
   </>
 );

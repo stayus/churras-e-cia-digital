@@ -1,86 +1,136 @@
 
 import React, { ReactNode, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
-import { useNavigate } from 'react-router-dom';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarContent,
-  SidebarTrigger,
-  SidebarInset
-} from '@/components/ui/sidebar';
-import AdminSidebar from '@/components/AdminSidebar';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { LogOut, BarChart3, Package, FileText, ShoppingBag } from 'lucide-react';
 
 interface AdminLayoutProps {
   children: ReactNode;
 }
 
 const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  console.log("AdminLayout - Auth state:", { 
-    isAuthenticated, 
-    isLoading, 
-    userRole: user?.role
-  });
-
-  // Verify if the user is authenticated and is an administrator
   useEffect(() => {
     if (isLoading) {
-      return; // Wait until loading is complete
+      return;
     }
     
     if (!isAuthenticated) {
-      console.log("AdminLayout - Redirecting to employee login: User not authenticated");
-      navigate('/employee-login');
+      navigate('/adm-login');
       return;
     }
 
     if (!user || user.role !== 'admin') {
-      console.log("AdminLayout - Redirecting to employee login: User not admin", user?.role);
-      navigate('/employee-login');
+      navigate('/');
+      return;
     }
   }, [isAuthenticated, isLoading, user, navigate]);
 
-  // If we're still checking authentication or user doesn't have admin role, show loading
+  const handleLogout = () => {
+    logout();
+    navigate('/adm-login');
+  };
+
+  const isActive = (path: string) => location.pathname === path;
+
   if (isLoading || !isAuthenticated || !user || user.role !== 'admin') {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-black via-gray-900 to-red-900">
+      <div className="flex h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center mb-4 mx-auto animate-pulse">
             <span className="text-white font-bold text-xl">C</span>
           </div>
-          <p className="text-white text-lg">Carregando...</p>
+          <p className="text-gray-600 text-lg">Carregando...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-red-900">
-      <SidebarProvider>
-        <div className="flex h-screen w-full">
-          <Sidebar variant="inset" side="left" className="bg-gray-900/90 border-r border-gray-700">
-            <SidebarContent>
-              <AdminSidebar />
-            </SidebarContent>
-          </Sidebar>
-          <SidebarInset className="overflow-y-auto bg-gradient-to-b from-gray-900 to-black">
-            <div className="flex justify-between items-center p-4 bg-gray-900/90 border-b border-gray-700 backdrop-blur-sm">
-              <div className="flex items-center">
-                <SidebarTrigger className="text-white hover:text-yellow-400" />
-                <h2 className="text-xl font-semibold ml-2 bg-gradient-to-r from-red-500 to-yellow-400 bg-clip-text text-transparent">
-                  Painel de Administração
-                </h2>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-lg">C</span>
             </div>
-            <div className="p-6">
-              {children}
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Churrasquinho & Cia</h1>
+              <p className="text-sm text-gray-600">Painel Administrativo</p>
             </div>
-          </SidebarInset>
+          </div>
+          <Button 
+            variant="outline" 
+            className="gap-2 hover:bg-gray-100 text-gray-700 border-gray-300" 
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            Sair
+          </Button>
         </div>
-      </SidebarProvider>
+      </header>
+
+      {/* Navigation */}
+      <nav className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-6">
+          <div className="flex space-x-8">
+            <Link 
+              to="/admin" 
+              className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-colors ${
+                isActive('/admin') 
+                  ? 'border-red-600 text-red-600' 
+                  : 'border-transparent text-gray-700 hover:text-red-600 hover:border-red-600'
+              }`}
+            >
+              <BarChart3 className="h-4 w-4" />
+              Dashboard
+            </Link>
+            <Link 
+              to="/admin/produtos" 
+              className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-colors ${
+                isActive('/admin/produtos') 
+                  ? 'border-red-600 text-red-600' 
+                  : 'border-transparent text-gray-700 hover:text-red-600 hover:border-red-600'
+              }`}
+            >
+              <Package className="h-4 w-4" />
+              Produtos
+            </Link>
+            <Link 
+              to="/admin/pedidos" 
+              className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-colors ${
+                isActive('/admin/pedidos') 
+                  ? 'border-red-600 text-red-600' 
+                  : 'border-transparent text-gray-700 hover:text-red-600 hover:border-red-600'
+              }`}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              Pedidos
+            </Link>
+            <Link 
+              to="/admin/relatorios" 
+              className={`flex items-center gap-2 py-4 px-2 border-b-2 transition-colors ${
+                isActive('/admin/relatorios') 
+                  ? 'border-red-600 text-red-600' 
+                  : 'border-transparent text-gray-700 hover:text-red-600 hover:border-red-600'
+              }`}
+            >
+              <FileText className="h-4 w-4" />
+              Relatórios
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Content */}
+      <main className="flex-1">
+        {children}
+      </main>
     </div>
   );
 };

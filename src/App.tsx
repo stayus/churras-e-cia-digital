@@ -8,10 +8,8 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/auth";
 import { CartProvider } from "@/contexts/cart";
 
-// Route imports - these now export route elements rather than components
+// Route imports
 import AdminRoutes from "./routes/AdminRoutes";
-import EmployeeRoutes from "./routes/EmployeeRoutes";
-import MotoboyRoutes from "./routes/MotoboyRoutes";
 import CustomerRoutes from "./routes/CustomerRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 
@@ -25,11 +23,11 @@ const App = () => (
           <TooltipProvider>
             <BrowserRouter>
               <Routes>
-                {/* Each Routes file should return a collection of Route elements */}
+                {/* Public routes including cardapio */}
                 {PublicRoutes}
+                {/* Admin routes */}
                 {AdminRoutes}
-                {EmployeeRoutes}
-                {MotoboyRoutes}
+                {/* Customer routes */}
                 {CustomerRoutes}
               </Routes>
               
