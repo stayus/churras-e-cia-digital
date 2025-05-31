@@ -17,7 +17,7 @@ const CardapioPage = () => {
     return (
       <CustomerLayout>
         <Helmet>
-          <title>Cardápio - Churrasquinho & Cia777777777777</title>
+          <title>Cardápio - Churrasquinho & Cia</title>
         </Helmet>
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-64">
@@ -35,7 +35,7 @@ const CardapioPage = () => {
     return (
       <CustomerLayout>
         <Helmet>
-          <title>Cardápio - Churrasquinho & Cia</title>
+          <title>Cardápio - Churrasquinho & Cia0000000000000</title>
         </Helmet>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-16">
