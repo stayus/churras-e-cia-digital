@@ -56,14 +56,24 @@ const AdminDashboard = () => {
       // Get open orders with customer info
       const openOrdersList = orders?.filter(order => 
         order.status === 'received' || order.status === 'preparing' || order.status === 'delivering'
-      ).map(order => ({
-        id: order.id,
-        customer_name: order.address?.name || 'Cliente',
-        customer_phone: order.address?.phone || 'Não informado',
-        status: order.status,
-        created_at: order.created_at,
-        total: order.total
-      })) || [];
+      ).map(order => {
+        // Safely parse the address JSON
+        let addressData: any = {};
+        try {
+          addressData = typeof order.address === 'string' ? JSON.parse(order.address) : order.address || {};
+        } catch (e) {
+          console.error('Error parsing address:', e);
+        }
+
+        return {
+          id: order.id,
+          customer_name: addressData.name || 'Cliente',
+          customer_phone: addressData.phone || 'Não informado',
+          status: order.status,
+          created_at: order.created_at,
+          total: order.total
+        };
+      }) || [];
 
       setStats({
         totalOrders,
