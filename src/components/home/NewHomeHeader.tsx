@@ -1,155 +1,193 @@
-import React, { ReactNode, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
-import { useCart } from '@/contexts/cart';
-import {
-  ShoppingCart,
-  User,
-  Package,
-  Home,
-  UtensilsCrossed,
-  LogOut,
-  Menu,
-  X
-} from 'lucide-react';
+
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Menu, X, ShoppingCart, Package, LogOut, LogIn, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/CartContext';
 import { Badge } from '@/components/ui/badge';
 
-interface CustomerLayoutProps {
-  children: ReactNode;
-}
-
-const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { logout, isAuthenticated } = useAuth();
-  const { getTotalItems } = useCart();
-  const totalItems = getTotalItems();
+const NewHomeHeader = () => {
+  const { user, isAuthenticated, logout } = useAuth();
+  const { cart } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleLogout = async () => {
     await logout();
     setIsMobileMenuOpen(false);
-    navigate('/');
   };
 
-  const navItems = [
-    { label: 'Início', path: '/', icon: Home },
-    { label: 'Cardápio', path: '/cardapio', icon: UtensilsCrossed },
-    { label: 'Pedidos', path: '/pedidos', icon: Package },
-    { label: 'Carrinho', path: '/carrinho', icon: ShoppingCart, badge: totalItems },
-    { label: 'Conta', path: '/minha-conta', icon: User }
-  ];
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-16">
-      {/* Header */}
-      <header className="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-lg z-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16">
-            {/* Logo */}
-            <div
-              className="flex items-center space-x-2 cursor-pointer"
-              onClick={() => navigate('/')}
-            >
-              <div className="text-xl sm:text-2xl font-bold">
-                <span className="text-red-600">Churrasquinho</span>
-                <span className="text-yellow-500">&Cia</span>
-              </div>
+    <header className="fixed top-0 w-full bg-white/95 backdrop-blur-md shadow-lg z-50 border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-14 sm:h-16">
+          {/* Logo */}
+          <Link to="/home" className="flex items-center space-x-2">
+            <div className="text-xl sm:text-2xl font-bold">
+              <span className="text-red-600">Churrasquinho</span>
+              <span className="text-yellow-500">&Cia</span>
             </div>
-
-            {/* Desktop Nav - Ícones apenas */}
-            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
-              {navItems.map(({ path, icon: Icon, badge }) => (
-                <div key={path} className="relative">
-                  <button
-                    onClick={() => navigate(path)}
-                    className={`text-gray-700 hover:text-red-600 transition-colors ${
-                      location.pathname === path ? 'text-red-600' : ''
-                    }`}
-                  >
-                    <Icon className="h-5 w-5" />
-                    {badge > 0 && path === '/carrinho' && (
-                      <Badge
-                        variant="destructive"
-                        className="absolute -top-2 -right-2 h-4 w-4 p-0 text-[10px] flex items-center justify-center"
-                      >
-                        {badge}
+          </Link>
+          
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
+            <button onClick={scrollToTop} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+              Início
+            </button>
+            <button onClick={() => scrollToSection('cardapio')} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+              Cardápio
+            </button>
+            
+            {isAuthenticated ? (
+              <>
+                <Link to="/pedidos" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                  Pedidos
+                </Link>
+                <div className="relative">
+                  <Link to="/cart" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
+                    <ShoppingCart className="h-4 w-4" />
+                    Carrinho
+                    {totalItems > 0 && (
+                      <Badge variant="destructive" className="h-5 w-5 flex items-center justify-center p-0 text-xs">
+                        {totalItems}
                       </Badge>
                     )}
-                  </button>
+                  </Link>
                 </div>
-              ))}
-            </nav>
+                <Link to="/minha-conta" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                  Conta
+                </Link>
+              </>
+            ) : null}
+          </nav>
 
-            {/* Auth Button */}
-            <div className="hidden md:flex items-center space-x-4">
-              {isAuthenticated && (
-                <Button
-                  onClick={handleLogout}
-                  variant="outline"
-                  size="sm"
-                  className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white text-sm"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
-
-            {/* Mobile Button */}
-            <div className="md:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-gray-700 hover:text-red-600"
+          {/* Auth Actions */}
+          <div className="hidden md:flex items-center space-x-4">
+            {isAuthenticated ? (
+              <Button 
+                onClick={handleLogout}
+                variant="outline"
+                size="sm"
+                className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white transition-all text-sm"
               >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
+            ) : (
+              <Link to="/login">
+                <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white font-semibold transition-all duration-300 hover:scale-105 shadow-lg text-sm">
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Entrar
+                </Button>
+              </Link>
+            )}
           </div>
 
-          {/* Mobile Menu - Ícones apenas */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-100 py-4 bg-white/95 backdrop-blur-md">
-              <div className="flex flex-wrap justify-around gap-4">
-                {navItems.map(({ path, icon: Icon, badge }) => (
-                  <button
-                    key={path}
-                    onClick={() => {
-                      navigate(path);
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="text-gray-700 hover:text-red-600 transition-colors relative"
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-700 hover:text-red-600"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-100 py-4 bg-white/95 backdrop-blur-md">
+            <div className="flex flex-col space-y-4">
+              <button 
+                onClick={() => {
+                  scrollToTop();
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
+              >
+                Início
+              </button>
+              <button 
+                onClick={() => {
+                  scrollToSection('cardapio');
+                  setIsMobileMenuOpen(false);
+                }}
+                className="text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
+              >
+                Cardápio
+              </button>
+              
+              {isAuthenticated && (
+                <>
+                  <Link 
+                    to="/pedidos" 
+                    className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Icon className="h-6 w-6" />
-                    {badge > 0 && path === '/carrinho' && (
-                      <Badge
-                        variant="destructive"
-                        className="absolute -top-1 -right-2 h-4 w-4 p-0 text-[10px] flex items-center justify-center"
-                      >
-                        {badge}
+                    <Package className="h-4 w-4" />
+                    Pedidos
+                  </Link>
+                  <Link 
+                    to="/cart" 
+                    className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <ShoppingCart className="h-4 w-4" />
+                    Carrinho
+                    {totalItems > 0 && (
+                      <Badge variant="destructive" className="h-5 w-5 flex items-center justify-center p-0 text-xs">
+                        {totalItems}
                       </Badge>
                     )}
-                  </button>
-                ))}
-                {isAuthenticated && (
-                  <Button
+                  </Link>
+                  <Link 
+                    to="/minha-conta" 
+                    className="text-gray-700 hover:text-red-600 transition-colors font-medium"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Conta
+                  </Link>
+                </>
+              )}
+              
+              <div className="border-t border-gray-100 pt-4">
+                {isAuthenticated ? (
+                  <Button 
                     onClick={handleLogout}
                     variant="outline"
-                    className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white mt-4"
+                    className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Sair
                   </Button>
+                ) : (
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button className="bg-red-600 hover:bg-red-700 text-white font-semibold w-full">
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Entrar
+                    </Button>
+                  </Link>
                 )}
               </div>
             </div>
-          )}
-        </div>
-      </header>
-
-      {/* Conteúdo principal */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">{children}</main>
-    </div>
+          </div>
+        )}
+      </div>
+    </header>
   );
 };
 
-export default CustomerLayout;
+export default NewHomeHeader;
