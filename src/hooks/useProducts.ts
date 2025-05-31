@@ -88,6 +88,49 @@ export const useProducts = () => {
     }
   };
 
+  const checkProducts = async (): Promise<Product[] | null> => {
+    try {
+      console.log('useProducts: Verificando produtos no banco...');
+      
+      const { data, error } = await supabase.functions.invoke('check-products');
+      
+      if (error) {
+        console.error('useProducts: Erro ao verificar produtos:', error);
+        throw error;
+      }
+      
+      if (data?.success && data?.data) {
+        const formattedProducts = formatDbProducts(data.data);
+        console.log('useProducts: Produtos verificados:', formattedProducts);
+        return formattedProducts;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('useProducts: Erro na verificação:', error);
+      throw error;
+    }
+  };
+
+  const setupRealtime = async () => {
+    try {
+      console.log('useProducts: Configurando realtime...');
+      
+      const { data, error } = await supabase.functions.invoke('enable-realtime');
+      
+      if (error) {
+        console.error('useProducts: Erro ao configurar realtime:', error);
+        throw error;
+      }
+      
+      console.log('useProducts: Realtime configurado:', data);
+      return true;
+    } catch (error) {
+      console.error('useProducts: Erro ao configurar realtime:', error);
+      throw error;
+    }
+  };
+
   const addProduct = async (productData: AddProductData): Promise<Product | null> => {
     try {
       const { data, error } = await supabase.functions.invoke('add-product', {
@@ -244,6 +287,8 @@ export const useProducts = () => {
     addProduct,
     updateProduct,
     deleteProduct,
-    toggleProductStock
+    toggleProductStock,
+    checkProducts,
+    setupRealtime
   };
 };
