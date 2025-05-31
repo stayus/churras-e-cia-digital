@@ -141,7 +141,7 @@ const NewHomeHeader = () => {
                     Pedidos
                   </Link>
                   <Link 
-                    to="/cart" 
+                    to="/carrinho" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
