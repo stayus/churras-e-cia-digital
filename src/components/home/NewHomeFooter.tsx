@@ -1,5 +1,5 @@
 
-/Home Principal parte de baixo rodapé
+///Home Principal parte de baixo rodapé
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Clock, Facebook, Instagram, Twitter } from 'lucide-react';

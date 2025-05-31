@@ -1,5 +1,5 @@
 
-/Usado para parte onde tem a imagem 
+///Usado para parte onde tem a imagem 
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
