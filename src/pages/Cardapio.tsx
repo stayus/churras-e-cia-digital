@@ -17,7 +17,12 @@ const CardapioPage = () => {
     return (
       <CustomerLayout>
         <Helmet>
-          <title>Cardápio - Churrasquinho & Cia</title>
+          <Link to="/home" className="flex items-center space-x-2">
+            <div className="text-xl sm:text-2xl font-bold">
+              <span className="text-red-600">Churrasquinho</span>
+              <span className="text-yellow-500">&Cia</span>
+            </div>
+          </Link>
         </Helmet>
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-64">
