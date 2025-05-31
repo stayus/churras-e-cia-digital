@@ -34,7 +34,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
   };
 
   const navItems = [
-    { label: 'Início', path: '/', },
+    { label: 'Início', path: '/', icon: },
     { label: 'Cardápio', path: '/cardapio', icon: UtensilsCrossed },
     { label: 'Pedidos', path: '/pedidos', icon: Package },
     { label: 'Carrinho', path: '/carrinho', icon: ShoppingCart, badge: totalItems },
