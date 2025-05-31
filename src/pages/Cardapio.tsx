@@ -84,7 +84,7 @@ const CardapioPage = () => {
                 <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center">
                   <span className="text-white font-bold text-lg">C</span>
                 </div>
-                <h3 className="text-xl font-bold">Churrasquinho&Cia3333333333333</h3>
+                <h3 className="text-xl font-bold">Churrasquinho&Cia</h3>
               </div>
               <p className="text-gray-400">Sabor que conquista</p>
             </div>
