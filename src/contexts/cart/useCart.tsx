@@ -2,10 +2,19 @@
 import { useContext } from 'react';
 import { CartContext } from './CartContext';
 
-export function useCart() {
+export const useCart = () => {
   const context = useContext(CartContext);
   if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
+    throw new Error('useCart must be used within a CartProvider');
   }
-  return context;
-}
+  
+  // Add getTotalItems method
+  const getTotalItems = () => {
+    return context.cart.items.reduce((total, item) => total + item.quantity, 0);
+  };
+
+  return {
+    ...context,
+    getTotalItems
+  };
+};

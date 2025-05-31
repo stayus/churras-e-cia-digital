@@ -30,7 +30,7 @@ const ProductEditDialog: React.FC<ProductEditDialogProps> = ({
     name: product.name,
     description: product.description,
     price: product.price,
-    category: product.category,
+    category: product.category as 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro',
     image_url: product.image_url || '',
   };
   

@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { formatDbProducts } from '@/utils/productUtils';
 
 export interface Product {
   id: string;
@@ -10,12 +11,20 @@ export interface Product {
   image_url: string;
   is_out_of_stock: boolean;
   promotion_price?: number;
-  category: string;
-  extras?: Array<{
+  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
+  extras: Array<{
     id: string;
     name: string;
     price: number;
   }>;
+}
+
+export interface AddProductData {
+  name: string;
+  description: string;
+  price: number;
+  category: 'lanche' | 'bebida' | 'refeicao' | 'sobremesa' | 'outro';
+  image_url?: string;
 }
 
 export const useProducts = () => {
@@ -37,25 +46,105 @@ export const useProducts = () => {
         throw fetchError;
       }
 
-      // Format data to match Product interface
-      const formattedProducts: Product[] = (data || []).map(product => ({
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        image_url: product.image_url || 'https://placehold.co/400x250?text=Produto',
-        is_out_of_stock: product.is_out_of_stock,
-        promotion_price: product.promotion_price,
-        category: product.category || 'outro',
-        extras: product.extras || []
-      }));
-
+      const formattedProducts = formatDbProducts(data || []);
       setProducts(formattedProducts);
     } catch (err) {
       console.error('Error fetching products:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar produtos');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const addProduct = async (productData: AddProductData): Promise<Product | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('add-product', {
+        body: productData
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.product) {
+        await fetchProducts(); // Refresh the list
+        return data.product;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error adding product:', error);
+      throw error;
+    }
+  };
+
+  const updateProduct = async (id: string, updates: Partial<AddProductData>): Promise<Product | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('update-product', {
+        body: { id, ...updates }
+      });
+
+      if (error) throw error;
+
+      if (data?.success && data?.product) {
+        await fetchProducts(); // Refresh the list
+        return data.product;
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
+  };
+
+  const deleteProduct = async (id: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-product', {
+        body: { id }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        await fetchProducts(); // Refresh the list
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      return false;
+    }
+  };
+
+  const checkProducts = async (): Promise<Product[] | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-products');
+
+      if (error) throw error;
+
+      if (data?.success && data?.data) {
+        return formatDbProducts(data.data);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error checking products:', error);
+      throw error;
+    }
+  };
+
+  const setupRealtime = async (): Promise<void> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('enable-realtime', {
+        body: { table: 'products' }
+      });
+
+      if (error) throw error;
+
+      console.log('Realtime setup successful:', data);
+    } catch (error) {
+      console.error('Error setting up realtime:', error);
+      throw error;
     }
   };
 
@@ -88,6 +177,11 @@ export const useProducts = () => {
     products,
     loading,
     error,
-    fetchProducts
+    fetchProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    checkProducts,
+    setupRealtime
   };
 };

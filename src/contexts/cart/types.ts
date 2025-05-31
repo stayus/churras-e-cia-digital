@@ -74,4 +74,5 @@ export interface CartContextType {
   setObservations: (observations: string) => void;
   calculateShipping: (address: Address) => void;
   clearCart: () => void;
+  getTotalItems: () => number;
 }
