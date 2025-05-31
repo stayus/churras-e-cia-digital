@@ -56,6 +56,10 @@ export function CartProvider({ children }: CartProviderProps) {
     dispatch({ type: 'CLEAR_CART' });
   };
 
+  const getTotalItems = () => {
+    return cart.items.reduce((total, item) => total + item.quantity, 0);
+  };
+
   return (
     <CartContext.Provider value={{
       cart,
@@ -66,7 +70,8 @@ export function CartProvider({ children }: CartProviderProps) {
       setPaymentMethod,
       setObservations,
       calculateShipping,
-      clearCart
+      clearCart,
+      getTotalItems
     }}>
       {children}
     </CartContext.Provider>
