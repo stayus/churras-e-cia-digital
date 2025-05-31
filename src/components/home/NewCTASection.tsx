@@ -1,4 +1,4 @@
-
+///Parte de Pedir por ligação
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ const NewCTASection = () => {
             size="lg" 
             className="border-2 border-white text-white hover:bg-white hover:text-red-600 font-bold px-8 sm:px-12 py-4 sm:py-6 text-lg sm:text-xl rounded-full transition-all duration-300 hover:scale-105 bg-transparent"
           >
-            <Link to="tel:(11)99999-9999">
+            <Link to="tel:(98)98851-0154">
               <Phone className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
               Ligar Agora
             </Link>
