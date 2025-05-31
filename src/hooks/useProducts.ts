@@ -39,20 +39,50 @@ export const useProducts = () => {
       setLoading(true);
       setError(null);
       
-      const { data, error: fetchError } = await supabase
+      console.log('useProducts: Iniciando busca de produtos...');
+      
+      // Try direct database query first
+      const { data: directData, error: directError } = await supabase
         .from('products')
         .select('*')
         .order('name');
-
-      if (fetchError) {
-        throw fetchError;
+        
+      if (!directError && directData) {
+        console.log('useProducts: Produtos obtidos diretamente do banco:', directData);
+        const formattedProducts = formatDbProducts(directData);
+        setProducts(formattedProducts);
+        console.log('useProducts: Produtos formatados:', formattedProducts);
+        return;
       }
-
-      const formattedProducts = formatDbProducts(data || []);
-      setProducts(formattedProducts);
+      
+      console.log('useProducts: Consulta direta falhou, tentando edge function get-products');
+      
+      // If direct query fails, try the edge function
+      const { data, error } = await supabase.functions.invoke('get-products');
+      
+      if (error) {
+        console.error('useProducts: Erro ao invocar get-products:', error);
+        throw error;
+      }
+      
+      console.log('useProducts: Resposta da função get-products:', data);
+      
+      if (data?.success && data?.data) {
+        const formattedProducts = formatDbProducts(data.data);
+        setProducts(formattedProducts);
+        console.log('useProducts: Produtos formatados da edge function:', formattedProducts);
+      } else {
+        throw new Error('Nenhum produto encontrado');
+      }
     } catch (err) {
-      console.error('Error fetching products:', err);
+      console.error('useProducts: Erro ao carregar produtos:', err);
       setError(err instanceof Error ? err.message : 'Erro ao carregar produtos');
+      
+      toast({
+        variant: "destructive",
+        title: "Erro ao carregar produtos",
+        description: err instanceof Error ? err.message : 'Erro desconhecido'
+      });
     } finally {
       setLoading(false);
     }
@@ -68,12 +98,21 @@ export const useProducts = () => {
 
       if (data?.success && data?.product) {
         await fetchProducts();
+        toast({
+          title: "Produto adicionado",
+          description: "Produto adicionado com sucesso!"
+        });
         return data.product;
       }
       
       return null;
     } catch (error) {
       console.error('Error adding product:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao adicionar produto",
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
       throw error;
     }
   };
@@ -88,12 +127,21 @@ export const useProducts = () => {
 
       if (data?.success && data?.product) {
         await fetchProducts();
+        toast({
+          title: "Produto atualizado",
+          description: "Produto atualizado com sucesso!"
+        });
         return data.product;
       }
       
       return null;
     } catch (error) {
       console.error('Error updating product:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao atualizar produto",
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
       throw error;
     }
   };
@@ -108,58 +156,53 @@ export const useProducts = () => {
 
       if (data?.success) {
         await fetchProducts();
+        toast({
+          title: "Produto removido",
+          description: "Produto removido com sucesso!"
+        });
         return true;
       }
       
       return false;
     } catch (error) {
       console.error('Error deleting product:', error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao remover produto",
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
+      });
       return false;
     }
   };
 
-  const checkProducts = async (): Promise<Product[] | null> => {
+  const toggleProductStock = async (id: string, isOutOfStock: boolean): Promise<boolean> => {
     try {
-      const { data, error } = await supabase.functions.invoke('check-products');
+      const { error } = await supabase
+        .from('products')
+        .update({ is_out_of_stock: isOutOfStock })
+        .eq('id', id);
 
       if (error) throw error;
 
-      if (data?.success && data?.data) {
-        return formatDbProducts(data.data);
-      }
-      
-      return null;
-    } catch (error) {
-      console.error('Error checking products:', error);
-      throw error;
-    }
-  };
-
-  const setupRealtime = async (): Promise<void> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('enable-realtime', {
-        body: { table: 'products' }
-      });
-
-      if (error) throw error;
-
-      console.log('Realtime setup successful:', data);
+      await fetchProducts();
       toast({
-        title: "Realtime ativado",
-        description: "Monitoramento de produtos configurado com sucesso."
+        title: "Status atualizado",
+        description: `Produto ${isOutOfStock ? 'marcado como esgotado' : 'disponível novamente'}`
       });
+      return true;
     } catch (error) {
-      console.error('Error setting up realtime:', error);
+      console.error('Error toggling product stock:', error);
       toast({
         variant: "destructive",
-        title: "Erro",
-        description: "Falha ao configurar realtime para produtos."
+        title: "Erro ao atualizar status",
+        description: error instanceof Error ? error.message : 'Erro desconhecido'
       });
-      throw error;
+      return false;
     }
   };
 
   useEffect(() => {
+    console.log('useProducts: useEffect executado, iniciando fetchProducts');
     fetchProducts();
 
     // Set up realtime subscription
@@ -172,15 +215,19 @@ export const useProducts = () => {
           schema: 'public',
           table: 'products'
         },
-        () => {
-          console.log('Produto alterado - atualizando lista');
+        (payload) => {
+          console.log('useProducts: Mudança realtime detectada:', payload);
           fetchProducts();
+          toast({
+            title: "Realtime ativado",
+            description: "Produtos atualizados em tempo real!"
+          });
         }
       )
       .subscribe((status) => {
-        console.log('Status da subscrição realtime:', status);
+        console.log('useProducts: Status da subscrição realtime:', status);
         if (status === 'SUBSCRIBED') {
-          console.log('Realtime ativo para produtos');
+          console.log('useProducts: Realtime ativo para produtos');
         }
       });
 
@@ -197,7 +244,6 @@ export const useProducts = () => {
     addProduct,
     updateProduct,
     deleteProduct,
-    checkProducts,
-    setupRealtime
+    toggleProductStock
   };
 };

@@ -36,17 +36,17 @@ const NewHomeHeader = () => {
             <Link to="/home" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Início
             </Link>
-            <Link to="/cardapio" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+            <Link to="/home#cardapio" onClick={() => window.location.href = '/home#cardapio'} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
               Cardápio
             </Link>
             
             {isAuthenticated ? (
               <>
-                <Link to="/pedidos" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/home#pedidos" onClick={() => window.location.href = '/home#pedidos'} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Pedidos
                 </Link>
                 <div className="relative">
-                  <Link to="/carrinho" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
+                  <Link to="/home#carrinho" onClick={() => window.location.href = '/home#carrinho'} className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
                     {totalItems > 0 && (
@@ -56,7 +56,7 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                 </div>
-                <Link to="/minha-conta" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/home#conta" onClick={() => window.location.href = '/home#conta'} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Conta
                 </Link>
               </>
@@ -108,9 +108,12 @@ const NewHomeHeader = () => {
                 Início
               </Link>
               <Link 
-                to="/catalogo" 
+                to="/home#cardapio" 
                 className="text-gray-700 hover:text-red-600 transition-colors font-medium"
-                onClick={() => setIsMobileMenuOpen(false)}
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  window.location.href = '/home#cardapio';
+                }}
               >
                 Cardápio
               </Link>
@@ -118,17 +121,23 @@ const NewHomeHeader = () => {
               {isAuthenticated && (
                 <>
                   <Link 
-                    to="/pedidos" 
+                    to="/home#pedidos" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      window.location.href = '/home#pedidos';
+                    }}
                   >
                     <Package className="h-4 w-4" />
                     Pedidos
                   </Link>
                   <Link 
-                    to="/carrinho" 
+                    to="/home#carrinho" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      window.location.href = '/home#carrinho';
+                    }}
                   >
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
@@ -139,9 +148,12 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                   <Link 
-                    to="/minha-conta" 
+                    to="/home#conta" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      window.location.href = '/home#conta';
+                    }}
                   >
                     Conta
                   </Link>

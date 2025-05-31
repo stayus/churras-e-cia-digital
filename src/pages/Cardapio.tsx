@@ -9,12 +9,16 @@ const CardapioPage = () => {
   const { products, loading, error, fetchProducts } = useProducts();
 
   useEffect(() => {
+    console.log('Cardapio: Componente montado, carregando produtos...');
     fetchProducts();
   }, []);
 
   if (loading) {
     return (
       <CustomerLayout>
+        <Helmet>
+          <title>Cardápio - Churrasquinho & Cia</title>
+        </Helmet>
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center items-center h-64">
             <div className="text-center">
@@ -30,6 +34,9 @@ const CardapioPage = () => {
   if (error) {
     return (
       <CustomerLayout>
+        <Helmet>
+          <title>Cardápio - Churrasquinho & Cia</title>
+        </Helmet>
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-16">
             <div className="max-w-md mx-auto p-8 bg-white rounded-lg shadow-md">

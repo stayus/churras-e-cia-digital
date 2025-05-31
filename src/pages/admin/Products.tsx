@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
-import { PlusCircle, Loader2, Pencil, Trash2 } from "lucide-react";
+import { PlusCircle, Loader2, Pencil, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
 import ProductFormDialog from "@/components/admin/products/ProductFormDialog";
 import ProductEditDialog from "@/components/admin/products/ProductEditDialog";
 import DeleteConfirmationDialog from "@/components/admin/DeleteConfirmationDialog";
@@ -17,7 +17,7 @@ const AdminProducts = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const { products, loading, fetchProducts, deleteProduct } = useProducts();
+  const { products, loading, error, fetchProducts, deleteProduct, toggleProductStock } = useProducts();
 
   // Função para formatar preço como currency
   const formatCurrency = (value: number) => {
@@ -64,27 +64,66 @@ const AdminProducts = () => {
     setIsDeleteDialogOpen(false);
   };
 
+  // Função para alternar status de estoque
+  const handleToggleStock = async (product: Product) => {
+    await toggleProductStock(product.id, !product.is_out_of_stock);
+  };
+
   // Efetuar refresh dos produtos quando a página carrega
   useEffect(() => {
     console.log("AdminProducts montado - buscando produtos");
     fetchProducts();
   }, []);
 
+  if (loading) {
+    return (
+      <AdminLayout>
+        <div className="p-6">
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-8 w-8 animate-spin text-red-600 mr-2" />
+            <span className="text-gray-700">Carregando produtos...</span>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout>
+        <div className="p-6">
+          <div className="text-center py-8">
+            <div className="max-w-md mx-auto p-8 bg-white rounded-lg shadow-md">
+              <p className="text-red-600 mb-6 text-lg">Erro ao carregar produtos:</p>
+              <p className="text-gray-600 mb-6">{error}</p>
+              <Button 
+                onClick={fetchProducts}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Tentar novamente
+              </Button>
+            </div>
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
   return (
     <AdminLayout>
       <div className="p-6">
         <BackButton to="/admin" label="Voltar ao Dashboard" />
         
-        <h1 className="text-3xl font-bold mb-6">Gerenciar Produtos</h1>
+        <h1 className="text-3xl font-bold mb-6 text-gray-900">Gerenciar Produtos</h1>
         
         {/* Debugger de produtos */}
         <ProductDebugger />
         
-        <Card className="mb-6">
+        <Card className="mb-6 bg-white">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Produtos</CardTitle>
+            <CardTitle className="text-gray-900">Produtos</CardTitle>
             <Button 
-              className="bg-red-600 hover:bg-red-700 flex items-center gap-2"
+              className="bg-red-600 hover:bg-red-700 flex items-center gap-2 text-white"
               onClick={() => setIsProductDialogOpen(true)}
             >
               <PlusCircle size={16} />
@@ -92,13 +131,8 @@ const AdminProducts = () => {
             </Button>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                <span className="ml-2">Carregando produtos...</span>
-              </div>
-            ) : products.length === 0 ? (
-              <p className="text-center py-8 text-muted-foreground">
+            {products.length === 0 ? (
+              <p className="text-center py-8 text-gray-600">
                 Nenhum produto cadastrado. Adicione seu primeiro produto!
               </p>
             ) : (
@@ -106,29 +140,45 @@ const AdminProducts = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>Descrição</TableHead>
-                      <TableHead>Preço</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+                      <TableHead className="text-gray-700">Nome</TableHead>
+                      <TableHead className="text-gray-700">Descrição</TableHead>
+                      <TableHead className="text-gray-700">Preço</TableHead>
+                      <TableHead className="text-gray-700">Categoria</TableHead>
+                      <TableHead className="text-gray-700">Status</TableHead>
+                      <TableHead className="text-right text-gray-700">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {products.map((product) => (
                       <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell className="max-w-xs truncate">{product.description}</TableCell>
-                        <TableCell>{formatCurrency(product.price)}</TableCell>
+                        <TableCell className="font-medium text-gray-900">{product.name}</TableCell>
+                        <TableCell className="max-w-xs truncate text-gray-700">{product.description}</TableCell>
+                        <TableCell className="text-gray-900">{formatCurrency(product.price)}</TableCell>
+                        <TableCell className="text-gray-700 capitalize">{product.category}</TableCell>
                         <TableCell>
-                          <span 
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              product.is_out_of_stock
-                                ? "bg-red-100 text-red-800"
-                                : "bg-green-100 text-green-800"
-                            }`}
-                          >
-                            {product.is_out_of_stock ? "Esgotado" : "Disponível"}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span 
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                product.is_out_of_stock
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-green-100 text-green-800"
+                              }`}
+                            >
+                              {product.is_out_of_stock ? "Esgotado" : "Disponível"}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleToggleStock(product)}
+                              className="p-1 h-8 w-8"
+                            >
+                              {product.is_out_of_stock ? (
+                                <ToggleLeft className="h-4 w-4 text-red-600" />
+                              ) : (
+                                <ToggleRight className="h-4 w-4 text-green-600" />
+                              )}
+                            </Button>
+                          </div>
                         </TableCell>
                         <TableCell className="text-right space-x-2">
                           <Button 
@@ -143,7 +193,7 @@ const AdminProducts = () => {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleDeleteClick(product)}
-                            className="text-red-600 hover:text-red-700"
+                            className="text-red-600 hover:text-red-700 border-red-600 hover:border-red-700"
                           >
                             <Trash2 className="h-4 w-4" />
                             <span className="sr-only">Excluir</span>
