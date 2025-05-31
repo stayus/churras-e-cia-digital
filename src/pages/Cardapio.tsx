@@ -58,7 +58,7 @@ const CardapioPage = () => {
   return (
     <CustomerLayout>
       <Helmet>
-        <title>Cardápio - Churrasquinho & Cia000000000000000</title>
+        <title>Cardápio - Churrasquinho & Cia</title>
       </Helmet>
       
       <div className="container mx-auto px-4 py-8">
