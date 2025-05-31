@@ -67,8 +67,8 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
                 <span className="text-white font-bold text-lg">C</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Churrasquinho&Cia</h1>
-                <p className="text-xs text-gray-600">Sabor que conquista333333</p>
+                <span className="text-red-600">Churrasquinho</span>
+                <span className="text-yellow-500">&Cia</span>
               </div>
             </div>
 
