@@ -67,7 +67,7 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                 </div>
-                <Link to="/customer/account" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/minha-conta" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Conta
                 </Link>
               </>
@@ -141,7 +141,7 @@ const NewHomeHeader = () => {
                     Pedidos
                   </Link>
                   <Link 
-                    to="/carrinho" 
+                    to="/cart" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -154,7 +154,7 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                   <Link 
-                    to="/customer/account" 
+                    to="/minha-conta" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
