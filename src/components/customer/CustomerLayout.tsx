@@ -68,7 +68,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">Churrasquinho&Cia</h1>
-                <p className="text-xs text-gray-600">Sabor que conquista</p>
+                <p className="text-xs text-gray-600">Sabor que conquista333333</p>
               </div>
             </div>
 
