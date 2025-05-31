@@ -1,139 +1,93 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Product, AddProductData } from '@/types/product';
-import { formatDbProducts } from '@/utils/productUtils';
-import { useProductsRealtime } from './useProductsRealtime';
-import { useProductOperations } from './useProductsOperations';
 
-export type { Product, ProductExtra, AddProductData } from '@/types/product';
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image_url: string;
+  is_out_of_stock: boolean;
+  promotion_price?: number;
+  category: string;
+  extras?: Array<{
+    id: string;
+    name: string;
+    price: number;
+  }>;
+}
 
 export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
-  
-  // Fetch products from database
-  const fetchProducts = useCallback(async () => {
+
+  const fetchProducts = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      console.log("useProducts: Buscando produtos do Supabase...");
-
-      // Try using the edge function first
-      const { data: edgeResponse, error: edgeError } = await supabase.functions.invoke('get-products');
-
-      if (!edgeError && edgeResponse?.success) {
-        console.log("useProducts: Produtos recebidos pelo get-products:", edgeResponse);
-        
-        if (edgeResponse.data && Array.isArray(edgeResponse.data) && edgeResponse.data.length > 0) {
-          const formattedProducts = formatDbProducts(edgeResponse.data);
-          console.log("useProducts: Produtos formatados:", formattedProducts);
-          setProducts(formattedProducts);
-          setLoading(false);
-          return;
-        }
-      }
-      
-      // If edge function fails, try direct query
-      console.log("Edge function falhou ou não retornou dados, tentando consulta direta...");
-      
-      const { data, error } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('products')
-        .select('*');
-        
-      if (error) {
-        console.error('Erro na consulta direta:', error);
-        
-        // Try the check-products function as last resort
-        console.log("Consulta direta falhou, tentando com check-products...");
-        const { data: checkResponse, error: checkError } = await supabase.functions.invoke('check-products');
-        
-        if (checkError) {
-          console.error('Erro com check-products:', checkError);
-          throw new Error('Não foi possível obter produtos através de nenhum método disponível');
-        }
-        
-        if (!checkResponse || !checkResponse.data) {
-          console.log("check-products não retornou dados:", checkResponse);
-          setProducts([]);
-          setLoading(false);
-          return;
-        }
-        
-        console.log("Produtos recebidos da função check-products:", checkResponse.data);
-        
-        // Transform the data to match our Product type
-        const formattedProducts = formatDbProducts(checkResponse.data);
-        console.log("Produtos formatados (de check-products):", formattedProducts);
-        setProducts(formattedProducts);
-        setLoading(false);
-        return;
+        .select('*')
+        .order('name');
+
+      if (fetchError) {
+        throw fetchError;
       }
-      
-      console.log("useProducts: Produtos recebidos através de consulta direta:", data);
-      
-      if (!data || data.length === 0) {
-        console.log("useProducts: Nenhum produto encontrado no banco de dados");
-        setProducts([]);
-        setLoading(false);
-        return;
-      }
-      
-      // Transform the data to match our Product type
-      const formattedProducts = formatDbProducts(data);
-      
-      console.log("useProducts: Produtos formatados:", formattedProducts);
+
+      // Format data to match Product interface
+      const formattedProducts: Product[] = (data || []).map(product => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price,
+        image_url: product.image_url || 'https://placehold.co/400x250?text=Produto',
+        is_out_of_stock: product.is_out_of_stock,
+        promotion_price: product.promotion_price,
+        category: product.category || 'outro',
+        extras: product.extras || []
+      }));
+
       setProducts(formattedProducts);
-    } catch (error: any) {
-      console.error('Error fetching products:', error);
-      setError(error.message || 'Erro ao carregar produtos');
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar os produtos. Tente novamente mais tarde."
-      });
-      setProducts([]);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError(err instanceof Error ? err.message : 'Erro ao carregar produtos');
     } finally {
       setLoading(false);
     }
-  }, [toast]);
-  
-  // Set up realtime updates
-  const { setupRealtime } = useProductsRealtime(fetchProducts);
-  
-  // Set up product operations using our new modular hooks
-  const { checkProducts, addProduct, updateProduct, deleteProduct } = useProductOperations();
-  
-  // Fetch products on mount
+  };
+
   useEffect(() => {
-    console.log("useProducts: Hook montado, buscando produtos.");
     fetchProducts();
-    
-    // Configurar escuta em tempo real para atualizações de produtos
-    const setupRealtimeFunc = async () => {
-      try {
-        await setupRealtime();
-      } catch (err) {
-        console.warn("Não foi possível configurar realtime, mas produtos serão carregados normalmente:", err);
-      }
+
+    // Set up realtime subscription silently (no toast notifications)
+    const channel = supabase
+      .channel('products-channel')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'products'
+        },
+        () => {
+          // Silently refetch products when changes occur
+          fetchProducts();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
     };
-    setupRealtimeFunc();
-    
-  }, [fetchProducts, setupRealtime]);
-  
-  return { 
-    products, 
-    loading, 
-    error, 
-    fetchProducts,
-    addProduct,
-    updateProduct,
-    deleteProduct,
-    setupRealtime,
-    checkProducts
+  }, []);
+
+  return {
+    products,
+    loading,
+    error,
+    fetchProducts
   };
 };

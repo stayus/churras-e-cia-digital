@@ -25,11 +25,11 @@ const getCategoryLabel = (category: string): string => {
 
 const getCategoryColor = (category: string): string => {
   switch (category) {
-    case 'lanche': return 'bg-amber-500/20 text-amber-300 border border-amber-500/30';
-    case 'bebida': return 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
-    case 'refeicao': return 'bg-green-500/20 text-green-300 border border-green-500/30';
-    case 'sobremesa': return 'bg-purple-500/20 text-purple-300 border border-purple-500/30';
-    default: return 'bg-gray-500/20 text-gray-300 border border-gray-500/30';
+    case 'lanche': return 'bg-amber-100 text-amber-800 border border-amber-200';
+    case 'bebida': return 'bg-blue-100 text-blue-800 border border-blue-200';
+    case 'refeicao': return 'bg-green-100 text-green-800 border border-green-200';
+    case 'sobremesa': return 'bg-purple-100 text-purple-800 border border-purple-200';
+    default: return 'bg-gray-100 text-gray-800 border border-gray-200';
   }
 };
 
@@ -69,7 +69,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onCartOpen }) => {
   };
   
   return (
-    <Card className="brand-card overflow-hidden h-full flex flex-col hover-lift group">
+    <Card className="bg-white border border-gray-200 overflow-hidden h-full flex flex-col hover:shadow-lg transition-shadow duration-300 group">
       <div className="relative">
         <img 
           src={image_url || 'https://placehold.co/400x250?text=Produto'} 
@@ -95,27 +95,31 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onCartOpen }) => {
       </div>
       
       <CardContent className="pt-6 flex-grow">
-        <h3 className="heading-sm text-white mb-3 line-clamp-2">{name}</h3>
-        <p className="text-gray-400 text-sm leading-relaxed mb-4 line-clamp-3">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">{name}</h3>
+        <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
           {truncateDescription(description)}
         </p>
       </CardContent>
       
-      <CardFooter className="flex justify-between items-center border-t border-gray-700/50 p-6">
+      <CardFooter className="flex justify-between items-center border-t border-gray-100 p-6">
         <div className="flex flex-col">
           {promotion_price ? (
             <>
-              <span className="text-red-400 font-bold text-lg">{formatCurrency(promotion_price)}</span>
+              <span className="text-red-600 font-bold text-lg">{formatCurrency(promotion_price)}</span>
               <span className="text-gray-500 text-sm line-through">{formatCurrency(price)}</span>
             </>
           ) : (
-            <span className="text-white font-bold text-lg">{formatCurrency(price)}</span>
+            <span className="text-gray-900 font-bold text-lg">{formatCurrency(price)}</span>
           )}
         </div>
         <Button 
           size="sm" 
           disabled={is_out_of_stock}
-          className={`${is_out_of_stock ? 'opacity-50 cursor-not-allowed' : 'brand-button-primary'} flex items-center gap-2`}
+          className={`${
+            is_out_of_stock 
+              ? 'opacity-50 cursor-not-allowed' 
+              : 'bg-red-600 hover:bg-red-700 text-white'
+          } flex items-center gap-2`}
           onClick={handleAddToCart}
         >
           <ShoppingCart className="h-4 w-4" />

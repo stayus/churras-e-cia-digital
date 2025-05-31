@@ -1,205 +1,179 @@
 
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ShoppingCart, User, Home, BookOpen, Package, LogOut, Menu, X } from 'lucide-react';
+import React, { ReactNode } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth';
+import { ShoppingCart, User, Package, Home, UtensilsCrossed, LogOut } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/cart';
-import CartSidebar from './CartSidebar';
 
 interface CustomerLayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
-  const { user, logout, isAuthenticated } = useAuth();
-  const { cart } = useCart();
   const navigate = useNavigate();
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const { user, logout, isAuthenticated } = useAuth();
+  const { getTotalItems } = useCart();
 
-  const totalItems = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = getTotalItems();
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
+  const navItems = [
+    { 
+      label: 'Início', 
+      path: '/', 
+      icon: Home 
+    },
+    { 
+      label: 'Cardápio', 
+      path: '/cardapio', 
+      icon: UtensilsCrossed 
+    },
+    { 
+      label: 'Pedidos', 
+      path: '/pedidos', 
+      icon: Package 
+    },
+    { 
+      label: 'Carrinho', 
+      path: '/carrinho', 
+      icon: ShoppingCart,
+      badge: totalItems > 0 ? totalItems : undefined
+    },
+    { 
+      label: 'Conta', 
+      path: '/minha-conta', 
+      icon: User 
+    }
+  ];
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Fixed Header */}
-      <header className="fixed top-0 w-full bg-black/95 backdrop-blur-md shadow-2xl border-b border-red-600/30 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm border-b">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center">
-              <Link to="/" className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
-                  <span className="text-white font-bold text-lg">C</span>
-                </div>
-                <div className="text-xl font-bold">
-                  <span className="text-red-500">Churrasquinho</span>
-                  <span className="text-yellow-400">&Cia</span>
-                </div>
-              </Link>
+            <div 
+              className="flex items-center gap-3 cursor-pointer"
+              onClick={() => navigate('/')}
+            >
+              <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-lg">C</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Churrasquinho&Cia</h1>
+                <p className="text-xs text-gray-600">Sabor que conquista</p>
+              </div>
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link to="/" className="nav-link">
-                <Home className="h-4 w-4" />
-                Início
-              </Link>
-              <Link to="/cardapio" className="nav-link">
-                <BookOpen className="h-4 w-4" />
-                Cardápio
-              </Link>
-              {isAuthenticated && (
-                <>
-                  <Link to="/pedidos" className="nav-link">
-                    <Package className="h-4 w-4" />
-                    Pedidos
-                  </Link>
+            <nav className="hidden md:flex items-center gap-1">
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                const Icon = item.icon;
+                
+                return (
                   <Button
-                    variant="outline"
-                    size="sm"
-                    className="relative brand-button-secondary"
-                    onClick={() => setIsCartOpen(true)}
+                    key={item.path}
+                    variant={isActive ? "default" : "ghost"}
+                    onClick={() => navigate(item.path)}
+                    className={`relative ${
+                      isActive 
+                        ? 'bg-red-600 text-white hover:bg-red-700' 
+                        : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                    }`}
                   >
-                    <ShoppingCart className="h-4 w-4" />
-                    {totalItems > 0 && (
-                      <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-600">
-                        {totalItems}
-                      </Badge>
+                    <Icon className="w-4 h-4 mr-2" />
+                    {item.label}
+                    {item.badge && (
+                      <span className="absolute -top-2 -right-2 bg-yellow-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                        {item.badge}
+                      </span>
                     )}
-                    Carrinho
                   </Button>
-                  <Link to="/minha-conta" className="nav-link">
-                    <User className="h-4 w-4" />
-                    Conta
-                  </Link>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={handleLogout}
-                    className="border-red-500 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Sair
-                  </Button>
-                </>
-              )}
-              {!isAuthenticated && (
-                <Link to="/login">
-                  <Button size="sm" className="brand-button-primary">
-                    Entrar
-                  </Button>
-                </Link>
-              )}
-            </nav>
-
-            {/* Mobile menu button and cart */}
-            <div className="flex items-center space-x-3 md:hidden">
+                );
+              })}
+              
               {isAuthenticated && (
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="relative brand-button-secondary"
-                  onClick={() => setIsCartOpen(true)}
+                  onClick={handleLogout}
+                  className="ml-4 text-gray-700 border-gray-300 hover:bg-red-50 hover:text-red-600 hover:border-red-300"
                 >
-                  <ShoppingCart className="h-4 w-4" />
-                  {totalItems > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-600">
-                      {totalItems}
-                    </Badge>
-                  )}
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sair
                 </Button>
               )}
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-white hover:text-yellow-400 transition-colors"
-              >
-                {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-              </button>
-            </div>
+            </nav>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="md:hidden"
+              onClick={() => {/* Mobile menu logic */}}
+            >
+              <span className="sr-only">Menu</span>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </Button>
           </div>
 
-          {/* Mobile Menu */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-700 py-4 bg-black/95 backdrop-blur-md">
-              <div className="flex flex-col space-y-4">
-                <Link 
-                  to="/" 
-                  className="nav-link-mobile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <Home className="h-4 w-4" />
-                  Início
-                </Link>
-                <Link 
-                  to="/cardapio" 
-                  className="nav-link-mobile"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <BookOpen className="h-4 w-4" />
-                  Cardápio
-                </Link>
+          {/* Mobile Navigation */}
+          <nav className="md:hidden mt-4 pb-4 border-t pt-4">
+            <div className="grid grid-cols-3 gap-2">
+              {navItems.map((item) => {
+                const isActive = location.pathname === item.path;
+                const Icon = item.icon;
                 
-                {isAuthenticated && (
-                  <>
-                    <Link 
-                      to="/pedidos" 
-                      className="nav-link-mobile"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <Package className="h-4 w-4" />
-                      Pedidos
-                    </Link>
-                    <Link 
-                      to="/minha-conta" 
-                      className="nav-link-mobile"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      <User className="h-4 w-4" />
-                      Conta
-                    </Link>
-                  </>
-                )}
-                
-                <div className="border-t border-gray-700 pt-4">
-                  {isAuthenticated ? (
-                    <Button 
-                      onClick={handleLogout}
-                      variant="outline"
-                      className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sair
-                    </Button>
-                  ) : (
-                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                      <Button className="w-full brand-button-primary">
-                        Entrar
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
+                return (
+                  <Button
+                    key={item.path}
+                    variant={isActive ? "default" : "ghost"}
+                    onClick={() => navigate(item.path)}
+                    className={`relative flex flex-col h-auto py-3 ${
+                      isActive 
+                        ? 'bg-red-600 text-white' 
+                        : 'text-gray-700 hover:text-red-600 hover:bg-red-50'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5 mb-1" />
+                    <span className="text-xs">{item.label}</span>
+                    {item.badge && (
+                      <span className="absolute -top-1 -right-1 bg-yellow-400 text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                        {item.badge}
+                      </span>
+                    )}
+                  </Button>
+                );
+              })}
             </div>
-          )}
+            
+            {isAuthenticated && (
+              <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="w-full mt-3 text-gray-700 border-gray-300 hover:bg-red-50 hover:text-red-600"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair
+              </Button>
+            )}
+          </nav>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="pt-16 flex-1">
+      <main className="pt-20 md:pt-24">
         {children}
       </main>
-
-      {/* Cart Sidebar */}
-      {isAuthenticated && (
-        <CartSidebar isOpen={isCartOpen} onOpenChange={setIsCartOpen} />
-      )}
     </div>
   );
 };
