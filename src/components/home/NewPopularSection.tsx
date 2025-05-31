@@ -61,7 +61,7 @@ const NewPopularSection = () => {
             </p>
           </div>
           
-          <Link to="/catalogo">
+          <Link to="/cardapio">
             <Button 
               size="lg"
               className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base transition-all duration-300 hover:scale-105 hover:shadow-lg rounded-full"
