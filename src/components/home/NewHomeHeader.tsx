@@ -37,7 +37,7 @@ const NewHomeHeader = () => {
           {/* Logo */}
           <Link to="/home" className="flex items-center space-x-2">
             <div className="text-xl sm:text-2xl font-bold">
-              <span className="text-red-600">Churrasquinho</span>
+              <span className="text-red-600">Churrasquinhoeeeeeeee</span>
               <span className="text-yellow-500">&Cia</span>
             </div>
           </Link>
