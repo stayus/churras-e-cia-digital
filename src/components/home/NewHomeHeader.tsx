@@ -53,7 +53,7 @@ const NewHomeHeader = () => {
             
             {isAuthenticated ? (
               <>
-                <Link to="/orders" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/pedidos" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
                   Pedidos
                 </Link>
                 <div className="relative">
@@ -133,7 +133,7 @@ const NewHomeHeader = () => {
               {isAuthenticated && (
                 <>
                   <Link 
-                    to="/orders" 
+                    to="/pedidos" 
                     className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
