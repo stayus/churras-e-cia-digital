@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Menu, X, ShoppingCart, Package, LogOut, LogIn, User } from 'lucide-react';
+import { Menu, X, ShoppingCart, Package, LogOut, LogIn, User, Home, Utensils } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/contexts/CartContext';
 import { Badge } from '@/components/ui/badge';
@@ -41,23 +40,26 @@ const NewHomeHeader = () => {
               <span className="text-yellow-500">&Cia</span>
             </div>
           </Link>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-            <button onClick={scrollToTop} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+            <button onClick={scrollToTop} className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+              <Home className="h-4 w-4" />
               Início
             </button>
-            <button onClick={() => scrollToSection('cardapio')} className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+            <button onClick={() => scrollToSection('cardapio')} className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+              <Utensils className="h-4 w-4" />
               Cardápio
             </button>
-            
-            {isAuthenticated ? (
+
+            {isAuthenticated && (
               <>
-                <Link to="/pedidos" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/pedidos" className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                  <Package className="h-4 w-4" />
                   Pedidos
                 </Link>
                 <div className="relative">
-                  <Link to="/cart" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2 text-sm lg:text-base">
+                  <Link to="/cart" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-1 text-sm lg:text-base">
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
                     {totalItems > 0 && (
@@ -67,17 +69,18 @@ const NewHomeHeader = () => {
                     )}
                   </Link>
                 </div>
-                <Link to="/minha-conta" className="text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                <Link to="/minha-conta" className="flex items-center gap-1 text-gray-700 hover:text-red-600 transition-colors font-medium text-sm lg:text-base">
+                  <User className="h-4 w-4" />
                   Conta
                 </Link>
               </>
-            ) : null}
+            )}
           </nav>
 
           {/* Auth Actions */}
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
-              <Button 
+              <Button
                 onClick={handleLogout}
                 variant="outline"
                 size="sm"
@@ -111,38 +114,40 @@ const NewHomeHeader = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden border-t border-gray-100 py-4 bg-white/95 backdrop-blur-md">
             <div className="flex flex-col space-y-4">
-              <button 
+              <button
                 onClick={() => {
                   scrollToTop();
                   setIsMobileMenuOpen(false);
                 }}
-                className="text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
+                className="flex items-center gap-2 text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
               >
+                <Home className="h-4 w-4" />
                 Início
               </button>
-              <button 
+              <button
                 onClick={() => {
                   scrollToSection('cardapio');
                   setIsMobileMenuOpen(false);
                 }}
-                className="text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
+                className="flex items-center gap-2 text-left text-gray-700 hover:text-red-600 transition-colors font-medium"
               >
+                <Utensils className="h-4 w-4" />
                 Cardápio
               </button>
-              
+
               {isAuthenticated && (
                 <>
-                  <Link 
-                    to="/pedidos" 
-                    className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
+                  <Link
+                    to="/pedidos"
+                    className="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <Package className="h-4 w-4" />
                     Pedidos
                   </Link>
-                  <Link 
-                    to="/cart" 
-                    className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-2"
+                  <Link
+                    to="/cart"
+                    className="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     <ShoppingCart className="h-4 w-4" />
@@ -153,19 +158,20 @@ const NewHomeHeader = () => {
                       </Badge>
                     )}
                   </Link>
-                  <Link 
-                    to="/minha-conta" 
-                    className="text-gray-700 hover:text-red-600 transition-colors font-medium"
+                  <Link
+                    to="/minha-conta"
+                    className="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
+                    <User className="h-4 w-4" />
                     Conta
                   </Link>
                 </>
               )}
-              
+
               <div className="border-t border-gray-100 pt-4">
                 {isAuthenticated ? (
-                  <Button 
+                  <Button
                     onClick={handleLogout}
                     variant="outline"
                     className="w-full border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
