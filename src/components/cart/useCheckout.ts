@@ -18,17 +18,18 @@ export const useCheckout = () => {
   const [selectedAddress, setSelectedAddress] = useState<CustomerAddress | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('');
   const [isPickup, setIsPickup] = useState(false);
-
+  
   const { cart, clearCart } = useCart();
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const subtotal = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+  const subtotal = cart.items.reduce((sum, item) => {
+    return sum + item.totalPrice;
+  }, 0);
+
   const shippingFee = isPickup ? 0 : 5;
   const total = subtotal + shippingFee;
-
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
   const findOrCreateCustomer = async () => {
     if (!user) {
@@ -45,24 +46,26 @@ export const useCheckout = () => {
         .select()
         .single();
 
-      if (error || !customer) {
+      if (error) {
         console.error('Erro ao criar cliente convidado:', error);
-        throw new Error('Erro ao criar cliente');
+        throw new Error('Erro ao criar registro do cliente');
       }
 
-      return customer.id;
+      return customer.uid;
     }
 
     const { data: existingCustomer, error: fetchError } = await supabase
       .from('customers')
-      .select('id')
-      .eq('id', user.id)
+      .select('uid')
+      .eq('uid', user.id)
       .maybeSingle();
 
-    if (existingCustomer) return existingCustomer.id;
+    if (existingCustomer) {
+      return existingCustomer.uid;
+    }
 
     const customerData = {
-      id: user.id,
+      uid: user.id,
       name: user.email?.split('@')[0] || 'Cliente',
       email: user.email || `user_${user.id}@temp.com`,
       password: 'auth_user',
@@ -75,51 +78,48 @@ export const useCheckout = () => {
       .select()
       .single();
 
-    if (createError || !newCustomer) {
-      console.error('Erro ao criar cliente:', createError);
-      throw new Error('Erro ao criar cliente');
+    if (createError) {
+      console.error('Erro ao criar cliente autenticado:', createError);
+      throw new Error('Erro ao criar registro do cliente');
     }
 
-    return newCustomer.id;
+    return newCustomer.uid;
   };
 
   const processCheckout = async (checkoutData: CheckoutData) => {
     if (cart.items.length === 0) {
       toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Seu carrinho está vazio',
+        variant: "destructive",
+        title: "Erro",
+        description: "Seu carrinho está vazio"
       });
       return false;
     }
 
     setIsProcessing(true);
-
+    
     try {
-      const customerId = await findOrCreateCustomer();
+      const customerUid = await findOrCreateCustomer();
 
-      const addressData = isPickup
-        ? {
-            street: 'Retirada no local',
-            number: 'N/A',
-            neighborhood: 'Centro',
-            city: 'Loja',
-            complement: 'Retirada no local',
-          }
-        : checkoutData.address;
+      const addressData = isPickup ? {
+        street: "Retirada no local",
+        number: "N/A",
+        neighborhood: "Centro",
+        city: "Loja",
+        complement: "Retirada no local"
+      } : checkoutData.address;
 
       const orderData = {
-        customer_id: customerId,
-        items: cart.items,
-        total,
-        address: addressData,
+        customer_uid: customerUid,
+        items: cart.items as any,
+        total: total,
+        address: addressData as any,
         payment_method: checkoutData.paymentMethod,
         observations: checkoutData.observations || null,
-        status: 'received',
+        status: 'received'
       };
 
-      // Aguarda 400ms antes de enviar pedido ao Supabase
-      await delay(400);
+      console.log('Criando pedido com dados:', orderData);
 
       const { data: order, error } = await supabase
         .from('orders')
@@ -127,25 +127,31 @@ export const useCheckout = () => {
         .select()
         .single();
 
-      if (error || !order) {
-        throw new Error(error?.message || 'Erro ao criar pedido');
+      if (error) {
+        console.error('Erro ao criar pedido:', error);
+        throw new Error(error.message || 'Erro ao criar pedido');
+      }
+
+      if (!order) {
+        throw new Error('Pedido não foi criado corretamente');
       }
 
       clearCart();
 
       toast({
-        title: 'Pedido realizado com sucesso!',
-        description: `Seu pedido #${order.id.slice(0, 8)} foi criado e está sendo processado.`,
+        title: "Pedido realizado com sucesso!",
+        description: `Seu pedido #${order.id.slice(0, 8)} foi criado e está sendo processado.`
       });
 
       navigate('/pedidos');
+      
       return true;
     } catch (error: any) {
       console.error('Erro no checkout:', error);
       toast({
-        variant: 'destructive',
-        title: 'Erro ao processar pedido',
-        description: error.message || 'Tente novamente em alguns minutos',
+        variant: "destructive",
+        title: "Erro ao processar pedido",
+        description: error.message || "Tente novamente em alguns minutos"
       });
       return false;
     } finally {
@@ -156,25 +162,23 @@ export const useCheckout = () => {
   const handleCheckout = async () => {
     if (!paymentMethod) {
       toast({
-        variant: 'destructive',
-        title: 'Erro',
-        description: 'Selecione uma forma de pagamento',
+        variant: "destructive",
+        title: "Erro",
+        description: "Selecione uma forma de pagamento"
       });
       return;
     }
 
     const checkoutData: CheckoutData = {
-      address: isPickup
-        ? {}
-        : selectedAddress || {
-            street: 'Endereço não informado',
-            number: 'S/N',
-            neighborhood: 'Centro',
-            city: 'Cidade',
-            complement: '',
-          },
+      address: isPickup ? {} : (selectedAddress || {
+        street: "Endereço não informado",
+        number: "S/N",
+        neighborhood: "Centro",
+        city: "Cidade",
+        complement: ""
+      }),
       paymentMethod,
-      observations,
+      observations
     };
 
     await processCheckout(checkoutData);
@@ -195,6 +199,6 @@ export const useCheckout = () => {
     shippingFee,
     subtotal,
     total,
-    handleCheckout,
+    handleCheckout
   };
 };
