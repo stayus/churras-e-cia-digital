@@ -60,7 +60,7 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
 
             {/* Desktop Nav */}
             <nav className="hidden md:flex items-center space-x-6 lg:space-x-8">
-              {navItems.map(({ label, path, badge }) => (
+              {navItems.map(({ label, path, icon: Icon, badge }) => (
                 <div key={path} className="relative">
                   <button
                     onClick={() => navigate(path)}
