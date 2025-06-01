@@ -20,9 +20,14 @@ const NewHomeHeader = () => {
   const { getTotalItems } = useCart();
   const totalItems = getTotalItems();
 
-  const navItems = [
+  // Itens básicos (visíveis para todos)
+  const publicNavItems = [
     { label: 'Início', path: '/', icon: Home },
-    { label: 'Cardápio', path: '/cardapio', icon: UtensilsCrossed },
+    { label: 'Cardápio', path: '/cardapio', icon: UtensilsCrossed }
+  ];
+
+  // Itens extras (somente para usuários logados)
+  const privateNavItems = [
     { label: 'Pedidos', path: '/pedidos', icon: Package },
     { label: 'Carrinho', path: '/carrinho', icon: ShoppingCart, badge: totalItems },
     { label: 'Conta', path: '/minha-conta', icon: User }
@@ -47,31 +52,33 @@ const NewHomeHeader = () => {
 
         {/* Navegação */}
         <nav className="flex items-center space-x-6">
-          {navItems.map(({ path, label, icon: Icon, badge }) => {
-            const isActive = location.pathname === path;
+          {(isAuthenticated ? [...publicNavItems, ...privateNavItems] : publicNavItems).map(
+            ({ path, label, icon: Icon, badge }) => {
+              const isActive = location.pathname === path;
 
-            return (
-              <div key={path} className="relative flex items-center space-x-1">
-                <button
-                  onClick={() => navigate(path)}
-                  className={`flex items-center space-x-1 text-sm font-medium transition-colors ${
-                    isActive ? 'text-red-600' : 'text-gray-700 hover:text-red-600'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{label}</span>
-                </button>
-                {badge > 0 && path === '/carrinho' && (
-                  <Badge
-                    variant="destructive"
-                    className="absolute -top-1 -right-2 text-[10px] h-4 w-4 p-0 flex items-center justify-center"
+              return (
+                <div key={path} className="relative flex items-center space-x-1">
+                  <button
+                    onClick={() => navigate(path)}
+                    className={`flex items-center space-x-1 text-sm font-medium transition-colors ${
+                      isActive ? 'text-red-600' : 'text-gray-700 hover:text-red-600'
+                    }`}
                   >
-                    {badge}
-                  </Badge>
-                )}
-              </div>
-            );
-          })}
+                    <Icon className="w-4 h-4" />
+                    <span>{label}</span>
+                  </button>
+                  {badge > 0 && path === '/carrinho' && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-2 text-[10px] h-4 w-4 p-0 flex items-center justify-center"
+                    >
+                      {badge}
+                    </Badge>
+                  )}
+                </div>
+              );
+            }
+          )}
         </nav>
 
         {/* Logout */}
