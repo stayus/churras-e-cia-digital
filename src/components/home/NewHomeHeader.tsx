@@ -59,7 +59,7 @@ const NewHomeHeader = () => {
                   Pedidos
                 </Link>
                 <div className="relative">
-                  <Link to="/cart" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-1 text-sm lg:text-base">
+                  <Link to="/carrinho" className="text-gray-700 hover:text-red-600 transition-colors font-medium flex items-center gap-1 text-sm lg:text-base">
                     <ShoppingCart className="h-4 w-4" />
                     Carrinho
                     {totalItems > 0 && (
@@ -146,7 +146,7 @@ const NewHomeHeader = () => {
                     Pedidos
                   </Link>
                   <Link
-                    to="/cart"
+                    to="/carrinho"
                     className="flex items-center gap-2 text-gray-700 hover:text-red-600 transition-colors font-medium"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
