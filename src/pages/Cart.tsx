@@ -85,6 +85,7 @@ const CartPage = () => {
               </div>
             </div>
           </div>
+          <SimpleFooter />
         </CustomerLayout>
       </div>
     );
