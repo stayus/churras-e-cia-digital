@@ -107,22 +107,9 @@ const CardapioPage = () => {
             </div>
           </div>
           
-          <div className="border-t border-gray-800 py-4 sm:py-6 animate-fade-in-up" style={{ animationDelay: '800ms' }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-400 text-sm sm:text-base mb-4 md:mb-0">
-              © 2025 Churrasquinho&Cia. Todos os direitos reservados.
-            </p>
-            <div className="flex gap-4 sm:gap-6 text-xs sm:text-sm">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Política de Privacidade
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                Termos de Uso
-              </a>
-            </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2025 Churrasquinho&Cia. Todos os direitos reservados.</p>
           </div>
-        </div>
         </div>
       </footer>
     </CustomerLayout>
