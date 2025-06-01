@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/contexts/auth';
@@ -17,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/format';
 import type { PaymentMethod } from '@/contexts/cart';
 import type { CheckedState } from '@radix-ui/react-checkbox';
+import SimpleFooter from '@/components/customer/SimpleFooter';
 
 const CartPage = () => {
   const { user } = useAuth();
@@ -269,6 +269,8 @@ const CartPage = () => {
             </div>
           </div>
         </div>
+        
+        <SimpleFooter />
       </CustomerLayout>
     </div>
   );

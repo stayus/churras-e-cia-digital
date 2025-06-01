@@ -14,7 +14,7 @@ const CustomerRoutes = (
       element={<ProtectedRoute element={<Dashboard />} allowedRoles={['customer']} />} 
     />
     <Route 
-      path="/cart" 
+      path="/carrinho" 
       element={<Cart />} 
     />
     <Route 
