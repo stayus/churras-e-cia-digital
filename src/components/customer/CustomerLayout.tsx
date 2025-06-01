@@ -33,13 +33,6 @@ const CustomerLayout: React.FC<CustomerLayoutProps> = ({ children }) => {
     navigate('/');
   };
 
-  const navItems = [
-    { label: 'Início', path: '/', icon: Home },
-    { label: 'Cardápio', path: '/cardapio', icon: UtensilsCrossed },
-    { label: 'Pedidos', path: '/pedidos', icon: Package },
-    { label: 'Carrinho', path: '/carrinho', icon: ShoppingCart, badge: totalItems },
-    { label: 'Conta', path: '/minha-conta', icon: User }
-  ];
 
   return (
     <div className="min-h-screen bg-gray-50 pt-16">
