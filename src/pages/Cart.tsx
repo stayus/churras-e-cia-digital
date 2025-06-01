@@ -103,8 +103,8 @@ const CartPage = () => {
 
           <div className="content-container">
             <div className="page-header">
-              <h1 className="page-title">
-                Finalizar <span className="text-red-600">Pedido</span>
+              <h1 className="page-title text-red-600">
+                Finalizar <span className="gradient-text">Pedido</span>
               </h1>
               <p className="page-subtitle">
                 Estamos quase lá! Confirme seus dados e finalize seu pedido
