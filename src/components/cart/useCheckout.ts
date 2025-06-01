@@ -71,9 +71,9 @@ export const useCheckout = () => {
       // Create order object with proper structure for Supabase
       const orderData = {
         customer_id: user.id,
-        items: cart.items,
+        items: cart.items as any,
         total: total,
-        address: addressData,
+        address: addressData as any,
         payment_method: checkoutData.paymentMethod,
         observations: checkoutData.observations || null,
         status: 'received'
@@ -81,10 +81,10 @@ export const useCheckout = () => {
 
       console.log('Creating order with data:', orderData);
 
-      // Insert order into database using direct insert
+      // Insert order into database - remove array wrapper
       const { data: order, error } = await supabase
         .from('orders')
-        .insert([orderData])
+        .insert(orderData)
         .select()
         .single();
 
