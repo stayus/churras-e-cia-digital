@@ -1,10 +1,9 @@
-
 import React from 'react';
 
 const SimpleFooter = () => {
   return (
-    <footer className="bg-gray-900 text-white mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <footer className="bg-gray-900 text-white mt-16 w-full">
+      <div className="px-4 sm:px-6 lg:px-8 py-6">
         <div className="text-center">
           <div className="mb-3">
             <h3 className="text-lg sm:text-xl font-bold">
