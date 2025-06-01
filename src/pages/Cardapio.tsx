@@ -108,7 +108,9 @@ const CardapioPage = () => {
           </div>
           
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Churrasquinho&Cia. Todos os direitos reservados.</p>
+            <p className="text-gray-400 text-sm sm:text-base mb-4 md:mb-0">
+              © 2025 Churrasquinho&Cia. Todos os direitos reservados.
+            </p>
           </div>
         </div>
       </footer>
