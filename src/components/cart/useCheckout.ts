@@ -36,17 +36,65 @@ export const useCheckout = () => {
   // Calculate total
   const total = subtotal + shippingFee;
 
-  const processCheckout = async (checkoutData: CheckoutData) => {
+  const findOrCreateCustomer = async () => {
     if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Você precisa estar logado para fazer um pedido"
-      });
-      navigate('/login');
-      return false;
+      // Para usuários não logados, criar um registro temporário
+      const guestData = {
+        name: 'Cliente',
+        email: `guest_${Date.now()}@temp.com`,
+        password: 'temp_password',
+        addresses: []
+      };
+
+      const { data: customer, error } = await supabase
+        .from('customers')
+        .insert(guestData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating guest customer:', error);
+        throw new Error('Erro ao criar registro do cliente');
+      }
+
+      return customer.id;
     }
 
+    // Para usuários logados, tentar encontrar ou criar
+    const { data: existingCustomer, error: fetchError } = await supabase
+      .from('customers')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (existingCustomer) {
+      return existingCustomer.id;
+    }
+
+    // Se não existe, criar novo registro
+    const customerData = {
+      id: user.id,
+      name: user.user_metadata?.name || user.email || 'Cliente',
+      email: user.email || `user_${user.id}@temp.com`,
+      password: 'auth_user', // Senha placeholder para usuários autenticados
+      addresses: []
+    };
+
+    const { data: newCustomer, error: createError } = await supabase
+      .from('customers')
+      .insert(customerData)
+      .select()
+      .single();
+
+    if (createError) {
+      console.error('Error creating customer:', createError);
+      throw new Error('Erro ao criar registro do cliente');
+    }
+
+    return newCustomer.id;
+  };
+
+  const processCheckout = async (checkoutData: CheckoutData) => {
     if (cart.items.length === 0) {
       toast({
         variant: "destructive",
@@ -59,6 +107,9 @@ export const useCheckout = () => {
     setIsProcessing(true);
     
     try {
+      // Encontrar ou criar cliente
+      const customerId = await findOrCreateCustomer();
+
       // Preparar endereço - usar endereço padrão para pickup
       const addressData = isPickup ? {
         street: "Retirada no local",
@@ -70,7 +121,7 @@ export const useCheckout = () => {
 
       // Create order object with proper structure for Supabase
       const orderData = {
-        customer_id: user.id,
+        customer_id: customerId,
         items: cart.items as any,
         total: total,
         address: addressData as any,
@@ -81,7 +132,7 @@ export const useCheckout = () => {
 
       console.log('Creating order with data:', orderData);
 
-      // Insert order into database - remove array wrapper
+      // Insert order into database
       const { data: order, error } = await supabase
         .from('orders')
         .insert(orderData)
@@ -123,7 +174,6 @@ export const useCheckout = () => {
   };
 
   const handleCheckout = async () => {
-    // Validações básicas removidas - permitir pedido sempre
     if (!paymentMethod) {
       toast({
         variant: "destructive",

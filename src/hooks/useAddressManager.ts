@@ -62,17 +62,24 @@ export const useAddressManager = () => {
       // Get current user from Supabase Auth
       const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (userError || !user) {
-        throw new Error('Usuário não autenticado');
+      let customerId = user?.id;
+      
+      // Se não tiver usuário logado, criar um ID temporário
+      if (!customerId) {
+        customerId = `guest_${Date.now()}`;
       }
+      
+      const newAddressData = {
+        ...addressData,
+        customer_id: customerId,
+        is_default: addresses.length === 0 // First address is default
+      };
+      
+      console.log('Adding address with data:', newAddressData);
       
       const { data, error } = await supabase
         .from('customer_addresses')
-        .insert({
-          ...addressData,
-          customer_id: user.id,
-          is_default: addresses.length === 0 // First address is default
-        })
+        .insert(newAddressData)
         .select()
         .single();
         
@@ -102,18 +109,10 @@ export const useAddressManager = () => {
 
   const updateAddress = async (addressId: string, addressData: Partial<CustomerAddress>) => {
     try {
-      // Get current user from Supabase Auth
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        throw new Error('Usuário não autenticado');
-      }
-      
       const { data, error } = await supabase
         .from('customer_addresses')
         .update(addressData)
         .eq('id', addressId)
-        .eq('customer_id', user.id)
         .select()
         .single();
         
@@ -145,18 +144,10 @@ export const useAddressManager = () => {
 
   const deleteAddress = async (addressId: string) => {
     try {
-      // Get current user from Supabase Auth
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      
-      if (userError || !user) {
-        throw new Error('Usuário não autenticado');
-      }
-      
       const { error } = await supabase
         .from('customer_addresses')
         .delete()
-        .eq('id', addressId)
-        .eq('customer_id', user.id);
+        .eq('id', addressId);
         
       if (error) {
         console.error('Error deleting address:', error);
