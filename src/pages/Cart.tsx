@@ -245,17 +245,17 @@ const CartPage = () => {
                   <CardContent className="space-y-6">
                     <div className="space-y-3">
                       <div className="flex justify-between text-white text-body-sm">
-                        <span className="text-red-600">Subtotal:</span>
-                        <span className="font-semibold">{formatCurrency(subtotal)}</span>
+                        <span className="text-yellow-400">Subtotal:</span>
+                        <span className="font-semibold text-yellow-400">{formatCurrency(subtotal)}</span>
                       </div>
                       <div className="flex justify-between text-white text-body-sm">
-                        <span className="text-red-600">Taxa de entrega:</span>
-                        <span className="font-semibold">{formatCurrency(shippingFee)}</span>
+                        <span className="text-yellow-400">Taxa de entrega:</span>
+                        <span className="font-semibold text-yellow-400">{formatCurrency(shippingFee)}</span>
                       </div>
                       <div className="border-t border-gray-600 pt-3">
                         <div className="flex justify-between font-bold text-xl text-yellow-400">
-                          <span className="text-red-600">Total:</span>
-                          <span>{formatCurrency(total)}</span>
+                          <span className="text-yellow-400">Total:</span>
+                          <span className="text-yellow-400">{formatCurrency(total)}</span>
                         </div>
                       </div>
                     </div>
