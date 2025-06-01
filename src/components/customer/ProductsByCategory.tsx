@@ -1,7 +1,9 @@
 
 import React, { useMemo } from 'react';
 import ProductCard from './ProductCard';
-import { Product } from '@/types/product';
+
+// Use the Product type from the cart context which is more complete
+import type { Product } from '@/contexts/cart/types';
 
 interface ProductsByCategoryProps {
   products: Product[];
@@ -57,11 +59,9 @@ const ProductsByCategory: React.FC<ProductsByCategoryProps> = ({ products }) => 
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
             {productsByCategory[category].map((product) => (
-              <ProductCard 
-                key={product.id} 
-                product={product}
-                className="animate-fade-in-up"
-              />
+              <div key={product.id} className="animate-fade-in-up">
+                <ProductCard product={product} />
+              </div>
             ))}
           </div>
         </div>

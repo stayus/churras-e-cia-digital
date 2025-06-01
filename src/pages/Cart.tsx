@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatCurrency } from '@/lib/format';
 import type { PaymentMethod } from '@/contexts/cart';
 import type { CheckedState } from '@radix-ui/react-checkbox';
-import SimpleFooter from '@/components/customer/SimpleFooter';
+import SimpleFooter from '@/components/shared/SimpleFooter';
 
 const CartPage = () => {
   const { user } = useAuth();
