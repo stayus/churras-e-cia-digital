@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useAuth } from '@/contexts/auth';
@@ -149,12 +150,15 @@ const CartPage = () => {
                     {!isPickup && (
                       <div>
                         <Label className="text-yellow-400 font-semibold mb-3 block">
-                          Endereço de Entrega
+                          Endereço de Entrega (opcional)
                         </Label>
                         <NewAddressSelector
                           selectedAddress={selectedAddress}
                           onAddressSelect={setSelectedAddress}
                         />
+                        <p className="text-sm text-gray-400 mt-2">
+                          Se não informar um endereço, entraremos em contato para confirmar.
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -264,10 +268,16 @@ const CartPage = () => {
                       onClick={handleCheckout} 
                       className="w-full brand-button-primary" 
                       size="lg"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !paymentMethod}
                     >
                       {isSubmitting ? 'Processando...' : 'Finalizar Pedido'}
                     </Button>
+                    
+                    {!paymentMethod && (
+                      <p className="text-sm text-red-400 text-center">
+                        Selecione uma forma de pagamento
+                      </p>
+                    )}
                   </CardContent>
                 </Card>
               </div>

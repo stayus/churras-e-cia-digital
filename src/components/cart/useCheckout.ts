@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CustomerAddress } from '@/hooks/useAddressManager';
 
 export interface CheckoutData {
-  address: CustomerAddress;
+  address: CustomerAddress | {};
   paymentMethod: string;
   observations?: string;
 }
@@ -59,12 +59,21 @@ export const useCheckout = () => {
     setIsProcessing(true);
     
     try {
-      // Create order object with proper JSON structure for Supabase
+      // Preparar endereço - usar endereço padrão para pickup
+      const addressData = isPickup ? {
+        street: "Retirada no local",
+        number: "N/A",
+        neighborhood: "Centro",
+        city: "Loja",
+        complement: "Retirada no local"
+      } : checkoutData.address;
+
+      // Create order object with proper structure for Supabase
       const orderData = {
         customer_id: user.id,
-        items: cart.items as any, // Cast to any to match Json type
+        items: cart.items,
         total: total,
-        address: checkoutData.address as any, // Cast to any to match Json type
+        address: addressData,
         payment_method: checkoutData.paymentMethod,
         observations: checkoutData.observations || null,
         status: 'received'
@@ -72,7 +81,7 @@ export const useCheckout = () => {
 
       console.log('Creating order with data:', orderData);
 
-      // Insert order into database
+      // Insert order into database using direct insert
       const { data: order, error } = await supabase
         .from('orders')
         .insert([orderData])
@@ -114,15 +123,7 @@ export const useCheckout = () => {
   };
 
   const handleCheckout = async () => {
-    if (!isPickup && !selectedAddress) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Selecione um endereço de entrega"
-      });
-      return;
-    }
-
+    // Validações básicas removidas - permitir pedido sempre
     if (!paymentMethod) {
       toast({
         variant: "destructive",
@@ -132,8 +133,16 @@ export const useCheckout = () => {
       return;
     }
 
+    // Para pickup, não precisa de endereço
+    // Para entrega, usar endereço selecionado ou criar um endereço padrão
     const checkoutData: CheckoutData = {
-      address: selectedAddress || {} as CustomerAddress,
+      address: isPickup ? {} : (selectedAddress || {
+        street: "Endereço não informado",
+        number: "S/N",
+        neighborhood: "Centro",
+        city: "Cidade",
+        complement: ""
+      }),
       paymentMethod,
       observations
     };
