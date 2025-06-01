@@ -5,7 +5,6 @@ import { useProducts } from '@/hooks/useProducts';
 import CustomerLayout from '@/components/customer/CustomerLayout';
 import ProductsByCategory from '@/components/customer/ProductsByCategory';
 import SimpleFooter from '@/components/shared/SimpleFooter';
-import type { Product } from '@/contexts/cart/types';
 
 const CardapioPage = () => {
   const { products, loading, error, fetchProducts } = useProducts();
@@ -14,13 +13,6 @@ const CardapioPage = () => {
     console.log('Cardapio: Componente montado, carregando produtos...');
     fetchProducts();
   }, []);
-
-  // Transform products to match the expected type
-  const transformedProducts: Product[] = products.map(product => ({
-    ...product,
-    promotion_price: product.promotion_price || undefined,
-    extras: product.extras || []
-  }));
 
   if (loading) {
     return (
@@ -81,7 +73,7 @@ const CardapioPage = () => {
           </p>
         </div>
 
-        <ProductsByCategory products={transformedProducts} />
+        <ProductsByCategory products={products} />
       </div>
 
       <SimpleFooter />

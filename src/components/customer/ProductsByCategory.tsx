@@ -2,8 +2,8 @@
 import React, { useMemo } from 'react';
 import ProductCard from './ProductCard';
 
-// Use the Product type from the cart context which is more complete
-import type { Product } from '@/contexts/cart/types';
+// Use the Product type from useProducts which includes category
+import type { Product } from '@/hooks/useProducts';
 
 interface ProductsByCategoryProps {
   products: Product[];
