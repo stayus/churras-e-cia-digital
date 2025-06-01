@@ -74,7 +74,7 @@ export const useCheckout = () => {
     // Se não existe, criar novo registro
     const customerData = {
       id: user.id,
-      name: user.user_metadata?.name || user.email || 'Cliente',
+      name: user.email?.split('@')[0] || 'Cliente',
       email: user.email || `user_${user.id}@temp.com`,
       password: 'auth_user', // Senha placeholder para usuários autenticados
       addresses: []
