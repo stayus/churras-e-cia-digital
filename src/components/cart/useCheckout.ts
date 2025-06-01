@@ -28,6 +28,8 @@ export const useCheckout = () => {
   const shippingFee = isPickup ? 0 : 5;
   const total = subtotal + shippingFee;
 
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
   const findOrCreateCustomer = async () => {
     if (!user) {
       const guestData = {
@@ -43,9 +45,9 @@ export const useCheckout = () => {
         .select()
         .single();
 
-      if (error) {
-        console.error('Erro ao criar cliente temporário:', error);
-        throw new Error('Erro ao criar registro do cliente');
+      if (error || !customer) {
+        console.error('Erro ao criar cliente convidado:', error);
+        throw new Error('Erro ao criar cliente');
       }
 
       return customer.id;
@@ -57,9 +59,7 @@ export const useCheckout = () => {
       .eq('id', user.id)
       .maybeSingle();
 
-    if (existingCustomer) {
-      return existingCustomer.id;
-    }
+    if (existingCustomer) return existingCustomer.id;
 
     const customerData = {
       id: user.id,
@@ -75,9 +75,9 @@ export const useCheckout = () => {
       .select()
       .single();
 
-    if (createError) {
-      console.error('Erro ao criar cliente autenticado:', createError);
-      throw new Error('Erro ao criar registro do cliente');
+    if (createError || !newCustomer) {
+      console.error('Erro ao criar cliente:', createError);
+      throw new Error('Erro ao criar cliente');
     }
 
     return newCustomer.id;
@@ -86,9 +86,9 @@ export const useCheckout = () => {
   const processCheckout = async (checkoutData: CheckoutData) => {
     if (cart.items.length === 0) {
       toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Seu carrinho está vazio"
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Seu carrinho está vazio',
       });
       return false;
     }
@@ -98,25 +98,28 @@ export const useCheckout = () => {
     try {
       const customerId = await findOrCreateCustomer();
 
-      const addressData = isPickup ? {
-        street: "Retirada no local",
-        number: "N/A",
-        neighborhood: "Centro",
-        city: "Loja",
-        complement: "Retirada no local"
-      } : checkoutData.address;
+      const addressData = isPickup
+        ? {
+            street: 'Retirada no local',
+            number: 'N/A',
+            neighborhood: 'Centro',
+            city: 'Loja',
+            complement: 'Retirada no local',
+          }
+        : checkoutData.address;
 
       const orderData = {
         customer_id: customerId,
-        items: cart.items as any,
-        total: total,
-        address: addressData as any,
+        items: cart.items,
+        total,
+        address: addressData,
         payment_method: checkoutData.paymentMethod,
         observations: checkoutData.observations || null,
-        status: 'received'
+        status: 'received',
       };
 
-      console.log('Creating order with data:', orderData);
+      // Aguarda 400ms antes de enviar pedido ao Supabase
+      await delay(400);
 
       const { data: order, error } = await supabase
         .from('orders')
@@ -124,34 +127,25 @@ export const useCheckout = () => {
         .select()
         .single();
 
-      if (error) {
-        console.error('Erro ao criar pedido:', error);
-        throw new Error(error.message || 'Erro ao criar pedido');
+      if (error || !order) {
+        throw new Error(error?.message || 'Erro ao criar pedido');
       }
-
-      if (!order || !order.id) {
-        throw new Error('Pedido não foi criado corretamente');
-      }
-
-      // Corrigido: garantir que o ID seja tratado como string
-      const orderId = String(order.id);
 
       clearCart();
 
       toast({
-        title: "Pedido realizado com sucesso!",
-        description: `Seu pedido #${orderId.slice(0, 8)} foi criado e está sendo processado.`
+        title: 'Pedido realizado com sucesso!',
+        description: `Seu pedido #${order.id.slice(0, 8)} foi criado e está sendo processado.`,
       });
 
       navigate('/pedidos');
-
       return true;
     } catch (error: any) {
-      console.error('Checkout error:', error);
+      console.error('Erro no checkout:', error);
       toast({
-        variant: "destructive",
-        title: "Erro ao processar pedido",
-        description: error.message || "Tente novamente em alguns minutos"
+        variant: 'destructive',
+        title: 'Erro ao processar pedido',
+        description: error.message || 'Tente novamente em alguns minutos',
       });
       return false;
     } finally {
@@ -162,23 +156,25 @@ export const useCheckout = () => {
   const handleCheckout = async () => {
     if (!paymentMethod) {
       toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Selecione uma forma de pagamento"
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'Selecione uma forma de pagamento',
       });
       return;
     }
 
     const checkoutData: CheckoutData = {
-      address: isPickup ? {} : (selectedAddress || {
-        street: "Endereço não informado",
-        number: "S/N",
-        neighborhood: "Centro",
-        city: "Cidade",
-        complement: ""
-      }),
+      address: isPickup
+        ? {}
+        : selectedAddress || {
+            street: 'Endereço não informado',
+            number: 'S/N',
+            neighborhood: 'Centro',
+            city: 'Cidade',
+            complement: '',
+          },
       paymentMethod,
-      observations
+      observations,
     };
 
     await processCheckout(checkoutData);
@@ -199,6 +195,6 @@ export const useCheckout = () => {
     shippingFee,
     subtotal,
     total,
-    handleCheckout
+    handleCheckout,
   };
 };
